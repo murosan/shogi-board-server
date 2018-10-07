@@ -34,11 +34,6 @@ func ping(ws *websocket.Conn, done chan struct{}) {
 	}
 }
 
-func internalError(ws *websocket.Conn, msg string, err error) {
-	log.Println(msg, err)
-	ws.WriteMessage(websocket.TextMessage, []byte("Internal server error."))
-}
-
 var upgrader = websocket.Upgrader{}
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
@@ -49,15 +44,6 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer ws.Close()
-
-	if err := engine.Engine.Cmd.Start(); err != nil {
-		panic(err)
-	}
-
-	if err != nil {
-		internalError(ws, "start:", err)
-		return
-	}
 
 	go engine.Read(ws, engine.Engine.Stdout, engine.Engine.Done)
 	go ping(ws, engine.Engine.Done)
@@ -91,6 +77,9 @@ func main() {
 	config.Load()
 	engine.Connect()
 	defer engine.Close()
+	if err := engine.Engine.Cmd.Start(); err != nil {
+		panic(err)
+	}
 
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", serveWs)

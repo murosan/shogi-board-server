@@ -25,7 +25,7 @@ type position struct {
 }
 
 // JSONをUSIに変換する
-func Convert(b []byte) (s string, e error) {
+func Convert(b []byte) (s [][]byte, e error) {
 	v, err := jason.NewObjectFromBytes(b)
 	if err != nil {
 		e = errors.New("jsonのパースに失敗 json=" + string(b) + "\n" + err.Error())
@@ -41,6 +41,8 @@ func Convert(b []byte) (s string, e error) {
 
 	// コマンドによって再度パースする
 	switch cmd {
+	case "start":
+		s = startCmds
 	case "position":
 		if p, err := toUsiPosition(b); err != nil {
 			e = err
@@ -54,32 +56,35 @@ func Convert(b []byte) (s string, e error) {
 	return
 }
 
-func toUsiPosition(b []byte) (string, error) {
+func toUsiPosition(b []byte) (bl [][]byte, e error) {
 	var p position
 	if err := json.Unmarshal(b, &p); err != nil {
-		return "", errors.New("Positionコマンドに変換できませんでした json=" + string(b) + "\n " + err.Error())
+		e = errors.New("Positionコマンドに変換できませんでした json=" + string(b) + "\n " + err.Error())
+		return
 	}
 
 	arr := make([]string, 9)
 	for r, row := range p.Data.Position {
 		usir, err := rowToUsi(row)
 		if err != nil {
-			return "", err
+			e = err
+			return
 		}
 		arr[r] = usir
 	}
 
-	s := "position sfen " + strings.Join(arr, "/")
+	s := []byte("position sfen " + strings.Join(arr, "/"))
 
 	if p.Data.Turn == 0 {
-		s += " b "
+		s = append(s, []byte(" b ")...)
 	} else {
-		s += " w "
+		s = append(s, []byte(" w ")...)
 	}
 
 	c0, c1 := p.Data.Cap0, p.Data.Cap1
 	if len(c0) == 0 && len(c1) == 0 {
-		return s + "- 1", nil
+		s = append(s, []byte("- 1")...)
+		return
 	}
 
 	// TODO
@@ -87,21 +92,24 @@ func toUsiPosition(b []byte) (string, error) {
 		if c != 0 {
 			p, err := pieceIdToUsi(i + 1)
 			if err != nil {
-				return "", err
+				e = err
+				return
 			}
-			s += strconv.Itoa(c) + p
+			s = append(s, []byte(strconv.Itoa(c)+p)...)
 		}
 	}
 	for i, c := range c1 {
 		if c != 0 {
 			p, err := pieceIdToUsi(-i - 1)
 			if err != nil {
-				return "", err
+				e = err
+				return
 			}
-			s += strconv.Itoa(c) + p
+			s = append(s, []byte(strconv.Itoa(c)+p)...)
 		}
 	}
-	return s + " 1", nil
+	s = append(s, []byte(" 1")...)
+	return
 }
 
 func rowToUsi(r [9]int) (s string, e error) {

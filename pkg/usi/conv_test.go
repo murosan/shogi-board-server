@@ -5,6 +5,7 @@
 package usi
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -32,9 +33,9 @@ func TestConvert(t *testing.T) {
   }
 }
 `
-	usi := Convert([]byte(json))
+	usi, err := Convert([]byte(json))
 
-	if usi != r {
-		t.Errorf("\nResult:   %v\nExpected: %v", usi, r)
+	if err != nil || bytes.Equal(usi[0], []byte(r)) {
+		t.Errorf("\nResult:   %v\nError:    %v\nExpected: %v", usi, err, r)
 	}
 }

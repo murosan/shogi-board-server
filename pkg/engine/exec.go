@@ -5,10 +5,14 @@
 package engine
 
 import (
+	"bytes"
+	"io"
+	"log"
+	"time"
+
 	"github.com/gorilla/websocket"
 	"github.com/murosan/shogi-proxy-server/pkg/config"
-	"io"
-	"time"
+	"github.com/murosan/shogi-proxy-server/pkg/usi"
 )
 
 // WebSocket で受け取ったコマンドを USIプロトコル に変換して書き込む
@@ -23,9 +27,38 @@ func Exec(ws *websocket.Conn, w io.Writer) {
 			break
 		}
 		// TODO: USIに変換する
-		message = append(message, '\n')
-		if _, err := w.Write(message); err != nil {
-			break
+		ml, err := usi.Convert(message)
+		if err != nil {
+			log.Println("convert error")
+			// TODO: エラーをちゃんと返す
+			if err := ws.WriteMessage(websocket.TextMessage, []byte("error")); err != nil {
+				ws.Close()
+				break
+			}
+		}
+
+		for _, msg := range ml {
+			log.Printf("コマンドを実行: %v\n", string(msg))
+			if _, err := w.Write(append(msg, '\n')); err != nil {
+				break
+			}
+
+			if bytes.Equal(msg, usi.CmdUsi) || bytes.Equal(msg, usi.CmdIsReady) {
+				waitReady()
+			}
+		}
+	}
+}
+
+// usiok か readyok を待つ
+func waitReady() {
+	for {
+		select {
+		case b := <-Engine.EngineOut:
+			log.Println("受け取り: ", string(b))
+			if bytes.Equal(b, usi.ResOk) || bytes.Equal(b, usi.ResReady) {
+				return
+			}
 		}
 	}
 }

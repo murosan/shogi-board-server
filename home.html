@@ -16,21 +16,44 @@
 				}
 			}
 
-			document.getElementById("form").onsubmit = function () {
-				if (!conn) {
-					return false;
-				}
-				if (!msg.value) {
-					return false;
-				}
-				conn.send(msg.value);
-				const item = document.createElement("div");
-				item.className = "sendMsg";
-				item.innerText = "> " + msg.value;
-				appendLog(item);
-				msg.value = "";
-				return false;
+			document.getElementById("start").onclick = () => {
+				const m = {
+					version: 1,
+					command: "start"
+				};
+				conn.send(JSON.stringify(m));
 			};
+			document.getElementById("position").onclick = () => {
+				const m = {
+					version: 1,
+					command: "position",
+					data: {
+						position: [
+							[-2, -3, -4, -5, -8, 0, -4, -3, -2],
+							[0, 0, 0, 0, 0, 0, -5, -6, 0],
+							[-1, 0, -1, -1, -1, -1, 0, 0, -1],
+							[0, 0, 0, 0, 0, 0, 7, 0, 0],
+							[0, 0, 0, 0, 0, 0, 0, 0, 0],
+							[0, -7, 1, 0, 0, 0, 0, 0, 0],
+							[1, 0, 0, 1, 1, 1, 1, 0, 1],
+							[0, 6, 5, 0, 0, 0, 0, 0, 0],
+							[2, 3, 4, 0, 8, 5, 4, 3, 2],
+						],
+						cap_0: [3, 0, 0, 0, 0, 0, 0],
+						cap_1: [2, 0, 0, 0, 0, 0, 0],
+						turn: 1,
+					},
+				};
+				conn.send(JSON.stringify(m));
+			};
+			document.getElementById("quit").onclick = () => {
+				const m = {
+					version: 1,
+					command: "quit"
+				};
+				conn.send(JSON.stringify(m));
+			};
+
 			if (window["WebSocket"]) {
 				conn = new WebSocket("ws://" + document.location.host + "/ws");
 				conn.onclose = function (evt) {
@@ -93,6 +116,11 @@
 			overflow: hidden;
 		}
 
+		button {
+			width: 100px;
+			height: 50px;
+		}
+
 		.sendMsg {
 			color: #2bc425;
 		}
@@ -101,8 +129,9 @@
 <body>
 <div id="log"></div>
 <form id="form">
-	<input type="submit" value="Send"/>
-	<input type="text" id="msg" size="64"/>
+	<button id="start">Start</button>
+	<button id="position">Position</button>
+	<button id="quit">Quit</button>
 </form>
 </body>
 </html>

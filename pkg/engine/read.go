@@ -23,10 +23,11 @@ func Read(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 		ws.SetWriteDeadline(time.Now().Add(config.WriteWait))
 		// TODO: フロントに渡すデータに変換する
 		b := s.Bytes()
-		if err := ws.WriteMessage(websocket.TextMessage, b); err != nil {
-			ws.Close()
-			break
-		}
+		Engine.EngineOut<-b
+		//if err := ws.WriteMessage(websocket.TextMessage, b); err != nil {
+		//	ws.Close()
+		//	break
+		//}
 	}
 
 	if s.Err() != nil {

@@ -16,20 +16,24 @@ import (
 
 // TODO: 名前をどうにかしたい
 
-// Singleton
-var Engine *Client
+var (
+	// Singleton
+	Engine *Client
+)
 
 type Client struct {
 	// 将棋エンジンの実行コマンド
 	Cmd *exec.Cmd
 
-	// 将棋エンジンの入力パイプ
+	// 将棋エンジンへ入力を渡すパイプ
 	Stdin io.WriteCloser
-	// 将棋エンジンの出力パイプ
+	// 将棋エンジンの出力を受け取るパイプ
 	Stdout io.ReadCloser
 
 	// 将棋エンジンが出力した値を読み取る Scanner
 	Sc *bufio.Scanner
+	// 将棋エンジンの出力を渡すチャネル
+	EngineOut chan []byte
 
 	// 将棋エンジンが終了したかどうか
 	mux  sync.Mutex
@@ -56,14 +60,15 @@ func Connect() {
 		Stdin:  stdin,
 		Stdout: stdout,
 
-		Sc:   bufio.NewScanner(stdout),
-		Done: make(chan struct{}),
+		Sc:        bufio.NewScanner(stdout),
+		EngineOut: make(chan []byte, 10),
+		Done:      make(chan struct{}),
 	}
 }
 
 // 将棋エンジンを終了する
 func Close() {
-	// TODO: エンジンにquitを送って正常終了できるように
+	// TODO
 	Engine.Stdin.Close()
 	Engine.Stdout.Close()
 }
