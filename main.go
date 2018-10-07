@@ -5,9 +5,7 @@
 package main
 
 import (
-	"bufio"
 	"flag"
-	"io"
 	"log"
 	"net/http"
 	"time"
@@ -20,28 +18,6 @@ import (
 var (
 	addr = flag.String("addr", "127.0.0.1:8080", "http service address")
 )
-
-func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
-	defer func() {
-	}()
-	s := bufio.NewScanner(r)
-	for s.Scan() {
-		ws.SetWriteDeadline(time.Now().Add(config.WriteWait))
-		if err := ws.WriteMessage(websocket.TextMessage, s.Bytes()); err != nil {
-			ws.Close()
-			break
-		}
-	}
-	if s.Err() != nil {
-		log.Println("scan:", s.Err())
-	}
-	close(done)
-
-	ws.SetWriteDeadline(time.Now().Add(config.WriteWait))
-	ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-	time.Sleep(config.CloseGracePeriod)
-	ws.Close()
-}
 
 func ping(ws *websocket.Conn, done chan struct{}) {
 	ticker := time.NewTicker(config.PingPeriod)
@@ -83,7 +59,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go pumpStdout(ws, engine.Engine.Stdout, engine.Engine.Done)
+	go engine.Read(ws, engine.Engine.Stdout, engine.Engine.Done)
 	go ping(ws, engine.Engine.Done)
 
 	engine.Exec(ws, engine.Engine.Stdin)
@@ -91,10 +67,6 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	select {
 	case <-engine.Engine.Done:
 	case <-time.After(time.Second):
-		// A bigger bonk on the head.
-		//if err := proc.Signal(os.Kill); err != nil {
-		//	log.Println("term:", err)
-		//}
 		<-engine.Engine.Done
 	}
 
