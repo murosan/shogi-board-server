@@ -22,6 +22,7 @@
 					command: "start"
 				};
 				conn.send(JSON.stringify(m));
+				return false;
 			};
 			document.getElementById("position").onclick = () => {
 				const m = {
@@ -45,6 +46,7 @@
 					},
 				};
 				conn.send(JSON.stringify(m));
+				return false;
 			};
 			document.getElementById("quit").onclick = () => {
 				const m = {
@@ -52,6 +54,7 @@
 					command: "quit"
 				};
 				conn.send(JSON.stringify(m));
+				return false;
 			};
 
 			if (window["WebSocket"]) {

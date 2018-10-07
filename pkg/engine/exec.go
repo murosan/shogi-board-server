@@ -26,7 +26,7 @@ func Exec(ws *websocket.Conn, w io.Writer) {
 		if err != nil {
 			break
 		}
-		// TODO: USIに変換する
+
 		ml, err := usi.Convert(message)
 		if err != nil {
 			log.Println("convert error")
@@ -47,10 +47,13 @@ func Exec(ws *websocket.Conn, w io.Writer) {
 				waitReady()
 			}
 		}
+
+		// TODO: レスポンス
 	}
 }
 
 // usiok か readyok を待つ
+// TODO: timeout
 func waitReady() {
 	for {
 		select {
