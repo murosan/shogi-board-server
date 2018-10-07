@@ -6,12 +6,14 @@ package usi
 
 import (
 	"encoding/json"
-	"github.com/antonholmquist/jason"
+	"errors"
 	"strconv"
 	"strings"
+
+	"github.com/antonholmquist/jason"
 )
 
-type Position struct {
+type position struct {
 	Version uint8  `json:"version"`
 	Command string `json:"command"`
 	Data    struct {
@@ -22,38 +24,52 @@ type Position struct {
 	} `json:"data"`
 }
 
-// JSONをusiに変換する
-func Convert(b []byte) string {
+// JSONをUSIに変換する
+func Convert(b []byte) (s string, e error) {
 	v, err := jason.NewObjectFromBytes(b)
 	if err != nil {
-		panic("jsonのパースに失敗 json=" + string(b) + "\n" + err.Error())
+		e = errors.New("jsonのパースに失敗 json=" + string(b) + "\n" + err.Error())
+		return
 	}
 
+	// コマンドを一回動的にパースする
 	cmd, err2 := v.GetString("command")
 	if err2 != nil {
-		panic("コマンドが指定されていません\n" + err2.Error())
+		e = errors.New("コマンドが指定されていません\n" + err2.Error())
+		return
 	}
 
+	// コマンドによって再度パースする
 	switch cmd {
 	case "position":
-		return toUsiPosition(b)
+		if p, err := toUsiPosition(b); err != nil {
+			e = err
+		} else {
+			s = p
+		}
 	default:
-		panic("不明なコマンドです command=" + cmd)
+		e = errors.New("不明なコマンドです command=" + cmd)
 	}
+
+	return
 }
 
-func toUsiPosition(b []byte) string {
-	var p Position
+func toUsiPosition(b []byte) (string, error) {
+	var p position
 	if err := json.Unmarshal(b, &p); err != nil {
-		panic("Positionコマンドに変換できませんでした json=" + string(b) + "\n " + err.Error())
+		return "", errors.New("Positionコマンドに変換できませんでした json=" + string(b) + "\n " + err.Error())
 	}
 
 	arr := make([]string, 9)
 	for r, row := range p.Data.Position {
-		arr[r] = rowToUsi(row)
+		usir, err := rowToUsi(row)
+		if err != nil {
+			return "", err
+		}
+		arr[r] = usir
 	}
 
-	s := strings.Join(arr, "/")
+	s := "position sfen " + strings.Join(arr, "/")
 
 	if p.Data.Turn == 0 {
 		s += " b "
@@ -63,25 +79,35 @@ func toUsiPosition(b []byte) string {
 
 	c0, c1 := p.Data.Cap0, p.Data.Cap1
 	if len(c0) == 0 && len(c1) == 0 {
-		return s + "- 1"
+		return s + "- 1", nil
 	}
 
+	// TODO
 	for i, c := range c0 {
 		if c != 0 {
-			s += strconv.Itoa(c) + pieceIdToUsi(i+1)
+			p, err := pieceIdToUsi(i + 1)
+			if err != nil {
+				return "", err
+			}
+			s += strconv.Itoa(c) + p
 		}
 	}
 	for i, c := range c1 {
 		if c != 0 {
-			s += strconv.Itoa(c) + pieceIdToUsi(-i-1)
+			p, err := pieceIdToUsi(-i - 1)
+			if err != nil {
+				return "", err
+			}
+			s += strconv.Itoa(c) + p
 		}
 	}
-	return s + " 1"
+	return s + " 1", nil
 }
 
-func rowToUsi(r [9]int) (s string) {
+func rowToUsi(r [9]int) (s string, e error) {
 	emp := 0
 	for _, id := range r {
+		// クソ
 		if id == 0 {
 			emp++
 			continue
@@ -90,15 +116,20 @@ func rowToUsi(r [9]int) (s string) {
 			s += strconv.Itoa(emp)
 			emp = 0
 		}
-		s += pieceIdToUsi(id)
+		p, err := pieceIdToUsi(id)
+		if err != nil {
+			return "", err
+		}
+		s += p
 	}
+	// マジクソ
 	if emp != 0 {
 		s += strconv.Itoa(emp)
 	}
 	return
 }
 
-func pieceIdToUsi(i int) (s string) {
+func pieceIdToUsi(i int) (s string, e error) {
 	switch i {
 	case 1:
 		s = "P"
@@ -157,7 +188,7 @@ func pieceIdToUsi(i int) (s string) {
 	case -17:
 		s = "+r"
 	default:
-		panic("pieceIdが不正です id=" + strconv.Itoa(i))
+		e = errors.New("pieceIdが不正です id=" + strconv.Itoa(i))
 	}
 	return
 }
