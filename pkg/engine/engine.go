@@ -37,7 +37,7 @@ type Client struct {
 	EngineOut chan []byte
 
 	// 将棋エンジンが終了したかどうか
-	mux  sync.Mutex
+	Mux  sync.Mutex
 	Done chan struct{}
 }
 
@@ -70,6 +70,7 @@ func Connect() {
 
 // 将棋エンジンを終了する
 func Close() {
+	Engine.Mux.Lock()
 	log.Println("Close engine.")
 	// TODO: エラーとかね
 	if Engine == nil {
@@ -80,5 +81,6 @@ func Close() {
 	Engine.Stdout.Close()
 	Engine.Cmd.Wait()
 	<-Engine.Done
+	Engine.Mux.Unlock()
 	Engine = nil
 }

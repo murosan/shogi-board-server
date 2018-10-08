@@ -50,6 +50,9 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 必要かどうか分からないけど・・
+	engine.Engine.Mux.Lock()
+
 	go engine.CatchEngineOutput()
 
 	for _, msg := range usi.StartCmds {
@@ -59,6 +62,8 @@ func Start(w http.ResponseWriter, r *http.Request) {
 			waitStart()
 		}
 	}
+
+	engine.Engine.Mux.Unlock()
 
 	log.Println(connected)
 	w.WriteHeader(http.StatusOK)

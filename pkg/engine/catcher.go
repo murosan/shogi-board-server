@@ -15,7 +15,6 @@ func CatchEngineOutput() {
 	s := bufio.NewScanner(Engine.Stdout)
 
 	for s.Scan() {
-		// TODO: フロントに渡すデータに変換する
 		b := s.Bytes()
 		Engine.EngineOut <- b
 	}
