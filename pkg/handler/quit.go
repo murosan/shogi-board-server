@@ -27,7 +27,6 @@ func Quit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: ちゃんと終了したかどうか確認できるようにしたい
 	engine.Close()
 	if engine.Engine != nil {
 		panic("Cloud not shutdown engine successfully.")

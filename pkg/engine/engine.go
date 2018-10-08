@@ -79,5 +79,6 @@ func Close() {
 	Engine.Stdin.Close()
 	Engine.Stdout.Close()
 	Engine.Cmd.Wait()
+	<-Engine.Done
 	Engine = nil
 }
