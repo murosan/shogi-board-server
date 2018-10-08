@@ -12,13 +12,14 @@ import (
 	"sync"
 
 	"github.com/murosan/shogi-proxy-server/pkg/config"
+	"github.com/murosan/shogi-proxy-server/pkg/usi"
 )
 
 // TODO: 名前をどうにかしたい
 
 var (
 	// Singleton
-	Engine *Client
+	Engine *Client = nil
 )
 
 type Client struct {
@@ -43,6 +44,7 @@ type Client struct {
 // 将棋エンジンと接続する
 // TODO: エンジンの入れ替えをできるようにする
 func Connect() {
+	log.Println("Connect to engine.")
 	cmd := exec.Command(config.Conf.EnginePath)
 
 	stdin, err := cmd.StdinPipe()
@@ -68,7 +70,14 @@ func Connect() {
 
 // 将棋エンジンを終了する
 func Close() {
-	// TODO
+	log.Println("Close engine.")
+	// TODO: エラーとかね
+	if Engine == nil {
+		return
+	}
+	Engine.Stdin.Write(append(usi.CmdQuit, '\n'))
 	Engine.Stdin.Close()
 	Engine.Stdout.Close()
+	Engine.Cmd.Wait()
+	Engine = nil
 }

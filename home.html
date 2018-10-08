@@ -4,12 +4,10 @@
 	<title>Command Example</title>
 	<script type="text/javascript">
 		window.onload = function () {
-			var conn;
-			var msg = document.getElementById("msg");
-			var log = document.getElementById("log");
+			const log = document.getElementById("log");
 
 			function appendLog(item) {
-				var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+				const doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
 				log.appendChild(item);
 				if (doScroll) {
 					log.scrollTop = log.scrollHeight - log.clientHeight;
@@ -17,67 +15,59 @@
 			}
 
 			document.getElementById("start").onclick = () => {
-				const m = {
-					version: 1,
-					command: "start"
-				};
-				conn.send(JSON.stringify(m));
-				return false;
+				console.log("fetch start");
+				const e = document.createElement("div");
+				e.innerText = "> start";
+				appendLog(e);
+				fetch("/start").then(res => {
+					console.log(res);
+					return res.json();
+				}).then(j => appendLog(j));
 			};
 			document.getElementById("position").onclick = () => {
+				console.log("fetch position");
+				const e = document.createElement("div");
+				e.innerText = "> position";
+				appendLog(e);
 				const m = {
-					version: 1,
-					command: "position",
-					data: {
-						position: [
-							[-2, -3, -4, -5, -8, 0, -4, -3, -2],
-							[0, 0, 0, 0, 0, 0, -5, -6, 0],
-							[-1, 0, -1, -1, -1, -1, 0, 0, -1],
-							[0, 0, 0, 0, 0, 0, 7, 0, 0],
-							[0, 0, 0, 0, 0, 0, 0, 0, 0],
-							[0, -7, 1, 0, 0, 0, 0, 0, 0],
-							[1, 0, 0, 1, 1, 1, 1, 0, 1],
-							[0, 6, 5, 0, 0, 0, 0, 0, 0],
-							[2, 3, 4, 0, 8, 5, 4, 3, 2],
-						],
-						cap_0: [3, 0, 0, 0, 0, 0, 0],
-						cap_1: [2, 0, 0, 0, 0, 0, 0],
-						turn: 1,
-					},
+					position: [
+						[-2, -3, -4, -5, -8, 0, -4, -3, -2],
+						[0, 0, 0, 0, 0, 0, -5, -6, 0],
+						[-1, 0, -1, -1, -1, -1, 0, 0, -1],
+						[0, 0, 0, 0, 0, 0, 7, 0, 0],
+						[0, 0, 0, 0, 0, 0, 0, 0, 0],
+						[0, -7, 1, 0, 0, 0, 0, 0, 0],
+						[1, 0, 0, 1, 1, 1, 1, 0, 1],
+						[0, 6, 5, 0, 0, 0, 0, 0, 0],
+						[2, 3, 4, 0, 8, 5, 4, 3, 2],
+					],
+					cap_0: [3, 0, 0, 0, 0, 0, 0],
+					cap_1: [2, 0, 0, 0, 0, 0, 0],
+					turn: 1,
 				};
-				conn.send(JSON.stringify(m));
-				return false;
+				postData("/position", m)
+					.then(data => console.log(JSON.stringify(data)))
+					.catch(error => console.error(error));
 			};
 			document.getElementById("quit").onclick = () => {
-				const m = {
-					version: 1,
-					command: "quit"
-				};
-				conn.send(JSON.stringify(m));
-				return false;
+				console.log("fetch quit");
+				const e = document.createElement("div");
+				e.innerText = "> quit";
+				appendLog(e);
+				fetch("/quit").then(res => {
+					console.log(res);
+					return res.json();
+				}).then(j => appendLog(j));
 			};
-
-			if (window["WebSocket"]) {
-				conn = new WebSocket("ws://" + document.location.host + "/ws");
-				conn.onclose = function (evt) {
-					var item = document.createElement("div");
-					item.innerHTML = "<b>Connection closed.</b>";
-					appendLog(item);
-				};
-				conn.onmessage = function (evt) {
-					var messages = evt.data.split('\n');
-					for (var i = 0; i < messages.length; i++) {
-						var item = document.createElement("div");
-						item.innerText = messages[i];
-						appendLog(item);
-					}
-				};
-			} else {
-				var item = document.createElement("div");
-				item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-				appendLog(item);
-			}
 		};
+
+		function postData(url = "", data = {}) {
+			return fetch(url, {
+				method: "POST",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify(data),
+			}).then(response => response.json());
+		}
 	</script>
 	<style type="text/css">
 		html {
@@ -131,10 +121,10 @@
 </head>
 <body>
 <div id="log"></div>
-<form id="form">
+<div id="form">
 	<button id="start">Start</button>
 	<button id="position">Position</button>
 	<button id="quit">Quit</button>
-</form>
+</div>
 </body>
 </html>

@@ -8,58 +8,15 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/murosan/shogi-proxy-server/pkg/config"
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
+	"github.com/murosan/shogi-proxy-server/pkg/handler"
 )
 
 var (
 	addr = flag.String("addr", "127.0.0.1:8080", "http service address")
 )
-
-func ping(ws *websocket.Conn, done chan struct{}) {
-	ticker := time.NewTicker(config.PingPeriod)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			if err := ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(config.WriteWait)); err != nil {
-				log.Println("ping:", err)
-			}
-		case <-done:
-			return
-		}
-	}
-}
-
-var upgrader = websocket.Upgrader{}
-
-func serveWs(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("upgrade:", err)
-		return
-	}
-
-	defer ws.Close()
-
-	go engine.Read(ws, engine.Engine.Stdout, engine.Engine.Done)
-	go ping(ws, engine.Engine.Done)
-
-	engine.Exec(ws, engine.Engine.Stdin)
-
-	select {
-	case <-engine.Engine.Done:
-	case <-time.After(time.Second):
-		<-engine.Engine.Done
-	}
-
-	if err := engine.Engine.Cmd.Wait(); err != nil {
-		log.Println("wait:", err)
-	}
-}
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -74,14 +31,13 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	defer engine.Close() // for safety
 	config.Load()
-	engine.Connect()
-	defer engine.Close()
-	if err := engine.Engine.Cmd.Start(); err != nil {
-		panic(err)
-	}
 
+	log.Println("Listening. " + *addr)
 	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", serveWs)
+	http.HandleFunc("/start", handler.Start)
+	http.HandleFunc("/quit", handler.Quit)
+	http.HandleFunc("/position", handler.Position)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }

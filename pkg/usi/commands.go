@@ -5,10 +5,12 @@ var (
 	CmdIsReady = []byte("isready")
 	CmdNew     = []byte("usinewgame")
 
+	CmdQuit = []byte("quit")
+
 	ResOk    = []byte("usiok")
 	ResReady = []byte("readyok")
 
-	startCmds = [][]byte{
+	StartCmds = [][]byte{
 		CmdUsi,
 		CmdIsReady,
 		CmdNew,
