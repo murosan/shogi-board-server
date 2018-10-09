@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
+	"github.com/murosan/shogi-proxy-server/pkg/msg"
 	"github.com/murosan/shogi-proxy-server/pkg/usi"
 )
 
@@ -18,41 +19,33 @@ var (
 	quitPath     = "/quit"
 	positionPath = "/position"
 
-	// TODO: エラーをちゃんとする
-	methodNotAllowed = "Method not allowed."
-	alreadyRunning   = "Engine is already running."
-	notRunning       = "Engine is not running."
-	couldNotStart    = "Could not start engine."
-
 	connected = "Successfully connected."
 )
 
 func Start(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		log.Println(methodNotAllowed + " " + r.Method + " " + startPath)
-		http.Error(w, methodNotAllowed, http.StatusMethodNotAllowed)
+		log.Printf("%s %s", msg.MethodNotAllowed, startPath)
+		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)
 		return
 	}
 
 	log.Println(r.Method + " " + startPath)
 
-	// TODO: エラー
 	if engine.Engine != nil {
-		log.Println(alreadyRunning)
-		http.Error(w, alreadyRunning, http.StatusBadRequest)
+		log.Println(msg.EngineIsAlreadyRunning)
+		http.Error(w, msg.EngineIsAlreadyRunning.Error(), http.StatusBadRequest)
 		return
 	}
 
 	engine.Connect()
 	if err := engine.Engine.Cmd.Start(); err != nil {
-		http.Error(w, couldNotStart, http.StatusInternalServerError)
-		log.Fatalln(couldNotStart)
+		log.Fatalln(msg.FailedToStart)
+		http.Error(w, msg.FailedToStart.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	go engine.CatchEngineOutput()
 
-	// 必要かどうか分からないけど・・
 	engine.Engine.Mux.Lock()
 
 	for _, msg := range usi.StartCmds {

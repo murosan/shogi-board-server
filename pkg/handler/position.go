@@ -13,12 +13,13 @@ import (
 	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
+	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
 func Position(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		log.Println(methodNotAllowed + " " + r.Method + " " + positionPath)
-		http.Error(w, methodNotAllowed, http.StatusBadRequest)
+		log.Printf("%s %s", msg.MethodNotAllowed, positionPath)
+		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -32,8 +33,9 @@ func Position(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: エラー
 	if engine.Engine == nil {
-		http.Error(w, notRunning+"\nYou need to start Engine first.", http.StatusBadRequest)
-		log.Println(notRunning)
+		e := msg.EngineIsNotRunning.New("You need to start engine first.")
+		http.Error(w, e.Error(), http.StatusBadRequest)
+		log.Println(e)
 		return
 	}
 
@@ -49,7 +51,7 @@ func Position(w http.ResponseWriter, r *http.Request) {
 	l, err = r.Body.Read(body)
 	if err != nil && err != io.EOF {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("Failed to read body. " + err.Error())
+		log.Println(msg.FailedToReadBody.Error() + err.Error())
 		return
 	}
 
@@ -58,7 +60,7 @@ func Position(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &jsonBody)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("Failed to parse body. " + err.Error())
+		log.Println(msg.FailedToParseBody.Error() + err.Error())
 		return
 	}
 	fmt.Printf("%v\n", jsonBody)

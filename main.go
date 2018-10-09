@@ -12,6 +12,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/pkg/config"
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/handler"
+	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
 var (
@@ -19,12 +20,8 @@ var (
 )
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
 	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)
 		return
 	}
 	http.ServeFile(w, r, "home.html")
