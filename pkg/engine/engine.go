@@ -77,8 +77,6 @@ func Close() {
 		return
 	}
 	Engine.Stdin.Write(append(usi.CmdQuit, '\n'))
-	Engine.Stdin.Close()
-	Engine.Stdout.Close()
 	Engine.Cmd.Wait()
 	<-Engine.Done
 	Engine.Mux.Unlock()
