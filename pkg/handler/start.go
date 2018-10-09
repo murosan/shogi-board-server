@@ -50,10 +50,10 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	go engine.CatchEngineOutput()
+
 	// 必要かどうか分からないけど・・
 	engine.Engine.Mux.Lock()
-
-	go engine.CatchEngineOutput()
 
 	for _, msg := range usi.StartCmds {
 		engine.Engine.Stdin.Write(append(msg, '\n'))
