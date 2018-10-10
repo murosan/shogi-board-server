@@ -36,6 +36,11 @@ type Client struct {
 	// 将棋エンジンの出力を渡すチャネル
 	EngineOut chan []byte
 
+	// その他の情報
+	Name    []byte
+	Author  []byte
+	Options map[string]Option
+
 	// 将棋エンジンが終了したかどうか
 	Mux  sync.Mutex
 	Done chan struct{}

@@ -30,4 +30,7 @@ var (
 	FailedToShutdown       = &Error{Code: "FailedToShutdown"}
 	EngineIsNotRunning     = &Error{Code: "EngineIsNotRunning"}
 	EngineIsAlreadyRunning = &Error{Code: "EngineIsAlreadyRunning"}
+	InvalidIdSyntax        = &Error{Code: "InvalidIdSyntax"}
+	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
+	UnknownOption          = &Error{Code: "UnknownOption"}
 )
