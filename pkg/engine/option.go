@@ -5,10 +5,6 @@ import (
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
-type Option interface {
-	Usi() string
-}
-
 var (
 	space  = []byte(" ")
 	id     = []byte("id")
@@ -20,7 +16,7 @@ var (
 
 // id name <EngineName>
 // id author <AuthorName> をEngineにセットする
-// EngineNameやAuthorNameにスペースが入る場合もあるのでJoinしている
+// EngineNameやAuthorNameにスペースが入る場合もあるので最後にJoinしている
 func ParseId(b []byte) error {
 	s := bytes.Split(bytes.TrimSpace(b), space)
 	if len(s) < 3 || bytes.Equal(s[0], id) {
