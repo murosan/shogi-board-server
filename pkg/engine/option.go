@@ -73,10 +73,11 @@ func (e *Client) ParseOpt(b []byte) error {
 // このフォーマット以外は許容しない
 // default がなかったり、bool ではない時はエラー
 func (e *Client) parseCheck(b [][]byte) error {
-	n, d := b[2], b[6]
-	if len(b) != 7 || !bytes.Equal(b[5], deflt) || len(n) == 0 || len(d) == 0 {
+	if len(b) != 7 || !bytes.Equal(b[5], deflt) || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'check', but malformed. The format must be [option name <string> type check default <bool>]")
 	}
+
+	n, d := b[2], b[6]
 	if bytes.Equal(d, []byte("true")) {
 		e.Options[string(n)] = Check{Name: n, Val: true, Default: true}
 		return nil
@@ -93,25 +94,24 @@ func (e *Client) parseCheck(b [][]byte) error {
 // このフォーマット以外は許容しない
 // 各値がなかったり、int ではない時、min > max の時はエラー
 func (e *Client) parseSpin(b [][]byte) error {
-	n, d, mi, ma := b[2], b[6], b[8], b[10]
-	if len(b) != 11 || !bytes.Equal(b[5], deflt) || !bytes.Equal(b[7], min) || !bytes.Equal(b[9], max) || len(n) == 0 {
+	if len(b) != 11 || !bytes.Equal(b[5], deflt) || !bytes.Equal(b[7], min) || !bytes.Equal(b[9], max) || len(b[2]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'spin', but malformed. The format must be [option name <string> type spin default <int> min <int> max <int>]")
 	}
 
-	df, err := strconv.Atoi(string(d))
+	df, err := strconv.Atoi(string(b[6]))
 	if err != nil {
 		return msg.InvalidOptionSyntax.WithMsg("Default want of 'spin' type was not int. Received: " + string(min))
 	}
-	imi, err := strconv.Atoi(string(mi))
+	mi, err := strconv.Atoi(string(b[8]))
 	if err != nil {
 		return msg.InvalidOptionSyntax.WithMsg("Min want of 'spin' type was not int. Received: " + string(min))
 	}
-	ima, err := strconv.Atoi(string(ma))
+	ma, err := strconv.Atoi(string(b[10]))
 	if err != nil {
 		return msg.InvalidOptionSyntax.WithMsg("Max want of 'spin' type was not int. Received: " + string(min))
 	}
 
-	e.Options[string(n)] = Spin{n, df, df, imi, ima}
+	e.Options[string(b[2])] = Spin{b[2], df, df, mi, ma}
 	return nil
 }
 
@@ -120,12 +120,11 @@ func (e *Client) parseSpin(b [][]byte) error {
 // このフォーマット以外は許容しない
 // Default がない、var がない、default が var にない時はエラー
 func (e *Client) parseSelect(b [][]byte) error {
-	n, d := b[2], b[6]
-	if len(b) < 9 || len(n) == 0 || len(d) == 0 {
+	if len(b) < 9 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'combo', but malformed. The format must be [option name <string> type combo default <string> rep(var <string>)]")
 	}
 
-	s := Select{Name: n}
+	s := Select{Name: b[2]}
 
 	i := 8
 	for i < len(b) && bytes.Equal(b[i-1], selOpt) {
@@ -133,7 +132,7 @@ func (e *Client) parseSelect(b [][]byte) error {
 		i += 2
 	}
 
-	s.Index = lib.IndexOfBytes(b, d)
+	s.Index = lib.IndexOfBytes(b, b[6])
 	if s.Index == -1 {
 		return msg.InvalidOptionSyntax.WithMsg("Default want of 'combo' type was not found in vars.")
 	}
@@ -144,31 +143,28 @@ func (e *Client) parseSelect(b [][]byte) error {
 // button type を Engine の Options にセットする
 // option name <string> type button
 func (e *Client) parseButton(b [][]byte) error {
-	n := b[2]
-	if len(b) != 5 || len(n) == 0 {
+	if len(b) != 5 || len(b[2]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'button', but malformed. The format must be [option name <string> type button]")
 	}
-	e.Options[string(n)] = Button{n}
+	e.Options[string(b[2])] = Button{b[2]}
 	return nil
 }
 
 // string type を Engine の Options にセットする
 // option name <string> type string default <string>
 func (e *Client) parseString(b [][]byte) error {
-	n, d := b[2], b[6]
-	if len(b) != 7 || len(n) == 0 || len(d) == 0 {
+	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'string', but malformed. The format must be [option name <string> type string default <string>]")
 	}
-	e.Options[string(n)] = String{n, d, d}
+	e.Options[string(b[2])] = String{b[2], b[6], b[6]}
 	return nil
 }
 
 // option name <string> type filename default <string>
 func (e *Client) parseFileName(b [][]byte) error {
-	n, d := b[2], b[6]
-	if len(b) != 7 || len(n) == 0 || len(d) == 0 {
+	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'filename', but malformed. The format must be [option name <string> type filename default <string>]")
 	}
-	e.Options[string(n)] = FileName{n, d, d}
+	e.Options[string(b[2])] = FileName{b[2], b[6], b[6]}
 	return nil
 }
