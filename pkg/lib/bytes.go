@@ -12,3 +12,15 @@ func IndexOfBytes(b [][]byte, t []byte) int {
 	}
 	return -1
 }
+
+func EqualBytes(b1, b2 [][]byte) bool {
+	if len(b1) != len(b2) {
+		return false
+	}
+	for i, b := range b1 {
+		if !bytes.Equal(b, b2[i]) {
+			return false
+		}
+	}
+	return true
+}
