@@ -48,10 +48,10 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	engine.Engine.Mux.Lock()
 
-	for _, msg := range usi.StartCmds {
-		engine.Engine.Stdin.Write(append(msg, '\n'))
-		log.Println("Send message. " + string(msg))
-		if bytes.Equal(msg, usi.CmdUsi) || bytes.Equal(msg, usi.CmdIsReady) {
+	for _, mess := range usi.StartCmds {
+		engine.Engine.Stdin.Write(append(mess, '\n'))
+		log.Println("Send message. " + string(mess))
+		if bytes.Equal(mess, usi.CmdUsi) || bytes.Equal(mess, usi.CmdIsReady) {
 			waitStart()
 		}
 	}

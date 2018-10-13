@@ -33,7 +33,7 @@ func Position(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: エラー
 	if engine.Engine == nil {
-		e := msg.EngineIsNotRunning.New("You need to start engine first.")
+		e := msg.EngineIsNotRunning.WithMsg("You need to start engine first.")
 		http.Error(w, e.Error(), http.StatusBadRequest)
 		log.Println(e)
 		return

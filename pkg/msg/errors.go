@@ -14,7 +14,7 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("%s %s", e.Code, e.Msg)
 }
 
-func (e *Error) New(m string) *Error {
+func (e *Error) WithMsg(m string) *Error {
 	return &Error{e.Code, m}
 }
 
@@ -33,4 +33,5 @@ var (
 	InvalidIdSyntax        = &Error{Code: "InvalidIdSyntax"}
 	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
 	UnknownOption          = &Error{Code: "UnknownOption"}
+	UnknownOptionType      = &Error{Code: "UnknownOptionType"}
 )
