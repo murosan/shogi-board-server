@@ -132,11 +132,12 @@ func (e *Client) parseSelect(b [][]byte) error {
 		i += 2
 	}
 
-	s.Index = lib.IndexOfBytes(b, b[6])
+	s.Index = lib.IndexOfBytes(s.Vars, b[6])
 	if s.Index == -1 {
 		return msg.InvalidOptionSyntax.WithMsg("Default want of 'combo' type was not found in vars.")
 	}
 
+	e.Options[string(s.Name)] = s
 	return nil
 }
 
