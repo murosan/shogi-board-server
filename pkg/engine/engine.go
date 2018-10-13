@@ -69,7 +69,10 @@ func Connect() {
 
 		Sc:        bufio.NewScanner(stdout),
 		EngineOut: make(chan []byte, 10),
-		Done:      make(chan struct{}),
+
+		Options: make(map[string]Option),
+
+		Done: make(chan struct{}),
 	}
 }
 

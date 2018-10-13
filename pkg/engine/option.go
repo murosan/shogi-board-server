@@ -46,7 +46,7 @@ func (e *Client) ParseId(b []byte) error {
 // パースできなかったらエラーを返す
 func (e *Client) ParseOpt(b []byte) error {
 	s := bytes.Split(bytes.TrimSpace(b), space)
-	if len(s) < 5 || bytes.Equal(s[0], opt) || bytes.Equal(s[1], name) || bytes.Equal(s[3], tpe) || len(s[4]) == 0 {
+	if len(s) < 5 || !bytes.Equal(s[0], opt) || !bytes.Equal(s[1], name) || !bytes.Equal(s[3], tpe) || len(s[4]) == 0 {
 		return msg.InvalidOptionSyntax
 	}
 
@@ -85,7 +85,7 @@ func (e *Client) parseCheck(b [][]byte) error {
 		e.Options[string(n)] = Check{n, false, false}
 		return nil
 	}
-	return msg.InvalidOptionSyntax.WithMsg("Default value of 'check' type was not bool. Received: " + string(d))
+	return msg.InvalidOptionSyntax.WithMsg("Default want of 'check' type was not bool. Received: " + string(d))
 }
 
 // spin type を Engine の Options にセットする
@@ -100,15 +100,15 @@ func (e *Client) parseSpin(b [][]byte) error {
 
 	df, err := strconv.Atoi(string(d))
 	if err != nil {
-		return msg.InvalidOptionSyntax.WithMsg("Default value of 'spin' type was not int. Received: " + string(min))
+		return msg.InvalidOptionSyntax.WithMsg("Default want of 'spin' type was not int. Received: " + string(min))
 	}
 	imi, err := strconv.Atoi(string(mi))
 	if err != nil {
-		return msg.InvalidOptionSyntax.WithMsg("Min value of 'spin' type was not int. Received: " + string(min))
+		return msg.InvalidOptionSyntax.WithMsg("Min want of 'spin' type was not int. Received: " + string(min))
 	}
 	ima, err := strconv.Atoi(string(ma))
 	if err != nil {
-		return msg.InvalidOptionSyntax.WithMsg("Max value of 'spin' type was not int. Received: " + string(min))
+		return msg.InvalidOptionSyntax.WithMsg("Max want of 'spin' type was not int. Received: " + string(min))
 	}
 
 	e.Options[string(n)] = Spin{n, df, df, imi, ima}
@@ -135,7 +135,7 @@ func (e *Client) parseSelect(b [][]byte) error {
 
 	s.Index = lib.IndexOfBytes(b, d)
 	if s.Index == -1 {
-		return msg.InvalidOptionSyntax.WithMsg("Default value of 'combo' type was not found in vars.")
+		return msg.InvalidOptionSyntax.WithMsg("Default want of 'combo' type was not found in vars.")
 	}
 
 	return nil
