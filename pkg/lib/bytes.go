@@ -13,6 +13,7 @@ func IndexOfBytes(b [][]byte, t []byte) int {
 	return -1
 }
 
+// b1 と b2 が等しければ true
 func EqualBytes(b1, b2 [][]byte) bool {
 	if len(b1) != len(b2) {
 		return false
