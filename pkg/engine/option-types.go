@@ -14,13 +14,6 @@ import (
 var (
 	pref = []byte("setoption name")
 	val  = []byte("value")
-
-	check    = []byte("check")
-	spin     = []byte("spin")
-	combo    = []byte("combo")
-	btn      = []byte("button")
-	str      = []byte("string")
-	filename = []byte("filename")
 )
 
 type Option interface {
