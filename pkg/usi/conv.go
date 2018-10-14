@@ -13,8 +13,6 @@ import (
 	"github.com/antonholmquist/jason"
 )
 
-
-
 // JSONをUSIに変換する
 func Convert(b []byte) (s [][]byte, e error) {
 	v, err := jason.NewObjectFromBytes(b)
@@ -100,6 +98,7 @@ func toUsiPosition(b []byte) (bl [][]byte, e error) {
 		}
 	}
 	s = append(s, []byte(" 1")...)
+	bl = [][]byte{s}
 	return
 }
 

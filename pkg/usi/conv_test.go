@@ -10,7 +10,7 @@ import (
 )
 
 func TestConvert(t *testing.T) {
-	r := "lnsgk1snl/6gb1/p1pppp2p/6R2/9/1rP6/P2PPPP1P/1BG6/LNS1KGSNL w 3P2p 1"
+	r := "position sfen lnsgk1snl/6gb1/p1pppp2p/6R2/9/1rP6/P2PPPP1P/1BG6/LNS1KGSNL w 3P2p 1"
 	json := `
 {
   "version": 1,
@@ -35,7 +35,7 @@ func TestConvert(t *testing.T) {
 `
 	usi, err := Convert([]byte(json))
 
-	if err != nil || bytes.Equal(usi[0], []byte(r)) {
-		t.Errorf("\nResult:   %v\nError:    %v\nExpected: %v", usi, err, r)
+	if err != nil || len(usi) != 1 || !bytes.Equal(usi[0], []byte(r)) {
+		t.Errorf("\nResult: %v\nError: %v\nExpected: %v", string(usi[0]), err, r)
 	}
 }

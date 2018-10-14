@@ -2,15 +2,15 @@ package engine
 
 import (
 	"bytes"
-	"github.com/murosan/shogi-proxy-server/pkg/lib"
 	"strings"
 	"testing"
 
+	"github.com/murosan/shogi-proxy-server/pkg/lib"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
 func TestClient_ParseId(t *testing.T) {
-	nameCases := []struct {
+	cases := []struct {
 		in   string
 		name []byte
 		err  error
@@ -29,7 +29,7 @@ func TestClient_ParseId(t *testing.T) {
 		{"id auther typo_key", []byte(""), msg.UnknownOption},
 	}
 
-	for _, c := range nameCases {
+	for _, c := range cases {
 		e := Client{}
 		err := e.ParseId([]byte(c.in))
 		if err != c.err {
@@ -53,7 +53,7 @@ func TestClient_ParseId(t *testing.T) {
 }
 
 func TestClient_ParseOpt(t *testing.T) {
-	checkCases := []struct {
+	cases := []struct {
 		in   string
 		want Check
 		err  error
@@ -65,7 +65,7 @@ func TestClient_ParseOpt(t *testing.T) {
 		{"option name UseBook type check dlft true", Check{}, msg.InvalidOptionSyntax},
 	}
 
-	for _, c := range checkCases {
+	for _, c := range cases {
 		e := Client{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
@@ -82,7 +82,7 @@ func TestClient_ParseOpt(t *testing.T) {
 }
 
 func TestClient_ParseOpt2(t *testing.T) {
-	spinCases := []struct {
+	cases := []struct {
 		in   string
 		want Spin
 		err  error
@@ -95,7 +95,7 @@ func TestClient_ParseOpt2(t *testing.T) {
 		{"option name Selectivity type spin default two min 0 max 4", Spin{}, msg.InvalidOptionSyntax},
 	}
 
-	for _, c := range spinCases {
+	for _, c := range cases {
 		e := Client{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
@@ -112,7 +112,7 @@ func TestClient_ParseOpt2(t *testing.T) {
 }
 
 func TestClient_ParseOpt3(t *testing.T) {
-	spinCases := []struct {
+	cases := []struct {
 		in   string
 		want Select
 		err  error
@@ -122,9 +122,12 @@ func TestClient_ParseOpt3(t *testing.T) {
 			Select{[]byte("Style"), 1, [][]byte{[]byte("Solid"), []byte("Normal"), []byte("Risky")}},
 			nil,
 		},
+		{"option name Style type combo default None var Solid var Normal var Risky", Select{}, msg.InvalidOptionSyntax},
+		{"option name Style type combo var Solid var Normal var Risky", Select{}, msg.InvalidOptionSyntax},
+		{"option name Style type combo default Normal", Select{}, msg.InvalidOptionSyntax},
 	}
 
-	for _, c := range spinCases {
+	for _, c := range cases {
 		e := Client{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
@@ -133,6 +136,81 @@ func TestClient_ParseOpt3(t *testing.T) {
 			switch v := o.(type) {
 			case Select:
 				if c.want.Index != v.Index || !lib.EqualBytes(c.want.Vars, v.Vars) {
+					t.Errorf("Mismatch values.\nv1: %v\nv2: %v", c.want, v)
+				}
+			}
+		}
+	}
+}
+
+func TestClient_ParseOpt4(t *testing.T) {
+	cases := []struct {
+		in   string
+		want Button
+		err  error
+	}{
+		{"option name ResetLearning type button", Button{[]byte("ResetLearning")}, nil},
+		{"option name <empty> type button", Button{[]byte("<empty>")}, nil}, // まぁいい
+		{"option name ResetLearning type button sur", Button{}, msg.InvalidOptionSyntax},
+		{"option name 1 type button", Button{[]byte("1")}, nil},
+	}
+
+	for _, c := range cases {
+		e := Client{Options: make(map[string]Option)}
+		err := e.ParseOpt([]byte(c.in))
+		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
+	}
+}
+
+func TestClient_ParseOpt5(t *testing.T) {
+	cases := []struct {
+		in   string
+		want String
+		err  error
+	}{
+		{"option name BookFile type string default public.bin", String{[]byte("BookFile"), []byte("public.bin"), []byte("public.bin")}, nil},
+		{"option name BookFile type string default public.bin var a", String{}, msg.InvalidOptionSyntax},
+		{"option name BookFile type string", String{}, msg.InvalidOptionSyntax},
+		{"option name BookFile type string public.bin", String{}, msg.InvalidOptionSyntax},
+	}
+
+	for _, c := range cases {
+		e := Client{Options: make(map[string]Option)}
+		err := e.ParseOpt([]byte(c.in))
+		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
+		o, ok := e.Options[string(c.want.Name)]
+		if ok {
+			switch v := o.(type) {
+			case String:
+				if !bytes.Equal(v.Val, c.want.Val) || !bytes.Equal(v.Default, c.want.Default) {
+					t.Errorf("Mismatch values.\nv1: %v\nv2: %v", c.want, v)
+				}
+			}
+		}
+	}
+}
+
+func TestClient_ParseOpt6(t *testing.T) {
+	cases := []struct {
+		in   string
+		want FileName
+		err  error
+	}{
+		{"option name LearningFile type filename default <empty>", FileName{[]byte("LearningFile"), []byte("<empty>"), []byte("<empty>")}, nil},
+		{"option name LearningFile type filename default <empty> var a", FileName{}, msg.InvalidOptionSyntax},
+		{"option name LearningFile type filename", FileName{}, msg.InvalidOptionSyntax},
+		{"option name LearningFile type filename <empty>", FileName{}, msg.InvalidOptionSyntax},
+	}
+
+	for _, c := range cases {
+		e := Client{Options: make(map[string]Option)}
+		err := e.ParseOpt([]byte(c.in))
+		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
+		o, ok := e.Options[string(c.want.Name)]
+		if ok {
+			switch v := o.(type) {
+			case FileName:
+				if !bytes.Equal(v.Val, c.want.Val) || !bytes.Equal(v.Default, c.want.Default) {
 					t.Errorf("Mismatch values.\nv1: %v\nv2: %v", c.want, v)
 				}
 			}
