@@ -26,10 +26,14 @@ var (
 	FailedToParseBody = &Error{Code: "FailedToParseBody"}
 
 	// engine
-	FailedToStart          = &Error{Code: "FailedToStart"}
+	ConnectionTimeout      = &Error{Code: "ConnectionTimeout"}
+	FailedToConnect        = &Error{Code: "FailedToConnect"}
 	FailedToShutdown       = &Error{Code: "FailedToShutdown"}
 	EngineIsNotRunning     = &Error{Code: "EngineIsNotRunning"}
 	EngineIsAlreadyRunning = &Error{Code: "EngineIsAlreadyRunning"}
+	FailedToExecCommand    = &Error{Code: "FailedToExecCommand"}
+	FailedToStart          = &Error{Code: "FailedToStart"}
+	FailedToStop           = &Error{Code: "FailedToStop"}
 	InvalidIdSyntax        = &Error{Code: "InvalidIdSyntax"}
 	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
 	UnknownOption          = &Error{Code: "UnknownOption"}

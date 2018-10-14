@@ -31,7 +31,7 @@ func Convert(b []byte) (s [][]byte, e error) {
 	// コマンドによって再度パースする
 	switch cmd {
 	case "start":
-		s = StartCmds
+		s = ConnectCmds
 	case "position":
 		if p, err := toUsiPosition(b); err != nil {
 			e = err

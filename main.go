@@ -33,8 +33,9 @@ func main() {
 
 	log.Println("Listening. " + *addr)
 	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/start", handler.Start)
-	http.HandleFunc("/quit", handler.Quit)
-	http.HandleFunc("/position", handler.Position)
+	http.HandleFunc(handler.ConnectPath, handler.Connect)
+	http.HandleFunc(handler.QuitPath, handler.Quit)
+	http.HandleFunc(handler.SetPositionPath, handler.SetPosition)
+	http.HandleFunc(handler.StudyInitPath, handler.StudyInit)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }

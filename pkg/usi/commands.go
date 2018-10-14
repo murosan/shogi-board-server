@@ -9,14 +9,14 @@ var (
 	CmdIsReady = []byte("isready")
 	CmdNew     = []byte("usinewgame")
 
+	CmdStop = []byte("stop")
 	CmdQuit = []byte("quit")
 
 	ResOk    = []byte("usiok")
 	ResReady = []byte("readyok")
 
-	StartCmds = [][]byte{
+	ConnectCmds = [][]byte{
 		CmdUsi,
 		CmdIsReady,
-		CmdNew,
 	}
 )

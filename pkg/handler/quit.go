@@ -14,12 +14,12 @@ import (
 
 func Quit(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		log.Printf("%s %s", msg.MethodNotAllowed, quitPath)
+		log.Printf("%s %s", msg.MethodNotAllowed, QuitPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)
 		return
 	}
 
-	log.Println(r.Method + " " + quitPath)
+	log.Println(r.Method + " " + QuitPath)
 
 	if engine.Engine == nil {
 		log.Println(msg.EngineIsNotRunning)

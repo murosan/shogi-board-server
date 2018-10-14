@@ -16,14 +16,14 @@ import (
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
-func Position(w http.ResponseWriter, r *http.Request) {
+func SetPosition(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		log.Printf("%s %s", msg.MethodNotAllowed, positionPath)
+		log.Printf("%s %s", msg.MethodNotAllowed, SetPositionPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)
 		return
 	}
 
-	log.Println(r.Method + " " + positionPath)
+	log.Println(r.Method + " " + SetPositionPath)
 
 	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "Content-Type was not application/json.", http.StatusBadRequest)

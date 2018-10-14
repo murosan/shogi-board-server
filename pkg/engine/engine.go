@@ -6,6 +6,7 @@ package engine
 
 import (
 	"bufio"
+	"github.com/murosan/shogi-proxy-server/pkg/msg"
 	"io"
 	"log"
 	"os/exec"
@@ -25,6 +26,9 @@ var (
 type Client struct {
 	// 将棋エンジンの実行コマンド
 	Cmd *exec.Cmd
+
+	// 将棋エンジンの状態 state.go を参照
+	State struct{}
 
 	// 将棋エンジンへ入力を渡すパイプ
 	Stdin io.WriteCloser
@@ -64,6 +68,7 @@ func Connect() {
 
 	Engine = &Client{
 		Cmd:    cmd,
+		State:  NotConnected,
 		Stdin:  stdin,
 		Stdout: stdout,
 
@@ -89,4 +94,13 @@ func Close() {
 	<-Engine.Done
 	Engine.Mux.Unlock()
 	Engine = nil
+}
+
+func (e *Client) Exec(b []byte) error {
+	_, err := Engine.Stdin.Write(append(b, '\n'))
+	if err != nil {
+		log.Println(msg.FailedToExecCommand)
+		return err
+	}
+	return nil
 }

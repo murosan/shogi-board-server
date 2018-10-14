@@ -5,8 +5,15 @@
 package engine
 
 var (
+	// 起動前
 	NotConnected = struct{}{}
-	Connected    = struct{}{}
-	StandBy      = struct{}{}
-	Thinking     = struct{}{}
+
+	// 接続済み
+	Connected = struct{}{}
+
+	// コマンド待ち
+	StandBy = struct{}{}
+
+	// 思考中
+	Thinking = struct{}{}
 )

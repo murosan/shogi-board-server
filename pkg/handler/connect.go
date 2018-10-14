@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
@@ -15,21 +16,16 @@ import (
 )
 
 var (
-	startPath    = "/start"
-	quitPath     = "/quit"
-	positionPath = "/position"
-
 	connected = "Successfully connected."
 )
 
-func Start(w http.ResponseWriter, r *http.Request) {
+func Connect(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
-		log.Printf("%s %s", msg.MethodNotAllowed, startPath)
+		log.Printf("%s %s", msg.MethodNotAllowed, ConnectPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)
 		return
 	}
-
-	log.Println(r.Method + " " + startPath)
+	log.Println(r.Method + " " + ConnectPath)
 
 	if engine.Engine != nil {
 		log.Println(msg.EngineIsAlreadyRunning)
@@ -39,38 +35,59 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	engine.Connect()
 	if err := engine.Engine.Cmd.Start(); err != nil {
-		log.Fatalln(msg.FailedToStart)
-		http.Error(w, msg.FailedToStart.Error(), http.StatusInternalServerError)
+		log.Fatalln(msg.FailedToConnect)
+		http.Error(w, msg.FailedToConnect.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	go engine.CatchEngineOutput()
-
 	engine.Engine.Mux.Lock()
 
-	for _, mess := range usi.StartCmds {
-		engine.Engine.Stdin.Write(append(mess, '\n'))
+	for _, mess := range usi.ConnectCmds {
+		engine.Engine.Exec(mess)
 		log.Println("Send message. " + string(mess))
 		if bytes.Equal(mess, usi.CmdUsi) || bytes.Equal(mess, usi.CmdIsReady) {
-			waitStart()
+			if e := waitStart(); e != nil {
+				http.Error(w, msg.ConnectionTimeout.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 
+	engine.Engine.State = engine.Connected
 	engine.Engine.Mux.Unlock()
-
 	log.Println(connected)
 	w.WriteHeader(http.StatusOK)
 }
 
-func waitStart() {
-	// TODO: timeout
+func waitStart() error {
+	timeout := make(chan struct{})
+	go func() {
+		time.Sleep(time.Second * 10)
+		timeout <- struct{}{}
+	}()
 	for {
 		select {
 		case b := <-engine.Engine.EngineOut:
 			log.Println("Received. " + string(b))
-			if bytes.Equal(b, usi.ResOk) || bytes.Equal(b, usi.ResReady) {
-				return
+			if len(b) == 0 {
+				continue
 			}
+
+			if bytes.Equal(b, usi.ResOk) || bytes.Equal(b, usi.ResReady) {
+				return nil
+			}
+
+			// id でパースしてみて、失敗したら option でパース
+			if e := engine.Engine.ParseId(b); e != nil {
+				e := engine.Engine.ParseOpt(b)
+				if e != nil {
+					log.Println(e)
+				}
+			}
+		case <-timeout:
+			log.Println("Failed to connect to engine.")
+			return msg.ConnectionTimeout
 		}
 	}
 }
