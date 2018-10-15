@@ -22,10 +22,6 @@
   POST
   `position sfen ~`
 
-### /study/init
-
-  思考中なら終了し、`usinewgame`
-
 ### /study/start
 
   `study` は研究的な意味。

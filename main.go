@@ -31,11 +31,13 @@ func main() {
 	defer engine.Close() // for safety
 	config.Load()
 
+	// TODO: handlerパッケージはglobalのEngineを直接触っているのでテストできないので修正する
 	log.Println("Listening. " + *addr)
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc(handler.ConnectPath, handler.Connect)
 	http.HandleFunc(handler.QuitPath, handler.Quit)
 	http.HandleFunc(handler.SetPositionPath, handler.SetPosition)
-	http.HandleFunc(handler.StudyInitPath, handler.StudyInit)
+	http.HandleFunc(handler.StudyStartPath, handler.StudyStart)
+	http.HandleFunc(handler.StudyStopPath, handler.StudyStop)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }

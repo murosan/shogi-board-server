@@ -8,10 +8,10 @@ var (
 	// 起動前
 	NotConnected = struct{}{}
 
-	// 接続済み
+	// 接続済み. usinewgame 前
 	Connected = struct{}{}
 
-	// コマンド待ち
+	// usinewgame の後、go コマンドを待っている状態
 	StandBy = struct{}{}
 
 	// 思考中

@@ -8,9 +8,9 @@ var (
 	CmdUsi     = []byte("usi")
 	CmdIsReady = []byte("isready")
 	CmdNew     = []byte("usinewgame")
-
-	CmdStop = []byte("stop")
-	CmdQuit = []byte("quit")
+	CmdGoInf   = []byte("go infinite")
+	CmdStop    = []byte("stop")
+	CmdQuit    = []byte("quit")
 
 	ResOk    = []byte("usiok")
 	ResReady = []byte("readyok")
