@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package config
+package client
 
-var (
-	Conf Config
-)
+type Connector interface {
+	Connect() error
+	Close() error
+	Exec([]byte) error
+}
+

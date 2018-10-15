@@ -34,7 +34,7 @@ func TestClient_ParseId(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		e := Client{}
+		e := Engine{}
 		err := e.ParseId([]byte(c.in))
 		if err != c.err {
 			t.Errorf("Returned error was not as expected.\nInput: %v, Expected: %v, Actual: %v", c.in, c.err, err)
@@ -45,7 +45,7 @@ func TestClient_ParseId(t *testing.T) {
 	}
 
 	for _, c := range authorCases {
-		e := Client{}
+		e := Engine{}
 		err := e.ParseId([]byte(c.in))
 		if err != c.err {
 			t.Errorf("Returned error was not as expected.\nInput: %v, Expected: %v, Actual: %v", c.in, c.err, err)
@@ -70,7 +70,7 @@ func TestClient_ParseOpt(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		e := Client{Options: make(map[string]Option)}
+		e := Engine{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
 		o, ok := e.Options[string(c.want.Name)]
@@ -100,7 +100,7 @@ func TestClient_ParseOpt2(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		e := Client{Options: make(map[string]Option)}
+		e := Engine{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
 		o, ok := e.Options[string(c.want.Name)]
@@ -132,7 +132,7 @@ func TestClient_ParseOpt3(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		e := Client{Options: make(map[string]Option)}
+		e := Engine{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
 		o, ok := e.Options[string(c.want.Name)]
@@ -160,7 +160,7 @@ func TestClient_ParseOpt4(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		e := Client{Options: make(map[string]Option)}
+		e := Engine{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
 	}
@@ -179,7 +179,7 @@ func TestClient_ParseOpt5(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		e := Client{Options: make(map[string]Option)}
+		e := Engine{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
 		o, ok := e.Options[string(c.want.Name)]
@@ -207,7 +207,7 @@ func TestClient_ParseOpt6(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		e := Client{Options: make(map[string]Option)}
+		e := Engine{Options: make(map[string]Option)}
 		err := e.ParseOpt([]byte(c.in))
 		basicOptionMatching(t, &e, c.in, string(c.want.Name), c.want, c.err, err)
 		o, ok := e.Options[string(c.want.Name)]
@@ -227,7 +227,7 @@ func TestClient_ParseOpt6(t *testing.T) {
 // o:  Option
 // e1: cases のエラー(Expected Error)
 // e2: ParseOpt の戻り値のエラー(Actual Error)
-func basicOptionMatching(t *testing.T, e *Client, in, na string, o Option, ce, pe error) {
+func basicOptionMatching(t *testing.T, e *Engine, in, na string, o Option, ce, pe error) {
 	t.Helper()
 	if (ce == nil && pe != nil) || (ce != nil && pe == nil) {
 		t.Errorf("Returned error was not as expected.\nInput: %v\nExpected: %v\nActual: %v", in, ce, pe)

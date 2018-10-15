@@ -6,24 +6,15 @@ package engine
 
 import (
 	"bufio"
-	"github.com/murosan/shogi-proxy-server/pkg/msg"
 	"io"
 	"log"
 	"os/exec"
 	"sync"
 
-	"github.com/murosan/shogi-proxy-server/pkg/config"
-	"github.com/murosan/shogi-proxy-server/pkg/usi"
+	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
-// TODO: 名前をどうにかしたい
-
-var (
-	// Singleton
-	Engine *Client = nil
-)
-
-type Client struct {
+type Engine struct {
 	// 将棋エンジンの実行コマンド
 	Cmd *exec.Cmd
 
@@ -50,11 +41,10 @@ type Client struct {
 	Done chan struct{}
 }
 
-// 将棋エンジンと接続する
-// TODO: エンジンの入れ替えをできるようにする
-func Connect() {
-	log.Println("Connect to engine.")
-	cmd := exec.Command(config.Conf.EnginePath)
+// p: EngineCommandPath
+func NewEngine(p string) *Engine {
+	log.Println("NewEngine to engine.")
+	cmd := exec.Command(p)
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -66,7 +56,7 @@ func Connect() {
 		log.Fatalln("connect stdout: " + err.Error())
 	}
 
-	Engine = &Client{
+	return &Engine{
 		Cmd:    cmd,
 		State:  NotConnected,
 		Stdin:  stdin,
@@ -81,23 +71,9 @@ func Connect() {
 	}
 }
 
-// 将棋エンジンを終了する
-func Close() {
-	Engine.Mux.Lock()
-	log.Println("Close engine.")
-	// TODO: エラーとかね
-	if Engine == nil {
-		return
-	}
-	Engine.Stdin.Write(append(usi.CmdQuit, '\n'))
-	Engine.Cmd.Wait()
-	<-Engine.Done
-	Engine.Mux.Unlock()
-	Engine = nil
-}
-
-func (e *Client) Exec(b []byte) error {
-	_, err := Engine.Stdin.Write(append(b, '\n'))
+// USIコマンドの実行
+func (e *Engine) Exec(b []byte) error {
+	_, err := e.Stdin.Write(append(b, '\n'))
 	if err != nil {
 		log.Println(msg.FailedToExecCommand)
 		return err

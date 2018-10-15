@@ -21,14 +21,14 @@ func Quit(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(r.Method + " " + QuitPath)
 
-	if engine.Engine == nil {
+	if engine.Egn == nil {
 		log.Println(msg.EngineIsNotRunning)
 		http.Error(w, msg.EngineIsNotRunning.Error(), http.StatusBadRequest)
 		return
 	}
 
 	engine.Close()
-	if engine.Engine != nil {
+	if engine.Egn != nil {
 		panic(msg.FailedToShutdown)
 	}
 	log.Println("Successfully closed.")

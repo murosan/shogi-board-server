@@ -18,13 +18,17 @@ type Config struct {
 	EnginePath string `json:"engine_path"`
 }
 
-func Load() {
-	b, err := ioutil.ReadFile(path)
+func NewConfig(p string) Config {
+	b, err := ioutil.ReadFile(p)
 	if err != nil {
 		log.Fatalln("load: " + err.Error())
 	}
 
-	if err := json.Unmarshal(b, &Conf); err != nil {
+	var c Config
+
+	if err := json.Unmarshal(b, &c); err != nil {
 		log.Fatalln("unmarshal: " + err.Error())
 	}
+
+	return c
 }

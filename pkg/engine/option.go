@@ -25,10 +25,13 @@ var (
 	selOpt = []byte("var")
 )
 
+// TODO: Engineのメソッドにするべきではない
+// USIハンドラとか？を作る
+
 // id name <EngineName>
 // id author <AuthorName> をEngineにセットする
 // EngineNameやAuthorNameにスペースが入る場合もあるので最後にJoinしている
-func (e *Client) ParseId(b []byte) error {
+func (e *Engine) ParseId(b []byte) error {
 	s := bytes.Split(bytes.TrimSpace(b), space)
 	if len(s) < 3 || !bytes.Equal(s[0], id) {
 		return msg.InvalidIdSyntax
@@ -49,7 +52,7 @@ func (e *Client) ParseId(b []byte) error {
 
 // 一行受け取って、EngineのOptionMapにセットする
 // パースできなかったらエラーを返す
-func (e *Client) ParseOpt(b []byte) error {
+func (e *Engine) ParseOpt(b []byte) error {
 	s := bytes.Split(bytes.TrimSpace(b), space)
 	if len(s) < 5 || !bytes.Equal(s[0], opt) || !bytes.Equal(s[1], name) || !bytes.Equal(s[3], tpe) || len(s[4]) == 0 {
 		return msg.InvalidOptionSyntax
@@ -73,11 +76,11 @@ func (e *Client) ParseOpt(b []byte) error {
 	}
 }
 
-// check type を Engine の Options にセットする
+// check type を Egn の Options にセットする
 // option name <string> type check default <bool>
 // このフォーマット以外は許容しない
 // default がなかったり、bool ではない時はエラー
-func (e *Client) parseCheck(b [][]byte) error {
+func (e *Engine) parseCheck(b [][]byte) error {
 	if len(b) != 7 || !bytes.Equal(b[5], deflt) || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'check', but malformed. The format must be [option name <string> type check default <bool>]")
 	}
@@ -94,11 +97,11 @@ func (e *Client) parseCheck(b [][]byte) error {
 	return msg.InvalidOptionSyntax.WithMsg("Default want of 'check' type was not bool. Received: " + string(d))
 }
 
-// spin type を Engine の Options にセットする
+// spin type を Egn の Options にセットする
 // option name <string> type spin default <int> min <int> max <int>
 // このフォーマット以外は許容しない
 // 各値がなかったり、int ではない時、min > max の時はエラー
-func (e *Client) parseSpin(b [][]byte) error {
+func (e *Engine) parseSpin(b [][]byte) error {
 	if len(b) != 11 || !bytes.Equal(b[5], deflt) || !bytes.Equal(b[7], min) || !bytes.Equal(b[9], max) || len(b[2]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'spin', but malformed. The format must be [option name <string> type spin default <int> min <int> max <int>]")
 	}
@@ -120,11 +123,11 @@ func (e *Client) parseSpin(b [][]byte) error {
 	return nil
 }
 
-// select type を Engine の Options にセットする
+// select type を Egn の Options にセットする
 // option name <string> type combo default <string> rep(var <string>)
 // このフォーマット以外は許容しない
 // Default がない、var がない、default が var にない時はエラー
-func (e *Client) parseSelect(b [][]byte) error {
+func (e *Engine) parseSelect(b [][]byte) error {
 	if len(b) < 9 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'combo', but malformed. The format must be [option name <string> type combo default <string> rep(var <string>)]")
 	}
@@ -146,9 +149,9 @@ func (e *Client) parseSelect(b [][]byte) error {
 	return nil
 }
 
-// button type を Engine の Options にセットする
+// button type を Egn の Options にセットする
 // option name <string> type button
-func (e *Client) parseButton(b [][]byte) error {
+func (e *Engine) parseButton(b [][]byte) error {
 	if len(b) != 5 || len(b[2]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'button', but malformed. The format must be [option name <string> type button]")
 	}
@@ -156,9 +159,9 @@ func (e *Client) parseButton(b [][]byte) error {
 	return nil
 }
 
-// string type を Engine の Options にセットする
+// string type を Egn の Options にセットする
 // option name <string> type string default <string>
-func (e *Client) parseString(b [][]byte) error {
+func (e *Engine) parseString(b [][]byte) error {
 	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'string', but malformed. The format must be [option name <string> type string default <string>]")
 	}
@@ -167,7 +170,7 @@ func (e *Client) parseString(b [][]byte) error {
 }
 
 // option name <string> type filename default <string>
-func (e *Client) parseFileName(b [][]byte) error {
+func (e *Engine) parseFileName(b [][]byte) error {
 	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return msg.InvalidOptionSyntax.WithMsg("Received option type was 'filename', but malformed. The format must be [option name <string> type filename default <string>]")
 	}

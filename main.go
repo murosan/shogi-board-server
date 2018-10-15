@@ -29,7 +29,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	defer engine.Close() // for safety
-	config.Load()
+	config.NewConfig()
 
 	// TODO: handlerパッケージはglobalのEngineを直接触っているのでテストできないので修正する
 	log.Println("Listening. " + *addr)

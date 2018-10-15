@@ -13,6 +13,8 @@ import (
 	"github.com/antonholmquist/jason"
 )
 
+// TODO: USI専用ハンドラのレシーバメソッドに変える
+
 // JSONをUSIに変換する
 func Convert(b []byte) (s [][]byte, e error) {
 	v, err := jason.NewObjectFromBytes(b)

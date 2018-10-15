@@ -21,20 +21,20 @@ func StudyStart(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println(r.Method + " " + StudyInitPath)
 
-	if engine.Engine == nil {
+	if engine.Egn == nil {
 		http.Error(w, msg.EngineIsNotRunning.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// 将棋エンジンが思考中なら何もしない
-	if engine.Engine.State == engine.Thinking {
+	if engine.Egn.State == engine.Thinking {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
 	// 将棋エンジンが StandBy 状態なら思考を開始させる
-	if engine.Engine.State == engine.StandBy {
-		if e := engine.Engine.Exec(usi.CmdGoInf); e != nil {
+	if engine.Egn.State == engine.StandBy {
+		if e := engine.Egn.Exec(usi.CmdGoInf); e != nil {
 			log.Println(msg.FailedToExecCommand.Error() + " cmd: " + string(usi.CmdGoInf))
 			http.Error(w, msg.FailedToExecCommand.Error(), http.StatusInternalServerError)
 			return
@@ -56,14 +56,14 @@ func StudyStop(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println(r.Method + " " + StudyInitPath)
 
-	if engine.Engine == nil {
+	if engine.Egn == nil {
 		http.Error(w, msg.EngineIsNotRunning.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// 将棋エンジンが思考中ならStop
-	if engine.Engine.State == engine.Thinking {
-		if e := engine.Engine.Exec(usi.CmdStop); e != nil {
+	if engine.Egn.State == engine.Thinking {
+		if e := engine.Egn.Exec(usi.CmdStop); e != nil {
 			log.Println(msg.FailedToExecCommand.Error() + " cmd: " + string(usi.CmdStop))
 			http.Error(w, msg.FailedToExecCommand.Error(), http.StatusInternalServerError)
 			return

@@ -27,24 +27,24 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println(r.Method + " " + ConnectPath)
 
-	if engine.Engine != nil {
+	if engine.Egn != nil {
 		log.Println(msg.EngineIsAlreadyRunning)
 		http.Error(w, msg.EngineIsAlreadyRunning.Error(), http.StatusBadRequest)
 		return
 	}
 
-	engine.Connect()
-	if err := engine.Engine.Cmd.Start(); err != nil {
+	engine.NewEngine()
+	if err := engine.Egn.Cmd.Start(); err != nil {
 		log.Fatalln(msg.FailedToConnect)
 		http.Error(w, msg.FailedToConnect.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	go engine.CatchEngineOutput()
-	engine.Engine.Mux.Lock()
+	engine.Egn.Mux.Lock()
 
 	for _, mess := range usi.ConnectCmds {
-		engine.Engine.Exec(mess)
+		engine.Egn.Exec(mess)
 		log.Println("Send message. " + string(mess))
 		if bytes.Equal(mess, usi.CmdUsi) || bytes.Equal(mess, usi.CmdIsReady) {
 			if e := waitStart(); e != nil {
@@ -54,8 +54,8 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	engine.Engine.State = engine.Connected
-	engine.Engine.Mux.Unlock()
+	engine.Egn.State = engine.Connected
+	engine.Egn.Mux.Unlock()
 	log.Println(connected)
 	w.WriteHeader(http.StatusOK)
 }
@@ -68,7 +68,7 @@ func waitStart() error {
 	}()
 	for {
 		select {
-		case b := <-engine.Engine.EngineOut:
+		case b := <-engine.Egn.EngineOut:
 			log.Println("Received. " + string(b))
 			if len(b) == 0 {
 				continue
@@ -79,8 +79,8 @@ func waitStart() error {
 			}
 
 			// id でパースしてみて、失敗したら option でパース
-			if e := engine.Engine.ParseId(b); e != nil {
-				e := engine.Engine.ParseOpt(b)
+			if e := engine.Egn.ParseId(b); e != nil {
+				e := engine.Egn.ParseOpt(b)
 				if e != nil {
 					log.Println(e)
 				}
