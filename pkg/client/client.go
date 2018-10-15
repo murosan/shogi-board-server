@@ -6,6 +6,7 @@ package client
 
 import (
 	"bufio"
+	"github.com/murosan/shogi-proxy-server/pkg/config"
 	"log"
 
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
@@ -14,10 +15,16 @@ import (
 
 // TODO: 2つのエンジンを同時に使えるようにする。Poolとか作る
 type Client struct {
-	egn engine.Engine
+	conf *config.Config
+	egn  *engine.Engine
+}
+
+func NewClient(c *config.Config) *Client {
+	return &Client{c, nil}
 }
 
 func (c *Client) Connect() error {
+	c.egn = engine.NewEngine(c.conf.EnginePath)
 	// TODO
 	return nil
 }

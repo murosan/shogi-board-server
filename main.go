@@ -9,8 +9,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/murosan/shogi-proxy-server/pkg/client"
 	"github.com/murosan/shogi-proxy-server/pkg/config"
-	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/handler"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
@@ -28,8 +28,9 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	defer engine.Close() // for safety
-	config.NewConfig()
+	conf := config.NewConfig("./config.json")
+	cli := client.NewClient(conf)
+	defer cli.Close() // for safety
 
 	// TODO: handlerパッケージはglobalのEngineを直接触っているのでテストできないので修正する
 	log.Println("Listening. " + *addr)

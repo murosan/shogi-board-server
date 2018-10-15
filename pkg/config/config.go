@@ -10,15 +10,11 @@ import (
 	"log"
 )
 
-var (
-	path = "./config.json"
-)
-
 type Config struct {
 	EnginePath string `json:"engine_path"`
 }
 
-func NewConfig(p string) Config {
+func NewConfig(p string) *Config {
 	b, err := ioutil.ReadFile(p)
 	if err != nil {
 		log.Fatalln("load: " + err.Error())
@@ -30,5 +26,5 @@ func NewConfig(p string) Config {
 		log.Fatalln("unmarshal: " + err.Error())
 	}
 
-	return c
+	return &c
 }

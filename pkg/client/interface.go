@@ -9,4 +9,3 @@ type Connector interface {
 	Close() error
 	Exec([]byte) error
 }
-
