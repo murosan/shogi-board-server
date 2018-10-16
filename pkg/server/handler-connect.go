@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package handler
+package server
 
 import (
 	"bytes"
@@ -19,7 +19,8 @@ var (
 	connected = "Successfully connected."
 )
 
-func Connect(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Connect(w http.ResponseWriter, r *http.Request) {
+	// TODO: HTTPメソッドチェックとログは別のラッパーメソッドを書いて移す
 	if r.Method != "GET" {
 		log.Printf("%s %s", msg.MethodNotAllowed, ConnectPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)

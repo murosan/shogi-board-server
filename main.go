@@ -11,7 +11,7 @@ import (
 
 	"github.com/murosan/shogi-proxy-server/pkg/client"
 	"github.com/murosan/shogi-proxy-server/pkg/config"
-	"github.com/murosan/shogi-proxy-server/pkg/handler"
+	"github.com/murosan/shogi-proxy-server/pkg/server"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
@@ -35,10 +35,10 @@ func main() {
 	// TODO: handlerパッケージはglobalのEngineを直接触っているのでテストできないので修正する
 	log.Println("Listening. " + *addr)
 	http.HandleFunc("/", serveHome)
-	http.HandleFunc(handler.ConnectPath, handler.Connect)
-	http.HandleFunc(handler.QuitPath, handler.Quit)
-	http.HandleFunc(handler.SetPositionPath, handler.SetPosition)
-	http.HandleFunc(handler.StudyStartPath, handler.StudyStart)
-	http.HandleFunc(handler.StudyStopPath, handler.StudyStop)
+	http.HandleFunc(server.ConnectPath, server.Connect)
+	http.HandleFunc(server.QuitPath, server.Quit)
+	http.HandleFunc(server.SetPositionPath, server.SetPosition)
+	http.HandleFunc(server.StudyStartPath, server.StudyStart)
+	http.HandleFunc(server.StudyStopPath, server.StudyStop)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
