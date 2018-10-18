@@ -9,11 +9,9 @@ import (
 )
 
 type Server struct {
-	cli *client.Client
+	cli *client.Connector
 }
 
-func NewServer(cli *client.Client) *Server {
-	return &Server{cli}
+func NewServer(cli client.Connector) *Server {
+	return &Server{&cli}
 }
-
-

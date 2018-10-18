@@ -8,4 +8,5 @@ type Connector interface {
 	Connect() error
 	Close() error
 	Exec([]byte) error
+	CatchEngineOutput()
 }

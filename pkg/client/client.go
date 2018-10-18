@@ -6,9 +6,9 @@ package client
 
 import (
 	"bufio"
-	"github.com/murosan/shogi-proxy-server/pkg/config"
 	"log"
 
+	"github.com/murosan/shogi-proxy-server/pkg/config"
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/usi"
 )
