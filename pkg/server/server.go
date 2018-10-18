@@ -15,3 +15,5 @@ type Server struct {
 func NewServer(cli *client.Client) *Server {
 	return &Server{cli}
 }
+
+

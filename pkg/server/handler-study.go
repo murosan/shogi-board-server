@@ -13,7 +13,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/pkg/usi"
 )
 
-func StudyStart(w http.ResponseWriter, r *http.Request) {
+func (s *Server) StudyStart(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		log.Printf("%s %s", msg.MethodNotAllowed, StudyInitPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)
@@ -48,7 +48,7 @@ func StudyStart(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, e.Error(), http.StatusInternalServerError)
 }
 
-func StudyStop(w http.ResponseWriter, r *http.Request) {
+func (s *Server) StudyStop(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		log.Printf("%s %s", msg.MethodNotAllowed, StudyInitPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)

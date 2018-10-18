@@ -12,7 +12,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
-func Quit(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Quit(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		log.Printf("%s %s", msg.MethodNotAllowed, QuitPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)

@@ -16,7 +16,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
-func SetPosition(w http.ResponseWriter, r *http.Request) {
+func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		log.Printf("%s %s", msg.MethodNotAllowed, SetPositionPath)
 		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)
