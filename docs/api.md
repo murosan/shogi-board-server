@@ -1,4 +1,15 @@
-# API
+# API [WIP]
+
+GET  /
+POST /connect
+POST /close
+GET  /option/list
+POST /option/set
+POST /position/set
+POST /start
+GET  /study/values/list
+POST /analyze/init
+POST /analyze/start
 
 ### /connect
 
@@ -22,13 +33,11 @@
   POST
   `position sfen ~`
 
-### /study/start
+### /start
 
-  `study` は研究的な意味。
+  `usinewgame`
 
-### /study/stop
-
-### /study/candidate/list
+### /study/values/list
 
   エンジンの思考内容を取得
 

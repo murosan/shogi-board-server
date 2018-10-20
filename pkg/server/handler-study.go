@@ -5,76 +5,66 @@
 package server
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 
-	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
-	"github.com/murosan/shogi-proxy-server/pkg/usi"
 )
 
-func (s *Server) StudyStart(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		log.Printf("%s %s", msg.MethodNotAllowed, StudyInitPath)
-		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)
+func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Content-Type was not application/json.", http.StatusBadRequest)
+		log.Println("Content-Type was not application/json.")
 		return
 	}
-	log.Println(r.Method + " " + StudyInitPath)
 
+	// TODO: エラー
 	if engine.Egn == nil {
-		http.Error(w, msg.EngineIsNotRunning.Error(), http.StatusInternalServerError)
+		e := msg.EngineIsNotRunning.WithMsg("You need to start engine first.")
+		http.Error(w, e.Error(), http.StatusBadRequest)
+		log.Println(e)
 		return
 	}
 
-	// 将棋エンジンが思考中なら何もしない
-	if engine.Egn.State == engine.Thinking {
-		w.WriteHeader(http.StatusOK)
+	l, err := strconv.Atoi(r.Header.Get("Content-Length"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("Could not read Content-Length. " + err.Error())
 		return
 	}
 
-	// 将棋エンジンが StandBy 状態なら思考を開始させる
-	if engine.Egn.State == engine.StandBy {
-		if e := engine.Egn.Exec(usi.CmdGoInf); e != nil {
-			log.Println(msg.FailedToExecCommand.Error() + " cmd: " + string(usi.CmdGoInf))
-			http.Error(w, msg.FailedToExecCommand.Error(), http.StatusInternalServerError)
-			return
-		}
-		log.Println("Start thinking...")
-		w.WriteHeader(http.StatusOK)
+	// read body
+	body := make([]byte, l)
+	l, err = r.Body.Read(body)
+	if err != nil && err != io.EOF {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(msg.FailedToReadBody.Error() + err.Error())
 		return
 	}
 
-	e := msg.FailedToExecCommand.WithMsg("Before to start 'study mode', 'usinewgame' command should be sent to the engine.")
-	http.Error(w, e.Error(), http.StatusInternalServerError)
-}
-
-func (s *Server) StudyStop(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		log.Printf("%s %s", msg.MethodNotAllowed, StudyInitPath)
-		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)
+	//parse json
+	var jsonBody map[string]interface{}
+	err = json.Unmarshal(body, &jsonBody)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(msg.FailedToParseBody.Error() + err.Error())
 		return
 	}
-	log.Println(r.Method + " " + StudyInitPath)
+	fmt.Printf("%v\n", jsonBody)
 
-	if engine.Egn == nil {
-		http.Error(w, msg.EngineIsNotRunning.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// 将棋エンジンが思考中ならStop
-	if engine.Egn.State == engine.Thinking {
-		if e := engine.Egn.Exec(usi.CmdStop); e != nil {
-			log.Println(msg.FailedToExecCommand.Error() + " cmd: " + string(usi.CmdStop))
-			http.Error(w, msg.FailedToExecCommand.Error(), http.StatusInternalServerError)
-			return
-		}
-		log.Println("Stopped.")
-	}
-
-	// close してしまう
-	// TODO
-	engine.Close()
+	// TODO: positionの実行
 
 	w.WriteHeader(http.StatusOK)
-	return
+}
+
+func (s *Server) Start(w http.ResponseWriter, r *http.Request) {
+	// TODO
+}
+
+func (s *Server) GetValues(w http.ResponseWriter, r *http.Request) {
+  // TODO
 }

@@ -7,24 +7,77 @@ package server
 import "net/http"
 
 var (
-	ConnectPath     = "/connect"
-	QuitPath        = "/quit"
+	IndexPath = "/"
+
+	ConnectPath = "/connect"
+	ClosePath   = "/close"
+
+	ListOptPath = "/option/list"
+	SetOptPath  = "/option/set"
+
+	StartPath = "/start"
+
 	SetPositionPath = "/position/set"
-	StudyInitPath   = "/study/init"
-	StudyStartPath  = "/study/start"
-	StudyStopPath   = "/study/stop"
+
+	GetValuesPath = "/study/values/list"
+
+	InitAnalyze  = "/analyze/init"
+	StartAnalyze = "/analyze/start"
 )
 
 type ShogiProxyServer interface {
+	// methodをチェックしたりする
+	Handling(string, http.HandlerFunc) http.HandlerFunc
+
+	// HTML を返す
+	// method: GET
+	// returns: html
 	ServeHome(http.ResponseWriter, *http.Request)
+
+	// Engine に接続する
+	// method: POST
+	// returns: ok | error
 	Connect(http.ResponseWriter, *http.Request)
+
+	// Engine を終了する
+	// method: POST
+	// returns: ok | error
 	Close(http.ResponseWriter, *http.Request)
-	OptionList(http.ResponseWriter, *http.Request)
-	OptionSet(http.ResponseWriter, *http.Request)
-	PositionSet(http.ResponseWriter, *http.Request)
-	StudyStart(http.ResponseWriter, *http.Request)
-	StudyStop(http.ResponseWriter, *http.Request)
-	StudyCandidateList(http.ResponseWriter, *http.Request)
-	AnalyzeInit(http.ResponseWriter, *http.Request)
-	AnalyzeStart(http.ResponseWriter, *http.Request)
+
+	// Option 一覧を返す
+	// method: GET
+	// returns: list | error
+	ListOption(http.ResponseWriter, *http.Request)
+
+	// Option を設定する
+	// method: POST
+	// returns: ok | error
+	SetOption(http.ResponseWriter, *http.Request)
+
+	// 局面のセット
+	// method: POST
+	// returns: ok | error
+	SetPosition(http.ResponseWriter, *http.Request)
+
+	// newgame.
+	// method: POST
+	// returns: ok | error
+	Start(http.ResponseWriter, *http.Request)
+
+	// 評価値一覧を返す
+	// method: GET
+	// returns: list | error
+	GetValues(http.ResponseWriter, *http.Request)
+
+	// 棋譜解析の初期化。棋譜を渡す
+	// method: POST
+	// returns: ok | error
+	InitAnalyze(http.ResponseWriter, *http.Request)
+
+	// 解析する。結果を返す
+	// method: POST
+	// returns: list | error
+	StartAnalyze(http.ResponseWriter, *http.Request)
+
+	// TODO: 対局用のAPI
 }

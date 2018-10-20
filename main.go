@@ -11,36 +11,31 @@ import (
 
 	"github.com/murosan/shogi-proxy-server/pkg/client"
 	"github.com/murosan/shogi-proxy-server/pkg/config"
-	"github.com/murosan/shogi-proxy-server/pkg/msg"
 	"github.com/murosan/shogi-proxy-server/pkg/server"
 )
 
 var (
-	addr = flag.String("addr", "127.0.0.1:8080", "http service address")
+	addr       = flag.String("addr", "127.0.0.1:8080", "http service address")
+	configPath = flag.String("config_path", "./config.json", "設定ファイルのパス")
 )
 
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)
-		return
-	}
-	http.ServeFile(w, r, "home.html")
-}
-
 func main() {
-	conf := config.NewConfig("./config.json")
+	conf := config.NewConfig(*configPath)
 	cli := client.NewClient(conf)
 	defer cli.Close() // for safety
 
 	s := server.NewServer(cli)
 
-	// TODO: handlerパッケージはglobalのEngineを直接触っているのでテストできないので修正する
-	log.Println("Listening. " + *addr)
-	http.HandleFunc("/", serveHome)
-	http.HandleFunc(server.ConnectPath, server.Handling("GET", s.Connect))
-	http.HandleFunc(server.QuitPath, server.Handling("GET", s.Quit))
-	http.HandleFunc(server.SetPositionPath, server.Handling("POST", s.SetPosition))
-	http.HandleFunc(server.StudyStartPath, server.Handling("GET", s.StudyStart))
-	http.HandleFunc(server.StudyStopPath, server.Handling("GET", s.StudyStop))
+	log.Println("Listening. localhost:" + *addr)
+	http.HandleFunc(server.IndexPath, s.Handling("GET", s.ServeHome))
+	http.HandleFunc(server.ConnectPath, s.Handling("POST", s.Connect))
+	http.HandleFunc(server.ClosePath, s.Handling("POST", s.Close))
+	http.HandleFunc(server.ListOptPath, s.Handling("GET", s.ListOption))
+	http.HandleFunc(server.SetOptPath, s.Handling("POST", s.SetOption))
+	http.HandleFunc(server.SetPositionPath, s.Handling("POST", s.SetPosition))
+	http.HandleFunc(server.StartPath, s.Handling("POST", s.Start))
+	http.HandleFunc(server.GetValuesPath, s.Handling("GET", s.GetValues))
+	http.HandleFunc(server.InitAnalyze, s.Handling("POST", s.InitAnalyze))
+	http.HandleFunc(server.StartAnalyze, s.Handling("POST", s.StartAnalyze))
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }

@@ -1,6 +1,9 @@
 // Copyright 2018 murosan. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+// Copyright 2018 murosan. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 package server
 
@@ -91,4 +94,27 @@ func waitStart() error {
 			return msg.ConnectionTimeout
 		}
 	}
+}
+
+func (s *Server) Close(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		log.Printf("%s %s", msg.MethodNotAllowed, ClosePath)
+		http.Error(w, msg.MethodNotAllowed.Error(), http.StatusMethodNotAllowed)
+		return
+	}
+
+	log.Println(r.Method + " " + ClosePath)
+
+	if engine.Egn == nil {
+		log.Println(msg.EngineIsNotRunning)
+		http.Error(w, msg.EngineIsNotRunning.Error(), http.StatusBadRequest)
+		return
+	}
+
+	engine.Close()
+	if engine.Egn != nil {
+		panic(msg.FailedToShutdown)
+	}
+	log.Println("Successfully closed.")
+	w.WriteHeader(http.StatusOK)
 }
