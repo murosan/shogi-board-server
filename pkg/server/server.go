@@ -9,9 +9,9 @@ import (
 )
 
 type Server struct {
-	cli *client.Connector
+	cli client.Connector
 }
 
 func NewServer(cli client.Connector) *Server {
-	return &Server{&cli}
+	return &Server{cli}
 }

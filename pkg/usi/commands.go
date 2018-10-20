@@ -7,16 +7,11 @@ package usi
 var (
 	CmdUsi     = []byte("usi")
 	CmdIsReady = []byte("isready")
-	CmdNew     = []byte("usinewgame")
+	CmdNewGame = []byte("usinewgame")
 	CmdGoInf   = []byte("go infinite")
 	CmdStop    = []byte("stop")
 	CmdQuit    = []byte("quit")
 
 	ResOk    = []byte("usiok")
 	ResReady = []byte("readyok")
-
-	ConnectCmds = [][]byte{
-		CmdUsi,
-		CmdIsReady,
-	}
 )

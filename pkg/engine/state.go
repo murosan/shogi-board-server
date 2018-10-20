@@ -4,9 +4,6 @@
 
 package engine
 
-// TODO: 外から触れないようにする
-// State構造体でも作る
-
 var (
 	// 起動前
 	NotConnected = struct{}{}

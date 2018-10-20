@@ -57,8 +57,9 @@ func NewEngine(p string) *Engine {
 	}
 
 	return &Engine{
-		Cmd:    cmd,
-		State:  NotConnected,
+		Cmd:   cmd,
+		State: NotConnected,
+
 		Stdin:  stdin,
 		Stdout: stdout,
 
