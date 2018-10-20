@@ -75,12 +75,10 @@ func (c *Client) Close() error {
 	return nil
 }
 
-// byte配列を受け取ってエンジンに渡す
 func (c *Client) Exec(b []byte) error {
 	return c.egn.Exec(b)
 }
 
-// エンジンの出力を受け取り続ける
 func (c *Client) CatchOutput() {
 	defer func() {}()
 	s := bufio.NewScanner(c.egn.Stdout)
