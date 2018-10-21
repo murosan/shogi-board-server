@@ -5,7 +5,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -16,15 +15,9 @@ import (
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
+// Content-Type は application/json である必要がある
 func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
-
-	if r.Header.Get("Content-Type") != "application/json" {
-		m := "Content-Type was not application/json."
-		http.Error(w, m, http.StatusBadRequest)
-		log.Println(m)
-		return
-	}
-
+	// 将棋エンジンへ接続されてなければ BadRequest
 	if s.cli.GetState() == engine.NotConnected {
 		e := msg.EngineIsNotRunning.WithMsg("You need to start engine first.")
 		http.Error(w, e.Error(), http.StatusBadRequest)
@@ -43,22 +36,11 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 	body := make([]byte, l)
 	l, err = r.Body.Read(body)
 	if err != nil && err != io.EOF {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println(msg.FailedToReadBody.Error() + err.Error())
+		m := fmt.Sprintf("%v\ncaused by:\n%v", msg.FailedToReadBody.Error(), err.Error())
+		http.Error(w, m, http.StatusInternalServerError)
+		log.Println(m)
 		return
 	}
-
-	//parse json
-	var jsonBody map[string]interface{}
-	err = json.Unmarshal(body, &jsonBody)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println(msg.FailedToParseBody.Error() + err.Error())
-		return
-	}
-	fmt.Printf("%v\n", jsonBody)
-
-	// TODO: positionの実行
 
 	w.WriteHeader(http.StatusOK)
 }

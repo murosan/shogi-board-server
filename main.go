@@ -32,7 +32,7 @@ func main() {
 	http.HandleFunc(server.ClosePath, s.Handling("POST", s.Close))
 	http.HandleFunc(server.ListOptPath, s.Handling("GET", s.ListOption))
 	http.HandleFunc(server.SetOptPath, s.Handling("POST", s.SetOption))
-	http.HandleFunc(server.SetPositionPath, s.Handling("POST", s.SetPosition))
+	http.HandleFunc(server.SetPositionPath, s.Handling("POST", s.ContentTypeCheck("application/json", s.SetPosition)))
 	http.HandleFunc(server.StartPath, s.Handling("POST", s.Start))
 	http.HandleFunc(server.GetValuesPath, s.Handling("GET", s.GetValues))
 	http.HandleFunc(server.InitAnalyze, s.Handling("POST", s.InitAnalyze))

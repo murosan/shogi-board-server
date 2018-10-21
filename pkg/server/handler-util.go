@@ -5,6 +5,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -13,11 +14,25 @@ import (
 
 func (s *Server) Handling(meth string, h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Access-Log. [uri:" + r.RequestURI + "] [method:" + r.Method + "] [addr:" + r.RemoteAddr + "] [ua:" + r.Header.Get("user-agent") + "]")
+		log.Println(fmt.Sprintf("AccessLog. [uri:%s] [method:%s] [addr:%s] [ua:%s]", r.RequestURI, r.Method, r.RemoteAddr, r.Header.Get("user-agent")))
 
 		if r.Method != meth {
 			log.Printf("Error: %s, URI: %s\n", msg.MethodNotAllowed, r.RequestURI)
 			http.Error(w, msg.MethodNotAllowed.Error(), http.StatusBadRequest)
+			return
+		}
+
+		h(w, r)
+	}
+}
+
+func (s *Server) ContentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ct := r.Header.Get("Content-Type")
+		if ct != tpe {
+			m := fmt.Sprintf("Content-Type must be %s, but got %s", tpe, ct)
+			http.Error(w, m, http.StatusBadRequest)
+			log.Println(m)
 			return
 		}
 

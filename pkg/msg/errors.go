@@ -38,4 +38,7 @@ var (
 	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
 	UnknownOption          = &Error{Code: "UnknownOption"}
 	UnknownOptionType      = &Error{Code: "UnknownOptionType"}
+
+	// usi
+	InvalidPieceId = &Error{Code: "InvalidPieceId"}
 )
