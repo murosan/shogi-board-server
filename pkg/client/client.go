@@ -8,12 +8,20 @@ import (
 	"bufio"
 	"bytes"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/murosan/shogi-proxy-server/pkg/config"
+	"github.com/murosan/shogi-proxy-server/pkg/converter/models"
+	"github.com/murosan/shogi-proxy-server/pkg/converter/usi2go"
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 	"github.com/murosan/shogi-proxy-server/pkg/usi"
+)
+
+var (
+	idRegex  = regexp.MustCompile(`id.*`)
+	optRegex = regexp.MustCompile(`option.*`)
 )
 
 // TODO: 2つのエンジンを同時に使えるようにする。Poolとか作る
@@ -106,6 +114,14 @@ func (c *Client) GetState() struct{} {
 	return c.egn.State
 }
 
+func (c *Client) SetId(k []byte, v []byte) {
+	// TODO
+}
+
+func (c *Client) SetupOption(o *models.Option) {
+	// TODO
+}
+
 func (c *Client) waitFor(exitWord []byte, parseOpt bool) error {
 	timeout := make(chan struct{})
 	go func() {
@@ -123,19 +139,25 @@ func (c *Client) waitFor(exitWord []byte, parseOpt bool) error {
 				return nil
 			}
 
-			if parseOpt {
-				// id でパースしてみて、失敗したら option でパース
-				if e := c.egn.ParseId(b); e == nil {
+			if parseOpt && idRegex.Match(b) {
+				k, v, e := usi2go.ParseId(b)
+				if e != nil {
+					c.SetId(k, v)
 					continue
 				}
+				return e
+			}
 
-				if e := c.egn.ParseOpt(b); e != nil {
-					log.Println(e)
-					return e
+			if parseOpt && optRegex.Match(b) {
+				o, e := usi2go.ParseOpt(b)
+				if e == nil {
+					c.SetupOption(&o)
+					continue
 				}
+				return e
 			}
 		case <-timeout:
-			log.Println("Connection timeout.")
+			log.Println(msg.ConnectionTimeout.Error())
 			return msg.ConnectionTimeout
 		}
 	}

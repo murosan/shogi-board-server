@@ -1,23 +1,14 @@
-// Copyright 2018 murosan. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-package engine
+package models
 
 import (
 	"bytes"
 	"strconv"
 )
 
-// 将棋エンジンが出力するオプションを定義する
-// 数値はとりあえず int にしておく
-// 文字列は string より []byte の方が都合がいいので
-// []byte で統一しておく
-// TODO: bytes.Join のパフォーマンスを調べる
-
 var (
-	pref = []byte("setoption name")
-	val  = []byte("value")
+	space = []byte(" ")
+	val   = []byte("value")
+	pref  = []byte("setoption name")
 )
 
 type Option interface {

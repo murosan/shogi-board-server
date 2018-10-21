@@ -4,6 +4,8 @@
 
 package client
 
+import "github.com/murosan/shogi-proxy-server/pkg/converter/models"
+
 type Connector interface {
 	// 将棋エンジンと接続する
 	Connect() error
@@ -22,4 +24,11 @@ type Connector interface {
 
 	// State の取得
 	GetState() struct{}
+
+	// ID(author | name) をセットする
+	SetId([]byte, []byte)
+
+	// 設定可能な将棋エンジンのオプションを追加する
+	// オプション一覧は自分で持つ
+	SetupOption(*models.Option)
 }
