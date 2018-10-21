@@ -12,27 +12,29 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
 func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
+
 	if r.Header.Get("Content-Type") != "application/json" {
-		http.Error(w, "Content-Type was not application/json.", http.StatusBadRequest)
-		log.Println("Content-Type was not application/json.")
+		m := "Content-Type was not application/json."
+		http.Error(w, m, http.StatusBadRequest)
+		log.Println(m)
 		return
 	}
 
-	// TODO: エラー
-	if engine.Egn == nil {
+	if s.cli.GetState() == engine.NotConnected {
 		e := msg.EngineIsNotRunning.WithMsg("You need to start engine first.")
 		http.Error(w, e.Error(), http.StatusBadRequest)
-		log.Println(e)
+		log.Println(e.Error())
 		return
 	}
 
 	l, err := strconv.Atoi(r.Header.Get("Content-Length"))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), 411) // Length Required
 		log.Println("Could not read Content-Length. " + err.Error())
 		return
 	}
@@ -66,5 +68,5 @@ func (s *Server) Start(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) GetValues(w http.ResponseWriter, r *http.Request) {
-  // TODO
+	// TODO
 }

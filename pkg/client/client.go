@@ -99,6 +99,10 @@ func (c *Client) SetState(s struct{}) {
 	c.egn.State = s
 }
 
+func (c *Client) GetState() struct{} {
+	return c.egn.State
+}
+
 func (c *Client) waitFor(exitWord []byte, parseOpt bool) error {
 	timeout := make(chan struct{})
 	go func() {

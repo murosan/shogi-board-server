@@ -19,4 +19,7 @@ type Connector interface {
 
 	// State の更新
 	SetState(s struct{})
+
+	// State の取得
+	GetState() struct{}
 }
