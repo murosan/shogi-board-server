@@ -54,8 +54,8 @@
 ```json
 {
   "position": [9][9]pieceId,
-  "cap_0": []pieceId,
-  "cap_1": []pieceId,
+  "cap_0": [7],
+  "cap_1": [7],
   "turn": turn
 }
 ```
@@ -110,4 +110,3 @@
 14 ８六飛(82)  
 15 ３四飛(24)
 ``` 
-  
