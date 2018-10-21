@@ -23,7 +23,7 @@ var (
 	NotFound          = &Error{Code: "NotFound"}
 	MethodNotAllowed  = &Error{Code: "MethodNotAllowed"}
 	FailedToReadBody  = &Error{Code: "FailedToReadBody"}
-	FailedToParseBody = &Error{Code: "FailedToParseBody"}
+	FailedToParseJson = &Error{Code: "FailedToParseJson"}
 
 	// engine
 	ConnectionTimeout      = &Error{Code: "ConnectionTimeout"}
@@ -33,7 +33,6 @@ var (
 	EngineIsAlreadyRunning = &Error{Code: "EngineIsAlreadyRunning"}
 	FailedToExecCommand    = &Error{Code: "FailedToExecCommand"}
 	FailedToStart          = &Error{Code: "FailedToStart"}
-	FailedToStop           = &Error{Code: "FailedToStop"}
 	InvalidIdSyntax        = &Error{Code: "InvalidIdSyntax"}
 	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
 	UnknownOption          = &Error{Code: "UnknownOption"}

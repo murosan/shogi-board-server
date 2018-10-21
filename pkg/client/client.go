@@ -76,6 +76,9 @@ func (c *Client) Close() error {
 }
 
 func (c *Client) Exec(b []byte) error {
+	if c.GetState() == engine.NotConnected {
+		return msg.EngineIsNotRunning
+	}
 	return c.egn.Exec(b)
 }
 

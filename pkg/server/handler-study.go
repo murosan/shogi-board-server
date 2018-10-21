@@ -11,13 +11,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/murosan/shogi-proxy-server/pkg/converter/go2usi"
+	"github.com/murosan/shogi-proxy-server/pkg/converter/json2go"
 	"github.com/murosan/shogi-proxy-server/pkg/engine"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
 // Content-Type は application/json である必要がある
 func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
-	// 将棋エンジンへ接続されてなければ BadRequest
+	// 将棋エンジンへ接続されていなければ BadRequest
 	if s.cli.GetState() == engine.NotConnected {
 		e := msg.EngineIsNotRunning.WithMsg("You need to start engine first.")
 		http.Error(w, e.Error(), http.StatusBadRequest)
@@ -42,6 +44,21 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pos, err := json2go.ToPosition(body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	usi, err := go2usi.SetPosition(pos)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	s.cli.Exec(usi)
 	w.WriteHeader(http.StatusOK)
 }
 
