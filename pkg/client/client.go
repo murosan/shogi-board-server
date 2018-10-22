@@ -26,12 +26,13 @@ var (
 
 // TODO: 2つのエンジンを同時に使えるようにする。Poolとか作る
 type Client struct {
-	conf *config.Config
-	egn  *engine.Engine
+	conf    *config.Config
+	egn     *engine.Engine
+	options map[string]models.Option
 }
 
 func NewClient(c *config.Config) *Client {
-	return &Client{c, nil}
+	return &Client{c, nil, make(map[string]models.Option)}
 }
 
 func (c *Client) Connect() error {
@@ -114,12 +115,26 @@ func (c *Client) GetState() struct{} {
 	return c.egn.State
 }
 
-func (c *Client) SetId(k []byte, v []byte) {
-	// TODO
+func (c *Client) SetId(k []byte, v []byte) error {
+	switch string(k) {
+	case "name":
+		c.egn.Name = v
+		return nil
+	case "author":
+		c.egn.Author = v
+		return nil
+	default:
+		return msg.InvalidIdSyntax.WithMsg("Key was not 'name' or 'author'.")
+	}
 }
 
-func (c *Client) SetupOption(o *models.Option) {
-	// TODO
+func (c *Client) SetupOption(o models.Option) {
+	c.options[string(o.GetName())] = o
+}
+
+func (c *Client) OptionList() []models.Option {
+	// TODO: どの形で渡すのがいいかなぁ
+	return nil
 }
 
 func (c *Client) waitFor(exitWord []byte, parseOpt bool) error {
@@ -151,7 +166,7 @@ func (c *Client) waitFor(exitWord []byte, parseOpt bool) error {
 			if parseOpt && optRegex.Match(b) {
 				o, e := usi2go.ParseOpt(b)
 				if e == nil {
-					c.SetupOption(&o)
+					c.SetupOption(o)
 					continue
 				}
 				return e

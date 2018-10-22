@@ -26,9 +26,11 @@ type Connector interface {
 	GetState() struct{}
 
 	// ID(author | name) をセットする
-	SetId([]byte, []byte)
+	SetId([]byte, []byte) error
 
 	// 設定可能な将棋エンジンのオプションを追加する
 	// オプション一覧は自分で持つ
-	SetupOption(*models.Option)
+	SetupOption(models.Option)
+
+	OptionList() []models.Option
 }

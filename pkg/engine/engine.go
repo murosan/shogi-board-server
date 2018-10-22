@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"sync"
 
-	"github.com/murosan/shogi-proxy-server/pkg/converter/models"
 	"github.com/murosan/shogi-proxy-server/pkg/msg"
 )
 
@@ -35,7 +34,6 @@ type Engine struct {
 	// その他の情報
 	Name    []byte
 	Author  []byte
-	Options map[string]models.Option
 
 	// 将棋エンジンが終了したかどうか
 	Done chan struct{}
@@ -66,8 +64,6 @@ func NewEngine(p string) *Engine {
 
 		Sc:        bufio.NewScanner(stdout),
 		EngineOut: make(chan []byte, 10),
-
-		Options: make(map[string]models.Option),
 
 		Done: make(chan struct{}),
 	}

@@ -12,8 +12,8 @@ var (
 )
 
 type Option interface {
-	// USIコマンドを返す
 	Usi() []byte
+	GetName() []byte
 }
 
 type Check struct {
@@ -26,6 +26,8 @@ func (c Check) Usi() []byte {
 	return bytes.Join([][]byte{pref, c.Name, val, b}, space)
 }
 
+func (c Check) GetName() []byte { return c.Name }
+
 type Spin struct {
 	Name                   []byte
 	Val, Default, Min, Max int
@@ -36,6 +38,8 @@ func (s Spin) Usi() []byte {
 	return bytes.Join([][]byte{pref, s.Name, val, []byte(b)}, space)
 }
 
+func (s Spin) GetName() []byte { return s.Name }
+
 // USIのcombo
 type Select struct {
 	Name  []byte
@@ -43,9 +47,11 @@ type Select struct {
 	Vars  [][]byte
 }
 
-func (c Select) Usi() []byte {
-	return bytes.Join([][]byte{pref, c.Name, val, c.Vars[c.Index]}, space)
+func (s Select) Usi() []byte {
+	return bytes.Join([][]byte{pref, s.Name, val, s.Vars[s.Index]}, space)
 }
+
+func (s Select) GetName() []byte { return s.Name }
 
 type Button struct {
 	Name []byte
@@ -55,6 +61,8 @@ func (b Button) Usi() []byte {
 	return bytes.Join([][]byte{pref, b.Name}, space)
 }
 
+func (b Button) GetName() []byte { return b.Name }
+
 type String struct {
 	Name, Val, Default []byte
 }
@@ -63,6 +71,8 @@ func (s String) Usi() []byte {
 	return bytes.Join([][]byte{pref, s.Name, val, s.Val}, space)
 }
 
+func (s String) GetName() []byte { return s.Name }
+
 type FileName struct {
 	Name, Val, Default []byte
 }
@@ -70,3 +80,5 @@ type FileName struct {
 func (f FileName) Usi() []byte {
 	return bytes.Join([][]byte{pref, f.Name, val, f.Val}, space)
 }
+
+func (f FileName) GetName() []byte { return f.Name }
