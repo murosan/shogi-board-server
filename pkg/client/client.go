@@ -63,7 +63,7 @@ func (c *Client) Connect() error {
 }
 
 func (c *Client) Close() error {
-	if c.GetState() == engine.NotConnected {
+	if c.egn == nil {
 		return nil
 	}
 	// TODO: エラーをちゃんと返せない
@@ -84,6 +84,7 @@ func (c *Client) Close() error {
 			return msg.ConnectionTimeout
 		}
 	}
+	c.egn = nil
 	return nil
 }
 
