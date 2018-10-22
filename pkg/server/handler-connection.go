@@ -20,7 +20,7 @@ func (s *Server) Connect(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Close(w http.ResponseWriter, r *http.Request) {
-	if err := s.cli.Connect(); err != nil {
+	if err := s.cli.Close(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
