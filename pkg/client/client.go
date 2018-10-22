@@ -63,6 +63,9 @@ func (c *Client) Connect() error {
 }
 
 func (c *Client) Close() error {
+	if c.GetState() == engine.NotConnected {
+		return nil
+	}
 	// TODO: エラーをちゃんと返せない
 	c.egn.Mux.Lock()
 	c.Exec(usi.CmdQuit)
