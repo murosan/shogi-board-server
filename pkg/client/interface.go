@@ -20,10 +20,10 @@ type Connector interface {
 	CatchOutput()
 
 	// State の更新
-	SetState(s struct{})
+	SetState(s int)
 
 	// State の取得
-	GetState() struct{}
+	GetState() int
 
 	// ID(author | name) をセットする
 	SetId([]byte, []byte) error

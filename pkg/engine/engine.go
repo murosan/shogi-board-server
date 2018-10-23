@@ -19,7 +19,7 @@ type Engine struct {
 	Cmd *exec.Cmd
 
 	// 将棋エンジンの状態 state.go を参照
-	State struct{}
+	State int
 
 	// 将棋エンジンへ入力を渡すパイプ
 	Stdin io.WriteCloser
@@ -42,7 +42,7 @@ type Engine struct {
 
 // p: EngineCommandPath
 func NewEngine(p string) *Engine {
-	log.Println("NewEngine to engine.")
+	log.Println("Initializing Engine...")
 	cmd := exec.Command(p)
 
 	stdin, err := cmd.StdinPipe()

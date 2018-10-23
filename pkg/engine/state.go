@@ -6,14 +6,14 @@ package engine
 
 var (
 	// 起動前
-	NotConnected = struct{}{}
+	NotConnected = 1
 
 	// 接続済み. usinewgame 前
-	Connected = struct{}{}
+	Connected = 2
 
 	// usinewgame の後、go コマンドを待っている状態
-	StandBy = struct{}{}
+	StandBy = 3
 
 	// 思考中
-	Thinking = struct{}{}
+	Thinking = 4
 )

@@ -42,6 +42,8 @@ func (c *Client) Connect() error {
 	}
 
 	c.egn = engine.NewEngine(c.conf.EnginePath)
+	c.SetState(engine.Connected)
+	c.egn.Cmd.Start()
 	go c.CatchOutput()
 
 	c.egn.Mux.Lock()
@@ -57,7 +59,6 @@ func (c *Client) Connect() error {
 	if e := c.waitFor(usi.ResReady, false); e != nil {
 		return e
 	}
-	c.SetState(engine.Connected)
 	c.egn.Mux.Unlock()
 	return nil
 }
@@ -111,11 +112,11 @@ func (c *Client) CatchOutput() {
 	close(c.egn.Done)
 }
 
-func (c *Client) SetState(s struct{}) {
+func (c *Client) SetState(s int) {
 	c.egn.State = s
 }
 
-func (c *Client) GetState() struct{} {
+func (c *Client) GetState() int {
 	return c.egn.State
 }
 
