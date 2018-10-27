@@ -17,8 +17,8 @@ type config struct {
 }
 
 // TODO: ローダーを分離する
-func NewConfig(p string) cnf.Config {
-	b, err := ioutil.ReadFile(p)
+func NewConfig() cnf.Config {
+	b, err := ioutil.ReadFile("./config.json")
 	if err != nil {
 		log.Fatalln("load: " + err.Error())
 	}

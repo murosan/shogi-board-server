@@ -9,19 +9,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/murosan/shogi-proxy-server/app/infrastracture/config"
 	"github.com/murosan/shogi-proxy-server/app/server"
+	"github.com/murosan/shogi-proxy-server/app/service/config"
 	"github.com/murosan/shogi-proxy-server/app/service/connector"
 )
 
 var (
-	addr       = flag.String("addr", "127.0.0.1:8080", "http service address")
-	configPath = flag.String("config_path", "./config.json", "設定ファイルのパス")
+	addr = flag.String("addr", "127.0.0.1:8080", "http service address")
 )
 
 func main() {
-	conf := config.NewConfig(*configPath)
-	conn := connector.UseConnector(conf)
+	conn := connector.UseConnector(config.UseConfig())
 	defer conn.Close() // for safety
 
 	s := server.NewServer(conn)
