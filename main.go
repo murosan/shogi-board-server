@@ -9,9 +9,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/murosan/shogi-proxy-server/pkg/client"
-	"github.com/murosan/shogi-proxy-server/pkg/config"
-	"github.com/murosan/shogi-proxy-server/pkg/server"
+	"github.com/murosan/shogi-proxy-server/app/infrastracture/config"
+	"github.com/murosan/shogi-proxy-server/app/server"
+	"github.com/murosan/shogi-proxy-server/app/service/connector"
 )
 
 var (
@@ -21,10 +21,10 @@ var (
 
 func main() {
 	conf := config.NewConfig(*configPath)
-	cli := client.NewClient(conf)
-	defer cli.Close() // for safety
+	conn := connector.UseConnector(conf)
+	defer conn.Close() // for safety
 
-	s := server.NewServer(cli)
+	s := server.NewServer(conn)
 
 	log.Println("Listening. localhost:" + *addr)
 	http.HandleFunc(server.IndexPath, s.Handling("GET", s.ServeHome))
