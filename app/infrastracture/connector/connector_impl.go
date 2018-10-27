@@ -22,7 +22,6 @@ import (
 	engineService "github.com/murosan/shogi-proxy-server/app/service/engine"
 )
 
-// TODO: serviceに移動
 var (
 	idRegex  = regexp.MustCompile(`id.*`)
 	optRegex = regexp.MustCompile(`option.*`)
@@ -47,7 +46,6 @@ func NewConnector(c config.Config) conn.Connector {
 	}
 }
 
-// TODO
 func (c *connector) Connect() error {
 	if c.egn != nil {
 		log.Println(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
@@ -80,17 +78,19 @@ func (c *connector) Close() error {
 	if c.egn == nil {
 		return nil
 	}
-	// TODO: エラーをちゃんと返せない
-	c.egn.Lock()
+
 	c.Exec(&usi.CmdQuit)
+
 	timeout := make(chan struct{})
+	closeCh := make(chan struct{})
+
 	go func() {
 		time.Sleep(time.Second * 10)
 		timeout <- struct{}{}
 	}()
-	closeCh := make(chan struct{})
+
 	c.egn.Close(closeCh)
-	defer c.egn.Unlock()
+
 	for {
 		select {
 		case <-closeCh:
@@ -110,7 +110,6 @@ func (c *connector) Exec(b *[]byte) error {
 }
 
 func (c *connector) CatchOutput() {
-	defer func() {}()
 	s := c.egn.GetScanner()
 
 	for s.Scan() {

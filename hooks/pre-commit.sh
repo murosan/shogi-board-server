@@ -10,4 +10,5 @@ unformatted=$(gofmt -l $gofiles)
 
 for fn in $unformatted; do
   gofmt -w $PWD/$fn
+  git add $PWD/$fn
 done
