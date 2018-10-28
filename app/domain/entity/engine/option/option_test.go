@@ -24,6 +24,7 @@ func TestButton_GetName(t *testing.T) {
 		getNameTestHelper(t, i, c.in, c.want)
 	}
 }
+
 func TestButton_Usi(t *testing.T) {
 	cases := []struct {
 		in   Button
@@ -41,11 +42,35 @@ func TestButton_Usi(t *testing.T) {
 }
 
 func TestCheck_GetName(t *testing.T) {
+	cases := []struct {
+		in   Check
+		want []byte
+	}{
+		{Check{[]byte("chk-name"), true, true}, []byte("chk-name")},
+		{Check{Name: []byte("")}, []byte("")},
+		{Check{[]byte(" "), false, true}, []byte(" ")},
+		{Check{Name: []byte("%\n|t\t")}, []byte("%\n|t\t")},
+	}
 
+	for i, c := range cases {
+		getNameTestHelper(t, i, c.in, c.want)
+	}
 }
 
 func TestCheck_Usi(t *testing.T) {
+	cases := []struct {
+		in   Check
+		want []byte
+	}{
+		{Check{[]byte("chk-name"), true, true}, []byte("setoption name chk-name value true")},
+		{Check{Name: []byte("")}, []byte("setoption name  value false")},
+		{Check{[]byte(" "), false, true}, []byte("setoption name   value false")},
+		{Check{Name: []byte("%\n|t\t")}, []byte("setoption name %\n|t\t value false")},
+	}
 
+	for i, c := range cases {
+		usiTestHelper(t, i, c.in, c.want)
+	}
 }
 
 func TestFileName_GetName(t *testing.T) {
@@ -88,18 +113,18 @@ Index: %d
 Input: %v
 Want: %s
 Actual: %s
-`, i, o, string(o.GetName()), string(want))
+`, i, o, string(want), string(o.GetName()))
 	}
 }
 
 func usiTestHelper(t *testing.T, i int, o Option, want []byte) {
 	t.Helper()
-	if bytes.Equal(o.Usi(), want) {
+	if !bytes.Equal(o.Usi(), want) {
 		t.Errorf(`Option.Usi was not as expected
 Index: %d
 Input: %v
 Want: %s
 Actual: %s
-`, i, o, string(o.Usi()), string(want))
+`, i, o, string(want), string(o.Usi()))
 	}
 }
