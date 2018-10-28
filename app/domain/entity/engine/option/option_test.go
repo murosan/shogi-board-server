@@ -21,9 +21,7 @@ func TestButton_GetName(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		if !bytes.Equal(c.in.GetName(), c.want) {
-			t.Errorf("Button.GetName was not as Expected\nIndex: %d\nWant: %s\nActual: %s", i, string(c.in.GetName()), string(c.want))
-		}
+		getNameTestHelper(t, i, c.in, c.want)
 	}
 }
 func TestButton_Usi(t *testing.T) {
@@ -38,8 +36,70 @@ func TestButton_Usi(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		if !bytes.Equal(c.in.Usi(), c.want) {
-			t.Errorf("Button.Usi was not as Expected\nIndex: %d\nWant: %s\nActual: %s", i, string(c.in.Usi()), string(c.want))
-		}
+		usiTestHelper(t, i, c.in, c.want)
+	}
+}
+
+func TestCheck_GetName(t *testing.T) {
+
+}
+
+func TestCheck_Usi(t *testing.T) {
+
+}
+
+func TestFileName_GetName(t *testing.T) {
+
+}
+
+func TestFileName_Usi(t *testing.T) {
+
+}
+
+func TestSelect_GetName(t *testing.T) {
+
+}
+
+func TestSelect_Usi(t *testing.T) {
+
+}
+
+func TestSpin_GetName(t *testing.T) {
+
+}
+
+func TestSpin_Usi(t *testing.T) {
+
+}
+
+func TestString_GetName(t *testing.T) {
+
+}
+
+func TestString_Usi(t *testing.T) {
+
+}
+
+func getNameTestHelper(t *testing.T, i int, o Option, want []byte) {
+	t.Helper()
+	if !bytes.Equal(o.GetName(), want) {
+		t.Errorf(`Option.GetName was not as expected
+Index: %d
+Input: %v
+Want: %s
+Actual: %s
+`, i, o, string(o.GetName()), string(want))
+	}
+}
+
+func usiTestHelper(t *testing.T, i int, o Option, want []byte) {
+	t.Helper()
+	if bytes.Equal(o.Usi(), want) {
+		t.Errorf(`Option.Usi was not as expected
+Index: %d
+Input: %v
+Want: %s
+Actual: %s
+`, i, o, string(o.Usi()), string(want))
 	}
 }
