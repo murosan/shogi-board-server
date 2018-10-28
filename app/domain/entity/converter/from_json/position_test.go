@@ -7,6 +7,7 @@ package from_json
 import (
 	"testing"
 
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
 )
 
@@ -15,6 +16,7 @@ func TestFromJson_Position(t *testing.T) {
 	cases := []struct {
 		in   []byte
 		want shogi.Position
+		err  *exception.Error
 	}{
 		{[]byte(`
 {
@@ -51,11 +53,35 @@ func TestFromJson_Position(t *testing.T) {
 				Turn:      1,
 				MoveCount: 100,
 			},
+			nil,
+		},
+		{[]byte(`
+{
+  "pos": [
+    [-2, -3, -4, -5, -8, 0, -4, -3, -2],
+    [0, 0, 0, 0, 0, 0, -5, -6, 0],
+    [-1, 0, -1, -1, -1, -1, 0, 0, -1],
+    [0, 0, 0, 0, 0, 0, 7, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, -7, 1, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 1, 1, 1, 1, 0, 1],
+    [0, 6, 5, 0, 0, 0, 0, 0, 0],
+    [2, 3, 4, 0, 8, 5, 4, 3, 2]
+  ],
+  "cap_0": [3, 0, 0, 0, 0, 0, 0],
+  "cap_1": [2, 0, 0, 0, 0, 0, 0],
+  "turn": 1,
+}`),
+			shogi.Position{},
+			exception.FailedToParseJson,
 		},
 	}
 
 	for i, c := range cases {
 		p, e := fj.Position(c.in)
+		if e != nil && c.err.Code == c.err.Code {
+			continue
+		}
 		if e != nil {
 			t.Errorf("Error: %v\nIndex: %d", e.Error(), i)
 		}
