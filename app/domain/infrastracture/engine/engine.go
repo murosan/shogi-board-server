@@ -29,5 +29,6 @@ type Engine interface {
 	Start() error
 	Close(chan struct{})
 
+	// 将棋エンジンが出力した値を読み取る Scanner を作る
 	GetScanner() *bufio.Scanner
 }

@@ -18,7 +18,6 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/service/converter"
 	engineService "github.com/murosan/shogi-proxy-server/app/service/engine"
 )
 
@@ -36,13 +35,13 @@ type connector struct {
 	fu      *from_usi.FromUsi
 }
 
-func NewConnector(c config.Config) conn.Connector {
+func NewConnector(c config.Config, fu *from_usi.FromUsi) conn.Connector {
 	return &connector{
 		c,
 		nil,
 		make(chan []byte, 10),
 		make(map[string]option.Option),
-		converter.UseFromUsi(),
+		fu,
 	}
 }
 
@@ -52,7 +51,8 @@ func (c *connector) Connect() error {
 		return nil
 	}
 
-	c.egn = engineService.UseEngine(c.conf)
+	// TODO: 引数で渡す。Poolを作ってその中に入れるように修正する
+	c.egn = engineService.UseEngine()
 	c.SetState(state.Connected)
 	c.egn.Start()
 	go c.CatchOutput()

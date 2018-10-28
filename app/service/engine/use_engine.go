@@ -5,17 +5,21 @@
 package engine
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	"os/exec"
+
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	egn "github.com/murosan/shogi-proxy-server/app/infrastracture/engine"
+	"github.com/murosan/shogi-proxy-server/app/infrastracture/os/command"
+	"github.com/murosan/shogi-proxy-server/app/service/config"
 )
 
-// TODO: 2つのEngineを扱えるように、connection pool とか作って移す
+// TODO: 2つのEngineを扱えるように、connection pool とか作ってこのファイルは消す
 var e engine.Engine = nil
 
-func UseEngine(c config.Config) engine.Engine {
+func UseEngine() engine.Engine {
 	if e == nil {
-		e = egn.NewEngine(c.GetEnginePath())
+		ec := exec.Command(config.UseConfig().GetEnginePath())
+		e = egn.NewEngine(command.NewCmd(ec))
 	}
 	return e
 }

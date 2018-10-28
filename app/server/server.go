@@ -17,10 +17,10 @@ type Server struct {
 	tu   *to_usi.ToUsi
 }
 
-func NewServer(conn connector.Connector) *Server {
+func NewServer(conn connector.Connector, fj *from_json.FromJson, tu *to_usi.ToUsi) *Server {
 	return &Server{
 		conn,
-		from_json.NewFromJson(),
-		to_usi.NewToUsi(),
+		fj,
+		tu,
 	}
 }

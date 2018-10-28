@@ -10,8 +10,8 @@ import (
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/app/server"
-	"github.com/murosan/shogi-proxy-server/app/service/config"
 	"github.com/murosan/shogi-proxy-server/app/service/connector"
+	"github.com/murosan/shogi-proxy-server/app/service/converter"
 )
 
 var (
@@ -19,10 +19,10 @@ var (
 )
 
 func main() {
-	conn := connector.UseConnector(config.UseConfig())
+	conn := connector.UseConnector()
 	defer conn.Close() // for safety
 
-	s := server.NewServer(conn)
+	s := server.NewServer(conn, converter.UseFromJson(), converter.UseToUsi())
 
 	log.Println("Listening. localhost:" + *addr)
 	http.HandleFunc(server.IndexPath, s.Handling("GET", s.ServeHome))

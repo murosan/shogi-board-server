@@ -5,16 +5,17 @@
 package connector
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/config"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	conn "github.com/murosan/shogi-proxy-server/app/infrastracture/connector"
+	"github.com/murosan/shogi-proxy-server/app/service/config"
+	"github.com/murosan/shogi-proxy-server/app/service/converter"
 )
 
 var c connector.Connector = nil
 
-func UseConnector(conf config.Config) connector.Connector {
+func UseConnector() connector.Connector {
 	if c == nil {
-		c = conn.NewConnector(conf)
+		c = conn.NewConnector(config.UseConfig(), converter.UseFromUsi())
 	}
 	return c
 }
