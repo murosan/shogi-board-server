@@ -123,7 +123,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) 
 
 			if parseOpt && idRegex.Match(b) {
 				k, v, e := c.fu.EngineID(b)
-				if e != nil {
+				if e == nil {
 					c.setId(&k, &v)
 					continue
 				}
