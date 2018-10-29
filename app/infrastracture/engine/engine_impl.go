@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"sync"
 
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	egn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
@@ -20,16 +21,18 @@ type engine struct {
 	state state.State
 
 	// その他の情報
-	name   []byte
-	author []byte
+	name    []byte
+	author  []byte
+	options map[string]option.Option
 
 	mux sync.Mutex
 }
 
 func NewEngine(c command.OsCmd) egn.Engine {
 	return &engine{
-		cmd:   c,
-		state: state.NotConnected,
+		cmd:     c,
+		state:   state.NotConnected,
+		options: make(map[string]option.Option),
 	}
 }
 
@@ -40,6 +43,8 @@ func (e *engine) SetName(b *[]byte) { e.name = *b }
 func (e *engine) GetAuthor() *[]byte { return &e.author }
 
 func (e *engine) SetAuthor(b *[]byte) { e.author = *b }
+
+func (e *engine) SetOption(n string, o option.Option) { e.options[n] = o }
 
 func (e *engine) SetState(s state.State) { e.state = s }
 

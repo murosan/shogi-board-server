@@ -7,6 +7,7 @@ package engine
 import (
 	"bufio"
 
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 )
 
@@ -17,6 +18,8 @@ type Engine interface {
 
 	GetAuthor() *[]byte
 	SetAuthor(*[]byte)
+
+	SetOption(string, option.Option)
 
 	SetState(state.State)
 	GetState() state.State

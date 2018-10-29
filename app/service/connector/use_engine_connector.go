@@ -5,17 +5,19 @@
 package connector
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
-	conn "github.com/murosan/shogi-proxy-server/app/infrastracture/connector"
+	connModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
+	"github.com/murosan/shogi-proxy-server/app/infrastracture/connector"
 	"github.com/murosan/shogi-proxy-server/app/service/config"
 	"github.com/murosan/shogi-proxy-server/app/service/converter"
 )
 
-var c connector.Connector = nil
+var c connModel.Connector = nil
 
-func UseConnector() connector.Connector {
+func UseConnector() connModel.Connector {
 	if c == nil {
-		c = conn.NewConnector(config.UseConfig(), converter.UseFromUsi())
+		p := connector.NewConnectionPool(config.UseConfig())
+		p.Initialize()
+		c = connector.NewConnector(config.UseConfig(), p, converter.UseFromUsi())
 	}
 	return c
 }

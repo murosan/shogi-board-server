@@ -13,7 +13,7 @@ import (
 )
 
 type config struct {
-	EnginePath string `json:"engine_path"`
+	EnginePath map[string]string `json:"engine_path"`
 }
 
 // TODO: ローダーを分離する
@@ -32,6 +32,16 @@ func NewConfig() cnf.Config {
 	return &c
 }
 
-func (c *config) GetEnginePath() string {
-	return c.EnginePath
+func (c *config) GetEnginePath(key string) string {
+	return c.EnginePath[key]
+}
+
+func (c *config) GetEngineNames() []string {
+	l := make([]string, len(c.EnginePath))
+	i := 0
+	for name := range c.EnginePath {
+		l[i] = name
+		i++
+	}
+	return l
 }

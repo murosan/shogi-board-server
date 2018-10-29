@@ -5,5 +5,6 @@
 package config
 
 type Config interface {
-	GetEnginePath() string
+	GetEnginePath(string) string
+	GetEngineNames() []string
 }

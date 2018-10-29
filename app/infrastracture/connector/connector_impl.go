@@ -17,8 +17,6 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
-	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	engineService "github.com/murosan/shogi-proxy-server/app/service/engine"
 )
 
 var (
@@ -26,38 +24,32 @@ var (
 	optRegex = regexp.MustCompile(`option.*`)
 )
 
-// TODO: 2つのエンジンを同時に使えるようにする。Poolとか作る
 type connector struct {
-	conf    config.Config
-	egn     engine.Engine
-	egnOut  chan []byte
-	options map[string]option.Option
-	fu      *from_usi.FromUsi
+	conf config.Config
+	pool conn.ConnectionPool
+	fu   *from_usi.FromUsi
+
+	// TODO: 2つのエンジンから受け取る方法を考える
+	egnOut chan []byte
 }
 
-func NewConnector(c config.Config, fu *from_usi.FromUsi) conn.Connector {
-	return &connector{
-		c,
-		nil,
-		make(chan []byte, 10),
-		make(map[string]option.Option),
-		fu,
-	}
+func NewConnector(c config.Config, p conn.ConnectionPool, fu *from_usi.FromUsi) conn.Connector {
+	return &connector{c, p, fu, make(chan []byte)}
 }
 
 func (c *connector) Connect() error {
-	if c.egn != nil {
+	egn := c.pool.NamedEngine()
+
+	if egn.GetState() != state.NotConnected {
 		log.Println(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
 		return nil
 	}
 
-	// TODO: 引数で渡す。Poolを作ってその中に入れるように修正する
-	c.egn = engineService.UseEngine()
-	c.SetState(state.Connected)
-	c.egn.Start()
-	go c.CatchOutput()
+	egn.Start()
+	egn.SetState(state.Connected)
+	go c.CatchOutput(c.egnOut)
 
-	c.egn.Lock()
+	egn.Lock()
 	if e := c.Exec(&usi.CmdUsi); e != nil {
 		return e
 	}
@@ -70,31 +62,30 @@ func (c *connector) Connect() error {
 	if e := c.waitFor(usi.ResReady, false); e != nil {
 		return e
 	}
-	c.egn.Unlock()
+	egn.Unlock()
 	return nil
 }
 
 func (c *connector) Close() error {
-	if c.egn == nil {
-		return nil
-	}
+	egn := c.pool.NamedEngine()
 
 	c.Exec(&usi.CmdQuit)
 
 	timeout := make(chan struct{})
 	closeCh := make(chan struct{})
+	defer close(timeout)
+	defer close(closeCh)
 
 	go func() {
 		time.Sleep(time.Second * 10)
 		timeout <- struct{}{}
 	}()
 
-	c.egn.Close(closeCh)
+	egn.Close(closeCh)
 
 	for {
 		select {
 		case <-closeCh:
-			c.egn = nil
 			return nil
 		case <-timeout:
 			return exception.ConnectionTimeout
@@ -103,19 +94,21 @@ func (c *connector) Close() error {
 }
 
 func (c *connector) Exec(b *[]byte) error {
-	if c.GetState() == state.NotConnected {
+	egn := c.pool.NamedEngine()
+	if egn.GetState() == state.NotConnected {
 		return exception.EngineIsNotRunning
 	}
-	return c.egn.Exec(b)
+	return egn.Exec(b)
 }
 
-func (c *connector) CatchOutput() {
-	s := c.egn.GetScanner()
+func (c *connector) CatchOutput(ch chan []byte) {
+	egn := c.pool.NamedEngine()
+	s := egn.GetScanner()
 
 	for s.Scan() {
 		b := s.Bytes()
 		log.Println("[EngineOut] " + string(b))
-		c.egnOut <- b
+		ch <- b
 	}
 
 	if s.Err() != nil {
@@ -123,38 +116,9 @@ func (c *connector) CatchOutput() {
 	}
 }
 
-func (c *connector) SetState(s state.State) {
-	c.egn.SetState(s)
-}
-
-func (c *connector) GetState() state.State {
-	return c.egn.GetState()
-}
-
-func (c *connector) SetId(k *[]byte, v *[]byte) error {
-	switch string(*k) {
-	case "name":
-		c.egn.SetName(v)
-		return nil
-	case "author":
-		c.egn.SetAuthor(v)
-		return nil
-	default:
-		return exception.InvalidIdSyntax.WithMsg("Key was not 'name' or 'author'.")
-	}
-}
-
-func (c *connector) SetupOption(o option.Option) {
-	c.options[string(o.GetName())] = o
-}
-
-func (c *connector) OptionList() []option.Option {
-	// TODO: どの形で渡すのがいいかなぁ
-	return nil
-}
-
 func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 	timeout := make(chan struct{})
+	defer close(timeout)
 	go func() {
 		time.Sleep(time.Second * 10)
 		timeout <- struct{}{}
@@ -173,7 +137,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 			if parseOpt && idRegex.Match(b) {
 				k, v, e := c.fu.EngineID(b)
 				if e != nil {
-					c.SetId(&k, &v)
+					c.setId(&k, &v)
 					continue
 				}
 				return e
@@ -182,7 +146,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 			if parseOpt && optRegex.Match(b) {
 				o, e := c.fu.Option(b)
 				if e == nil {
-					c.SetupOption(o)
+					c.setOption(o)
 					continue
 				}
 				return e
@@ -192,4 +156,20 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 			return exception.ConnectionTimeout
 		}
 	}
+}
+
+func (c *connector) setId(k, v *[]byte) {
+	egn := c.pool.NamedEngine()
+	switch string(*k) {
+	case "name":
+		egn.SetName(v)
+	case "author":
+		egn.SetAuthor(v)
+	default:
+		panic("unknown id name")
+	}
+}
+
+func (c *connector) setOption(o option.Option) {
+	c.pool.NamedEngine().SetOption(string(o.GetName()), o)
 }

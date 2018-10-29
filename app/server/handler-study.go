@@ -11,20 +11,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 )
 
 // Content-Type は application/json である必要がある
 func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
-	// 将棋エンジンへ接続されていなければ BadRequest
-	if s.conn.GetState() == state.NotConnected {
-		e := exception.EngineIsNotRunning.WithMsg("You need to start engine first.")
-		http.Error(w, e.Error(), http.StatusBadRequest)
-		log.Println(e.Error())
-		return
-	}
-
 	l, err := strconv.Atoi(r.Header.Get("Content-Length"))
 	if err != nil {
 		http.Error(w, err.Error(), 411) // Length Required
@@ -56,7 +47,11 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.conn.Exec(&usi)
+	if err := s.conn.Exec(&usi); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
 
