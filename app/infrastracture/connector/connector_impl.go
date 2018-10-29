@@ -47,7 +47,7 @@ func (c *connector) Connect() error {
 
 	egn.Start()
 	egn.SetState(state.Connected)
-	go c.CatchOutput(c.egnOut)
+	go c.catchOutput(c.egnOut)
 
 	egn.Lock()
 	if e := c.Exec(&usi.CmdUsi); e != nil {
@@ -101,7 +101,7 @@ func (c *connector) Exec(b *[]byte) error {
 	return egn.Exec(b)
 }
 
-func (c *connector) CatchOutput(ch chan []byte) {
+func (c *connector) catchOutput(ch chan []byte) {
 	egn := c.pool.NamedEngine()
 	s := egn.GetScanner()
 

@@ -13,7 +13,4 @@ type Connector interface {
 
 	// 将棋エンジンにコマンドを実行する
 	Exec(*[]byte) error
-
-	// 将棋エンジンの出力を受け取り続ける
-	CatchOutput(chan []byte)
 }
