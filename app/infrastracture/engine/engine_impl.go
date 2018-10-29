@@ -6,12 +6,12 @@ package engine
 
 import (
 	"bufio"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	"log"
 	"sync"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	egn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
 )
