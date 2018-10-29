@@ -53,13 +53,13 @@ func (c *connector) Connect() error {
 	if e := c.Exec(&usi.CmdUsi); e != nil {
 		return e
 	}
-	if e := c.waitFor(usi.ResOk, true); e != nil {
+	if e := c.waitFor(usi.ResOk, true, c.egnOut); e != nil {
 		return e
 	}
 	if e := c.Exec(&usi.CmdIsReady); e != nil {
 		return e
 	}
-	if e := c.waitFor(usi.ResReady, false); e != nil {
+	if e := c.waitFor(usi.ResReady, false, c.egnOut); e != nil {
 		return e
 	}
 	egn.Unlock()
@@ -68,29 +68,16 @@ func (c *connector) Connect() error {
 
 func (c *connector) Close() error {
 	egn := c.pool.NamedEngine()
-
-	c.Exec(&usi.CmdQuit)
-
-	timeout := make(chan struct{})
-	closeCh := make(chan struct{})
-	defer close(timeout)
-	defer close(closeCh)
-
-	go func() {
-		time.Sleep(time.Second * 10)
-		timeout <- struct{}{}
-	}()
-
-	egn.Close(closeCh)
-
-	for {
-		select {
-		case <-closeCh:
-			return nil
-		case <-timeout:
-			return exception.ConnectionTimeout
-		}
+	if egn.GetState() == state.NotConnected {
+		return nil
 	}
+
+	// TODO: timeout
+	if err := egn.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *connector) Exec(b *[]byte) error {
@@ -116,16 +103,16 @@ func (c *connector) catchOutput(ch chan []byte) {
 	}
 }
 
-func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
+func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) error {
 	timeout := make(chan struct{})
-	defer close(timeout)
 	go func() {
 		time.Sleep(time.Second * 10)
 		timeout <- struct{}{}
+		close(timeout)
 	}()
 	for {
 		select {
-		case b := <-c.egnOut:
+		case b := <-egnOut:
 			if len(b) == 0 {
 				continue
 			}

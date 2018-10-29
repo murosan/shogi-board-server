@@ -6,6 +6,8 @@ package engine
 
 import (
 	"bufio"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
+	"log"
 	"sync"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
@@ -55,15 +57,16 @@ func (e *engine) Lock() { e.mux.Lock() }
 func (e *engine) Unlock() { e.mux.Unlock() }
 
 // USIコマンドの実行
-func (e *engine) Exec(b *[]byte) error { return e.cmd.Write(append(*b, '\n')) }
+func (e *engine) Exec(b *[]byte) error {
+	log.Println("[Exec] " + string(*b))
+	return e.cmd.Write(append(*b, '\n'))
+}
 
 func (e *engine) Start() error { return e.cmd.Start() }
 
-func (e *engine) Close(c chan struct{}) {
-	// TODO: quit をこっちから書き込むか検討
-	// TODO: timeout とかのエラーを返す
-	e.cmd.Wait()
-	c <- struct{}{}
+func (e *engine) Close() error {
+	e.Exec(&usi.CmdQuit)
+	return e.cmd.Wait()
 }
 
 func (e *engine) GetScanner() *bufio.Scanner { return bufio.NewScanner(*e.cmd.GetStdoutPipe()) }

@@ -30,7 +30,7 @@ type Engine interface {
 	Exec(*[]byte) error
 
 	Start() error
-	Close(chan struct{})
+	Close() error
 
 	// 将棋エンジンが出力した値を読み取る Scanner を作る
 	GetScanner() *bufio.Scanner
