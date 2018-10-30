@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 )
 
 // Content-Type は application/json である必要がある
@@ -35,28 +36,33 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 
 	pos, err := s.fj.Position(body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
+		s.internalServerError(w, err)
 		return
 	}
 
-	usi, err := s.tu.Position(pos)
+	usiCmd, err := s.tu.Position(pos)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
+		s.internalServerError(w, err)
 		return
 	}
 
-	if err := s.conn.Exec(&usi); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
+	if err := s.conn.Exec(usiCmd); err != nil {
+		s.internalServerError(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) Start(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	if err := s.conn.Exec(usi.CmdNewGame); err != nil {
+		s.internalServerError(w, err)
+		return
+	}
+	if err := s.conn.Exec(usi.CmdGoInf); err != nil {
+		s.internalServerError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) GetValues(w http.ResponseWriter, r *http.Request) {

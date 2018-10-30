@@ -12,5 +12,5 @@ type Connector interface {
 	Close() error
 
 	// 将棋エンジンにコマンドを実行する
-	Exec(*[]byte) error
+	Exec([]byte) error
 }

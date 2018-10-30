@@ -39,3 +39,8 @@ func (s *Server) ContentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFu
 		h(w, r)
 	}
 }
+
+func (s *Server) internalServerError(w http.ResponseWriter, e error) {
+	http.Error(w, e.Error(), http.StatusInternalServerError)
+	log.Println(e)
+}

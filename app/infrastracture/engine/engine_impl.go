@@ -57,15 +57,15 @@ func (e *engine) Lock() { e.mux.Lock() }
 func (e *engine) Unlock() { e.mux.Unlock() }
 
 // USIコマンドの実行
-func (e *engine) Exec(b *[]byte) error {
-	log.Println("[Exec] " + string(*b))
-	return e.cmd.Write(append(*b, '\n'))
+func (e *engine) Exec(b []byte) error {
+	log.Println("[Exec] " + string(b))
+	return e.cmd.Write(append(b, '\n'))
 }
 
 func (e *engine) Start() error { return e.cmd.Start() }
 
 func (e *engine) Close() error {
-	e.Exec(&usi.CmdQuit)
+	e.Exec(usi.CmdQuit)
 	return e.cmd.Wait()
 }
 

@@ -27,7 +27,7 @@ type Engine interface {
 	Lock()
 	Unlock()
 
-	Exec(*[]byte) error
+	Exec([]byte) error
 
 	Start() error
 	Close() error

@@ -50,19 +50,20 @@ func (c *connector) Connect() error {
 	go c.catchOutput(c.egnOut)
 
 	egn.Lock()
-	if e := c.Exec(&usi.CmdUsi); e != nil {
+	if e := c.Exec(usi.CmdUsi); e != nil {
 		return e
 	}
 	if e := c.waitFor(usi.ResOk, true, c.egnOut); e != nil {
 		return e
 	}
-	if e := c.Exec(&usi.CmdIsReady); e != nil {
+	if e := c.Exec(usi.CmdIsReady); e != nil {
 		return e
 	}
 	if e := c.waitFor(usi.ResReady, false, c.egnOut); e != nil {
 		return e
 	}
 	egn.Unlock()
+	// TODO: 出力を受け取り続けるやつ
 	return nil
 }
 
@@ -80,7 +81,7 @@ func (c *connector) Close() error {
 	return nil
 }
 
-func (c *connector) Exec(b *[]byte) error {
+func (c *connector) Exec(b []byte) error {
 	egn := c.pool.NamedEngine()
 	if egn.GetState() == state.NotConnected {
 		return exception.EngineIsNotRunning
