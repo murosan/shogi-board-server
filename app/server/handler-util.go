@@ -18,7 +18,7 @@ func (s *Server) Handling(meth string, h http.HandlerFunc) http.HandlerFunc {
 
 		if r.Method != meth {
 			log.Printf("Error: %s, URI: %s\n", exception.MethodNotAllowed, r.RequestURI)
-			http.Error(w, exception.MethodNotAllowed.Error(), http.StatusBadRequest)
+			s.badRequest(w, exception.MethodNotAllowed.Error())
 			return
 		}
 
@@ -30,9 +30,7 @@ func (s *Server) ContentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFu
 	return func(w http.ResponseWriter, r *http.Request) {
 		ct := r.Header.Get("Content-Type")
 		if ct != tpe {
-			m := fmt.Sprintf("Content-Type must be %s, but got %s", tpe, ct)
-			http.Error(w, m, http.StatusBadRequest)
-			log.Println(m)
+			s.badRequest(w, fmt.Sprintf("Content-Type must be %s, but got %s", tpe, ct))
 			return
 		}
 
@@ -43,4 +41,9 @@ func (s *Server) ContentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFu
 func (s *Server) internalServerError(w http.ResponseWriter, e error) {
 	http.Error(w, e.Error(), http.StatusInternalServerError)
 	log.Println(e)
+}
+
+func (s *Server) badRequest(w http.ResponseWriter, m string) {
+	http.Error(w, m, http.StatusBadRequest)
+	log.Println(m)
 }
