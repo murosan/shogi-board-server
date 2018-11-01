@@ -5,28 +5,32 @@
 package connector
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
 	connModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	egnModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/service/engine"
+	"github.com/murosan/shogi-proxy-server/app/infrastracture/engine"
+	"github.com/murosan/shogi-proxy-server/app/infrastracture/os/command"
+	"github.com/murosan/shogi-proxy-server/app/service/config"
+	"os/exec"
 )
 
 type connectionPool struct {
-	conf config.Config
+	conf confModel.Config
 
 	// TODO: 今はとりあえず1つだけ
 	e egnModel.Engine
 	//em   map[string]egnModel.Engine
 }
 
-func NewConnectionPool(c config.Config) connModel.ConnectionPool {
+func NewConnectionPool(c confModel.Config) connModel.ConnectionPool {
 	return &connectionPool{c, nil}
 }
 
 func (cp *connectionPool) Initialize() {
 	// TODO: 今は1つだけ使える
 	names := cp.conf.GetEngineNames()
-	cp.e = engine.UseEngine(names[0])
+	cmd := exec.Command(config.UseConfig().GetEnginePath(names[0]))
+	cp.e = engine.NewEngine(command.NewCmd(cmd))
 }
 
 func (cp *connectionPool) NamedEngine() egnModel.Engine {
