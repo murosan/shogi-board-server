@@ -27,6 +27,10 @@ type engine struct {
 	author  []byte
 	options map[string]option.Option
 
+	// エンジンの出力を流し込む scanner
+	// Singleton で持っておく
+	sc *bufio.Scanner
+
 	mux sync.Mutex
 }
 
@@ -35,6 +39,7 @@ func NewEngine(c command.OsCmd) egn.Engine {
 		cmd:     c,
 		state:   state.NotConnected,
 		options: make(map[string]option.Option),
+		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
 	}
 }
 
@@ -69,4 +74,4 @@ func (e *engine) Close() error {
 	return e.cmd.Wait()
 }
 
-func (e *engine) GetScanner() *bufio.Scanner { return bufio.NewScanner(*e.cmd.GetStdoutPipe()) }
+func (e *engine) GetScanner() *bufio.Scanner { return e.sc }
