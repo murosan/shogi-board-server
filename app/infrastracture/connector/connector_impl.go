@@ -38,6 +38,7 @@ func NewConnector(c config.Config, p conn.ConnectionPool, fu *from_usi.FromUsi) 
 }
 
 func (c *connector) Connect() error {
+	c.pool.Initialize() // TODO: Nameを渡して2つのエンジンを使えるように
 	egn := c.pool.NamedEngine()
 
 	if egn.GetState() != state.NotConnected {
@@ -45,21 +46,22 @@ func (c *connector) Connect() error {
 		return nil
 	}
 
-	egn.Start()
+	if e := egn.Start(); e != nil {
+		return e
+	}
 	egn.SetState(state.Connected)
-	go c.catchOutput(c.egnOut)
 
 	egn.Lock()
 	if e := c.Exec(usi.CmdUsi); e != nil {
 		return e
 	}
-	if e := c.waitFor(usi.ResOk, true, c.egnOut); e != nil {
+	if e := c.waitFor(usi.ResOk, true); e != nil {
 		return e
 	}
 	if e := c.Exec(usi.CmdIsReady); e != nil {
 		return e
 	}
-	if e := c.waitFor(usi.ResReady, false, c.egnOut); e != nil {
+	if e := c.waitFor(usi.ResReady, false); e != nil {
 		return e
 	}
 	egn.Unlock()
@@ -78,6 +80,7 @@ func (c *connector) Close() error {
 		return err
 	}
 
+	c.pool.Remove()
 	return nil
 }
 
@@ -104,16 +107,28 @@ func (c *connector) catchOutput(ch chan []byte) {
 	}
 }
 
-func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) error {
+func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 	timeout := make(chan struct{})
 	go func() {
 		time.Sleep(time.Second * 10)
 		timeout <- struct{}{}
 		close(timeout)
 	}()
+	go func() {
+		egn := c.pool.NamedEngine()
+		s := egn.GetScanner()
+		for s.Scan() {
+			b := s.Bytes()
+			log.Println("[EngineOut] " + string(b))
+			c.egnOut <- b
+			if bytes.Equal(b, exitWord) {
+				return
+			}
+		}
+	}()
 	for {
 		select {
-		case b := <-egnOut:
+		case b := <-c.egnOut:
 			if len(b) == 0 {
 				continue
 			}

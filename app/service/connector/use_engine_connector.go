@@ -16,7 +16,6 @@ var c connModel.Connector = nil
 func UseConnector() connModel.Connector {
 	if c == nil {
 		p := connector.NewConnectionPool(config.UseConfig())
-		p.Initialize()
 		c = connector.NewConnector(config.UseConfig(), p, converter.UseFromUsi())
 	}
 	return c

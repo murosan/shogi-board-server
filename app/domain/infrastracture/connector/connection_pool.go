@@ -14,4 +14,6 @@ type ConnectionPool interface {
 	// TODO: 今はとりあえず1つのEngineだけを使えるようにしてあるので、
 	// name を渡してない。あとで修正する
 	NamedEngine() engine.Engine
+
+	Remove() error
 }

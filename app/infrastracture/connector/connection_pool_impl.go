@@ -36,3 +36,8 @@ func (cp *connectionPool) Initialize() {
 func (cp *connectionPool) NamedEngine() egnModel.Engine {
 	return cp.e
 }
+
+func (cp *connectionPool) Remove() error {
+	cp.e = nil
+	return nil
+}
