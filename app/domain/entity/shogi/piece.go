@@ -4,7 +4,7 @@
 
 package shogi
 
-var (
+const (
 	Empty = 0
 
 	Fu0       = 1

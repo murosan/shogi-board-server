@@ -4,4 +4,6 @@
 
 package from_usi
 
-func Info(b []byte)
+func Info(b []byte) {
+
+}
