@@ -36,4 +36,34 @@ const (
 	NariGin1  = -NariGin0
 	Uma1      = -Uma0
 	Ryu1      = -Ryu0
+
+	UsiFu0       = "P"
+	UsiKyou0     = "L"
+	UsiKei0      = "N"
+	UsiGin0      = "S"
+	UsiKin0      = "G"
+	UsiKaku0     = "B"
+	UsiHisha0    = "R"
+	UsiGyoku0    = "K"
+	UsiTo0       = "+P"
+	UsiNariKyou0 = "+L"
+	UsiNariKei0  = "+N"
+	UsiNariGin0  = "+S"
+	UsiUma0      = "+B"
+	UsiRyu0      = "+R"
+
+	UsiFu1       = "p"
+	UsiKyou1     = "l"
+	UsiKei1      = "n"
+	UsiGin1      = "s"
+	UsiKin1      = "g"
+	UsiKaku1     = "b"
+	UsiHisha1    = "r"
+	UsiGyoku1    = "k"
+	UsiTo1       = "+p"
+	UsiNariKyou1 = "+l"
+	UsiNariKei1  = "+n"
+	UsiNariGin1  = "+s"
+	UsiUma1      = "+b"
+	UsiRyu1      = "+r"
 )

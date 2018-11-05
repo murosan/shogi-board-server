@@ -15,61 +15,61 @@ import (
 func (tu *ToUsi) Piece(i int) (s string, e error) {
 	switch i {
 	case shogi.Fu0:
-		s = "P"
+		s = shogi.UsiFu0
 	case shogi.Fu1:
-		s = "p"
+		s = shogi.UsiFu1
 	case shogi.Kyou0:
-		s = "L"
+		s = shogi.UsiKyou0
 	case shogi.Kyou1:
-		s = "l"
+		s = shogi.UsiKyou1
 	case shogi.Kei0:
-		s = "N"
+		s = shogi.UsiKei0
 	case shogi.Kei1:
-		s = "n"
+		s = shogi.UsiKei1
 	case shogi.Gin0:
-		s = "S"
+		s = shogi.UsiGin0
 	case shogi.Gin1:
-		s = "s"
+		s = shogi.UsiGin1
 	case shogi.Kin0:
-		s = "G"
+		s = shogi.UsiKin0
 	case shogi.Kin1:
-		s = "g"
+		s = shogi.UsiKin1
 	case shogi.Kaku0:
-		s = "B"
+		s = shogi.UsiKaku0
 	case shogi.Kaku1:
-		s = "b"
+		s = shogi.UsiKaku1
 	case shogi.Hisha0:
-		s = "R"
+		s = shogi.UsiHisha0
 	case shogi.Hisha1:
-		s = "r"
+		s = shogi.UsiHisha1
 	case shogi.Gyoku0:
-		s = "K"
+		s = shogi.UsiGyoku0
 	case shogi.Gyoku1:
-		s = "k"
+		s = shogi.UsiGyoku1
 	case shogi.To0:
-		s = "+P"
+		s = shogi.UsiTo0
 	case shogi.To1:
-		s = "+p"
+		s = shogi.UsiTo1
 	case shogi.NariKyou0:
-		s = "+L"
+		s = shogi.UsiNariKyou0
 	case shogi.NariKyou1:
-		s = "+l"
+		s = shogi.UsiNariKyou1
 	case shogi.NariKei0:
-		s = "+N"
+		s = shogi.UsiNariKei0
 	case shogi.NariKei1:
-		s = "+n"
+		s = shogi.UsiNariKei1
 	case shogi.NariGin0:
-		s = "+S"
+		s = shogi.UsiNariGin0
 	case shogi.NariGin1:
-		s = "+s"
+		s = shogi.UsiNariGin1
 	case shogi.Uma0:
-		s = "+B"
+		s = shogi.UsiUma0
 	case shogi.Uma1:
-		s = "+b"
+		s = shogi.UsiUma1
 	case shogi.Ryu0:
-		s = "+R"
+		s = shogi.UsiRyu0
 	case shogi.Ryu1:
-		s = "+r"
+		s = shogi.UsiRyu1
 	default:
 		e = exception.InvalidPieceId.WithMsg("PieceIdが不正です id=" + strconv.Itoa(i))
 	}
