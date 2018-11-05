@@ -27,6 +27,7 @@ type logger struct {
 }
 
 func NewLogger(c config.Config) Logger {
+	logrus.SetFormatter(&logrus.TextFormatter{})
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(os.Stdout)
 	// TODO: confで
