@@ -1,0 +1,19 @@
+// Copyright 2018 murosan. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package logger
+
+import (
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
+	"github.com/murosan/shogi-proxy-server/app/service/config"
+)
+
+var l logger.Logger = nil
+
+func Log() *logger.Logger {
+	if l == nil {
+		l = logger.NewLogger(config.UseConfig())
+	}
+	return &l
+}
