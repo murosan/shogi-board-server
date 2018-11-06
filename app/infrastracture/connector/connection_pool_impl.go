@@ -5,13 +5,14 @@
 package connector
 
 import (
+	"os/exec"
+
 	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
 	connModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	egnModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/infrastracture/os/command"
 	"github.com/murosan/shogi-proxy-server/app/service/config"
-	"os/exec"
 )
 
 type connectionPool struct {

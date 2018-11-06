@@ -6,14 +6,14 @@ package engine
 
 import (
 	"bufio"
-	"log"
 	"sync"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
-	egn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
+	engineModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
 )
 
 type engine struct {
@@ -34,7 +34,7 @@ type engine struct {
 	mux sync.Mutex
 }
 
-func NewEngine(c command.OsCmd) egn.Engine {
+func NewEngine(c command.OsCmd) engineModel.Engine {
 	return &engine{
 		cmd:     c,
 		state:   state.NotConnected,
@@ -63,7 +63,7 @@ func (e *engine) Unlock() { e.mux.Unlock() }
 
 // USIコマンドの実行
 func (e *engine) Exec(b []byte) error {
-	log.Println("[Exec] " + string(b))
+	logger.Use().Infof("[Exec] %s", string(b))
 	return e.cmd.Write(append(b, '\n'))
 }
 

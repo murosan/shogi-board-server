@@ -5,7 +5,7 @@
 package server
 
 import (
-	"log"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"net/http"
 )
 
@@ -15,7 +15,7 @@ func (s *Server) Connect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Successfully connected.")
+	logger.Use().Info("Successfully connected.")
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -25,6 +25,6 @@ func (s *Server) Close(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("Successfully closed.")
+	logger.Use().Info("Successfully closed.")
 	w.WriteHeader(http.StatusOK)
 }

@@ -7,9 +7,8 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 
-	cnf "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
 )
 
 type config struct {
@@ -17,16 +16,16 @@ type config struct {
 }
 
 // TODO: ローダーを分離する
-func NewConfig() cnf.Config {
+func NewConfig() confModel.Config {
 	b, err := ioutil.ReadFile("./config.json")
 	if err != nil {
-		log.Fatalln("load: " + err.Error())
+		panic(err)
 	}
 
 	var c config
 
 	if err := json.Unmarshal(b, &c); err != nil {
-		log.Fatalln("unmarshal: " + err.Error())
+		panic(err)
 	}
 
 	return &c

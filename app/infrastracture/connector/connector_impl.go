@@ -6,7 +6,6 @@ package connector
 
 import (
 	"bytes"
-	"log"
 	"regexp"
 	"time"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
 )
 
 var (
@@ -42,7 +42,7 @@ func (c *connector) Connect() error {
 	egn := c.pool.NamedEngine()
 
 	if egn.GetState() != state.NotConnected {
-		log.Println(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
+		logger.Use().Debugf("%s Ignore request...", exception.EngineIsAlreadyRunning)
 		return nil
 	}
 
@@ -98,12 +98,11 @@ func (c *connector) catchOutput(ch chan []byte) {
 
 	for s.Scan() {
 		b := s.Bytes()
-		log.Println("[EngineOut] " + string(b))
 		ch <- b
 	}
 
 	if s.Err() != nil {
-		log.Println("scan:", s.Err())
+		logger.Use().Debugf("scan:%s", s)
 	}
 }
 
@@ -119,7 +118,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 		s := egn.GetScanner()
 		for s.Scan() {
 			b := s.Bytes()
-			log.Println("[EngineOut] " + string(b))
+			logger.Use().Infof("[EngineOut] %s", string(b))
 			c.egnOut <- b
 			if bytes.Equal(b, exitWord) {
 				return
@@ -155,7 +154,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 				return e
 			}
 		case <-timeout:
-			log.Println(exception.ConnectionTimeout.Error())
+			logger.Use().Error(exception.ConnectionTimeout)
 			return exception.ConnectionTimeout
 		}
 	}

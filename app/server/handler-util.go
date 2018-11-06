@@ -6,18 +6,18 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
 )
 
 func (s *Server) Handling(meth string, h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println(fmt.Sprintf("AccessLog. [uri:%s] [method:%s] [addr:%s] [ua:%s]", r.RequestURI, r.Method, r.RemoteAddr, r.Header.Get("user-agent")))
+		logger.Use().Infof("AccessLog. [uri:%s] [method:%s] [addr:%s] [ua:%s]", r.RequestURI, r.Method, r.RemoteAddr, r.Header.Get("user-agent"))
 
 		if r.Method != meth {
-			log.Printf("Error: %s, URI: %s\n", exception.MethodNotAllowed, r.RequestURI)
+			logger.Use().Warnf("Error: %s, URI: %s\n", exception.MethodNotAllowed, r.RequestURI)
 			s.badRequest(w, exception.MethodNotAllowed.Error())
 			return
 		}
@@ -40,10 +40,10 @@ func (s *Server) ContentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFu
 
 func (s *Server) internalServerError(w http.ResponseWriter, e error) {
 	http.Error(w, e.Error(), http.StatusInternalServerError)
-	log.Println(e)
+	logger.Use().Error(e)
 }
 
 func (s *Server) badRequest(w http.ResponseWriter, m string) {
 	http.Error(w, m, http.StatusBadRequest)
-	log.Println(m)
+	logger.Use().Warn(m)
 }

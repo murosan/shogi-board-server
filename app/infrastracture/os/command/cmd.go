@@ -6,10 +6,10 @@ package command
 
 import (
 	"io"
-	"log"
 	"os/exec"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
 )
 
 type osCmd struct {
@@ -26,12 +26,12 @@ type osCmd struct {
 func NewCmd(cmd *exec.Cmd) command.OsCmd {
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		log.Fatalln("connect stdin: " + err.Error())
+		logger.Use().Fatalf("connect stdin: %s", err)
 	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Fatalln("connect stdout: " + err.Error())
+		logger.Use().Fatalf("connect stdout: %s", err)
 	}
 	return &osCmd{cmd, stdin, stdout}
 }

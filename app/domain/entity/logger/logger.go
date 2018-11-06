@@ -12,14 +12,16 @@ import (
 )
 
 type Log interface {
-	Fatal(args ...interface{})
-	Fatalf(format string, args ...interface{})
-	Error(args ...interface{})
-	Errorf(format string, args ...interface{})
-	Info(args ...interface{})
-	Infof(format string, args ...interface{})
 	Debug(args ...interface{})
 	Debugf(format string, args ...interface{})
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+	Warn(args ...interface{})
+	Warnf(format string, args ...interface{})
+	Error(args ...interface{})
+	Errorf(format string, args ...interface{})
+	Fatal(args ...interface{})
+	Fatalf(format string, args ...interface{})
 }
 
 type log struct {
@@ -27,7 +29,7 @@ type log struct {
 }
 
 func NewLogger(c config.Config) Log {
-	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetFormatter(&logrus.TextFormatter{FullTimestamp: true})
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(os.Stdout)
 	// TODO: confで

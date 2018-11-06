@@ -11,9 +11,9 @@ import (
 
 var l logger.Log = nil
 
-func Use() *logger.Log {
+func Use() logger.Log {
 	if l == nil {
 		l = logger.NewLogger(config.UseConfig())
 	}
-	return &l
+	return l
 }

@@ -7,12 +7,12 @@ package server
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
 )
 
 // Content-Type は application/json である必要がある
@@ -20,7 +20,7 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 	l, err := strconv.Atoi(r.Header.Get("Content-Length"))
 	if err != nil {
 		http.Error(w, err.Error(), 411) // Length Required
-		log.Println("Could not read Content-Length. " + err.Error())
+		logger.Use().Errorf("Could not read Content-Length. %s", err)
 		return
 	}
 
@@ -30,7 +30,7 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 	if err != nil && err != io.EOF {
 		m := fmt.Sprintf("%v\ncaused by:\n%v", exception.FailedToReadBody.Error(), err.Error())
 		http.Error(w, m, http.StatusInternalServerError)
-		log.Println(m)
+		logger.Use().Error(m)
 		return
 	}
 
