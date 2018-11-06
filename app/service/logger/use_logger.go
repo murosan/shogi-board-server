@@ -9,9 +9,9 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/service/config"
 )
 
-var l logger.Logger = nil
+var l logger.Log = nil
 
-func Log() *logger.Logger {
+func Use() *logger.Log {
 	if l == nil {
 		l = logger.NewLogger(config.UseConfig())
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Logger interface {
+type Log interface {
 	Fatal(args ...interface{})
 	Fatalf(format string, args ...interface{})
 	Error(args ...interface{})
@@ -22,60 +22,60 @@ type Logger interface {
 	Debugf(format string, args ...interface{})
 }
 
-type logger struct {
+type log struct {
 	conf config.Config
 }
 
-func NewLogger(c config.Config) Logger {
+func NewLogger(c config.Config) Log {
 	logrus.SetFormatter(&logrus.TextFormatter{})
 	logrus.SetLevel(logrus.DebugLevel)
 	logrus.SetOutput(os.Stdout)
 	// TODO: confで
-	//logrus.SetOutput(&lumberjack.Logger{
+	//logrus.SetOutput(&lumberjack.Log{
 	//	Filename:  "log/application.log",
 	//	MaxAge:    30,
 	//	LocalTime: true,
 	//	Compress:  true,
 	//})
-	return &logger{}
+	return &log{}
 }
 
-func (l *logger) Debug(args ...interface{}) {
+func (l *log) Debug(args ...interface{}) {
 	logrus.Debug(args...)
 }
 
-func (l *logger) Debugf(format string, args ...interface{}) {
+func (l *log) Debugf(format string, args ...interface{}) {
 	logrus.Debugf(format, args...)
 }
 
-func (l *logger) Info(args ...interface{}) {
+func (l *log) Info(args ...interface{}) {
 	logrus.Info(args...)
 }
 
-func (l *logger) Infof(format string, args ...interface{}) {
+func (l *log) Infof(format string, args ...interface{}) {
 	logrus.Infof(format, args...)
 }
 
-func (l *logger) Warn(args ...interface{}) {
+func (l *log) Warn(args ...interface{}) {
 	logrus.Warn(args...)
 }
 
-func (l *logger) Warnf(format string, args ...interface{}) {
+func (l *log) Warnf(format string, args ...interface{}) {
 	logrus.Warnf(format, args...)
 }
 
-func (l *logger) Error(args ...interface{}) {
+func (l *log) Error(args ...interface{}) {
 	logrus.Error(args...)
 }
 
-func (l *logger) Errorf(format string, args ...interface{}) {
+func (l *log) Errorf(format string, args ...interface{}) {
 	logrus.Errorf(format, args...)
 }
 
-func (l *logger) Fatal(args ...interface{}) {
+func (l *log) Fatal(args ...interface{}) {
 	logrus.Fatal(args...)
 }
 
-func (l *logger) Fatalf(format string, args ...interface{}) {
+func (l *log) Fatalf(format string, args ...interface{}) {
 	logrus.Fatalf(format, args...)
 }
