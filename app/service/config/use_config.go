@@ -5,15 +5,21 @@
 package config
 
 import (
-	cnf "github.com/murosan/shogi-proxy-server/app/config"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	"io/ioutil"
+
+	"github.com/murosan/shogi-proxy-server/app/config"
+	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
 )
 
-var c config.Config = nil
+var c confModel.Config = nil
 
-func UseConfig() config.Config {
+func UseConfig() confModel.Config {
 	if c == nil {
-		c = cnf.NewConfig()
+		b, err := ioutil.ReadFile("./config.json")
+		if err != nil {
+			panic(err)
+		}
+		c = config.NewConfig(b)
 	}
 	return c
 }

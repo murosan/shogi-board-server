@@ -6,28 +6,19 @@ package config
 
 import (
 	"encoding/json"
-	"io/ioutil"
-
 	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
 )
 
 type config struct {
-	EnginePath map[string]string `json:"engine_path"`
+	EnginePath map[string]string   `json:"engine_path"`
+	Log        confModel.LogConfig `json:"Log"`
 }
 
-// TODO: ローダーを分離する
-func NewConfig() confModel.Config {
-	b, err := ioutil.ReadFile("./config.json")
-	if err != nil {
-		panic(err)
-	}
-
+func NewConfig(b []byte) confModel.Config {
 	var c config
-
 	if err := json.Unmarshal(b, &c); err != nil {
 		panic(err)
 	}
-
 	return &c
 }
 
@@ -43,4 +34,8 @@ func (c *config) GetEngineNames() []string {
 		i++
 	}
 	return l
+}
+
+func (c *config) GetLogConf() confModel.LogConfig {
+	return c.Log
 }
