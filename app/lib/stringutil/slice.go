@@ -5,7 +5,7 @@
 package stringutil
 
 func SliceEquals(a, b []string) bool {
-	if a == nil || b == nil {
+	if (a == nil) != (b == nil) {
 		return false
 	}
 	if len(a) != len(b) {
