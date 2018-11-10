@@ -10,6 +10,7 @@ import (
 
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	"go.uber.org/zap"
 )
 
 type osCmd struct {
@@ -26,12 +27,12 @@ type osCmd struct {
 func NewCmd(cmd *exec.Cmd) command.OsCmd {
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		logger.Use().Fatalf("connect stdin: %s", err)
+		logger.Use().Fatal("connect stdin: "+err.Error(), zap.Error(err))
 	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		logger.Use().Fatalf("connect stdout: %s", err)
+		logger.Use().Fatal("connect stdout: "+err.Error(), zap.Error(err))
 	}
 	return &osCmd{cmd, stdin, stdout}
 }

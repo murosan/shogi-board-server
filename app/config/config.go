@@ -6,12 +6,14 @@ package config
 
 import (
 	"encoding/json"
+
 	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	"go.uber.org/zap"
 )
 
 type config struct {
-	EnginePath map[string]string   `json:"engine_path"`
-	Log        confModel.LogConfig `json:"Log"`
+	EnginePath map[string]string `json:"engine_path"`
+	Log        zap.Config        `json:"Log"`
 }
 
 func NewConfig(b []byte) confModel.Config {
@@ -36,6 +38,6 @@ func (c *config) GetEngineNames() []string {
 	return l
 }
 
-func (c *config) GetLogConf() confModel.LogConfig {
+func (c *config) GetLogConf() zap.Config {
 	return c.Log
 }

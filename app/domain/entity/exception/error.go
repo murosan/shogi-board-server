@@ -23,10 +23,11 @@ func (e *Error) WithMsg(m string) *Error {
 
 var (
 	// http
-	NotFound          = &Error{Code: "NotFound"}
-	MethodNotAllowed  = &Error{Code: "MethodNotAllowed"}
-	FailedToReadBody  = &Error{Code: "FailedToReadBody"}
-	FailedToParseJson = &Error{Code: "FailedToParseJson"}
+	NotFound            = &Error{Code: "NotFound"}
+	MethodNotAllowed    = &Error{Code: "MethodNotAllowed"}
+	InternalServerError = &Error{Code: "InternalServerError"}
+	FailedToReadBody    = &Error{Code: "FailedToReadBody"}
+	FailedToParseJson   = &Error{Code: "FailedToParseJson"}
 
 	// engine
 	ConnectionTimeout      = &Error{Code: "ConnectionTimeout"}

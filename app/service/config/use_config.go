@@ -13,13 +13,19 @@ import (
 
 var c confModel.Config = nil
 
-func UseConfig() confModel.Config {
+func InitConfig(path string) {
 	if c == nil {
-		b, err := ioutil.ReadFile("./config.json")
+		b, err := ioutil.ReadFile(path)
 		if err != nil {
 			panic(err)
 		}
 		c = config.NewConfig(b)
+	}
+}
+
+func UseConfig() confModel.Config {
+	if c == nil {
+		panic("Must run InitConfig(), first.")
 	}
 	return c
 }

@@ -63,7 +63,7 @@ func (e *engine) Unlock() { e.mux.Unlock() }
 
 // USIコマンドの実行
 func (e *engine) Exec(b []byte) error {
-	logger.Use().Infof("[Exec] %s", string(b))
+	logger.Use().Info("[Exec] " + string(b))
 	return e.cmd.Write(append(b, '\n'))
 }
 

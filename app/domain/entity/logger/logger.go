@@ -5,79 +5,43 @@
 package logger
 
 import (
-	"os"
-
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/config"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type Log interface {
-	Debug(args ...interface{})
-	Debugf(format string, args ...interface{})
-	Info(args ...interface{})
-	Infof(format string, args ...interface{})
-	Warn(args ...interface{})
-	Warnf(format string, args ...interface{})
-	Error(args ...interface{})
-	Errorf(format string, args ...interface{})
-	Fatal(args ...interface{})
-	Fatalf(format string, args ...interface{})
+	Debug(msg string, fields ...zap.Field)
+	Info(msg string, fields ...zap.Field)
+	Warn(msg string, fields ...zap.Field)
+	Error(msg string, fields ...zap.Field)
+	Fatal(msg string, fields ...zap.Field)
 }
 
 type log struct {
-	conf config.Config
+	z *zap.Logger
 }
 
 func NewLogger(c config.Config) Log {
-	logrus.SetFormatter(&logrus.TextFormatter{FullTimestamp: true})
-	logrus.SetLevel(logrus.DebugLevel)
-	logrus.SetOutput(os.Stdout)
-	// TODO: confで
-	//logrus.SetOutput(&lumberjack.Log{
-	//	Filename:  "log/application.log",
-	//	MaxAge:    30,
-	//	LocalTime: true,
-	//	Compress:  true,
-	//})
-	return &log{}
+	l, _ := c.GetLogConf().Build()
+	return &log{l}
 }
 
-func (l *log) Debug(args ...interface{}) {
-	logrus.Debug(args...)
+func (l *log) Debug(msg string, fields ...zap.Field) {
+	l.z.Debug(msg, fields...)
 }
 
-func (l *log) Debugf(format string, args ...interface{}) {
-	logrus.Debugf(format, args...)
+func (l *log) Info(msg string, fields ...zap.Field) {
+	l.z.Info(msg, fields...)
 }
 
-func (l *log) Info(args ...interface{}) {
-	logrus.Info(args...)
+func (l *log) Warn(msg string, fields ...zap.Field) {
+	l.z.Warn(msg, fields...)
 }
 
-func (l *log) Infof(format string, args ...interface{}) {
-	logrus.Infof(format, args...)
+func (l *log) Error(msg string, fields ...zap.Field) {
+	l.z.Error(msg, fields...)
 }
 
-func (l *log) Warn(args ...interface{}) {
-	logrus.Warn(args...)
-}
-
-func (l *log) Warnf(format string, args ...interface{}) {
-	logrus.Warnf(format, args...)
-}
-
-func (l *log) Error(args ...interface{}) {
-	logrus.Error(args...)
-}
-
-func (l *log) Errorf(format string, args ...interface{}) {
-	logrus.Errorf(format, args...)
-}
-
-func (l *log) Fatal(args ...interface{}) {
-	logrus.Fatal(args...)
-}
-
-func (l *log) Fatalf(format string, args ...interface{}) {
-	logrus.Fatalf(format, args...)
+func (l *log) Fatal(msg string, fields ...zap.Field) {
+	l.z.Fatal(msg, fields...)
 }

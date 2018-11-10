@@ -6,6 +6,7 @@ package connector
 
 import (
 	"bytes"
+	"go.uber.org/zap"
 	"regexp"
 	"time"
 
@@ -38,20 +39,22 @@ func NewConnector(c config.Config, p conn.ConnectionPool, fu *from_usi.FromUsi) 
 }
 
 func (c *connector) Connect() error {
-	c.pool.Initialize() // TODO: Nameを渡して2つのエンジンを使えるように
-	egn := c.pool.NamedEngine()
-
-	if egn.GetState() != state.NotConnected {
-		logger.Use().Debugf("%s Ignore request...", exception.EngineIsAlreadyRunning)
+	if c.pool.NamedEngine() != nil {
+		logger.Use().Debug(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
 		return nil
 	}
+
+	c.pool.Initialize() // TODO: Nameを渡して2つのエンジンを使えるように
+	egn := c.pool.NamedEngine()
+	stt := egn.GetState()
+	logger.Use().Debug("Connect", zap.Any("EngineState", stt))
 
 	if e := egn.Start(); e != nil {
 		return e
 	}
-	egn.SetState(state.Connected)
 
 	egn.Lock()
+	egn.SetState(state.Connected)
 	if e := c.Exec(usi.CmdUsi); e != nil {
 		return e
 	}
@@ -71,7 +74,7 @@ func (c *connector) Connect() error {
 
 func (c *connector) Close() error {
 	egn := c.pool.NamedEngine()
-	if egn.GetState() == state.NotConnected {
+	if egn == nil || egn.GetState() == state.NotConnected {
 		return nil
 	}
 
@@ -102,7 +105,7 @@ func (c *connector) catchOutput(ch chan []byte) {
 	}
 
 	if s.Err() != nil {
-		logger.Use().Debugf("scan:%s", s)
+		logger.Use().Debug("scan:" + s.Err().Error())
 	}
 }
 
@@ -118,7 +121,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 		s := egn.GetScanner()
 		for s.Scan() {
 			b := s.Bytes()
-			logger.Use().Infof("[EngineOut] %s", string(b))
+			logger.Use().Info("[EngineOut] " + string(b))
 			c.egnOut <- b
 			if bytes.Equal(b, exitWord) {
 				return
@@ -154,7 +157,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 				return e
 			}
 		case <-timeout:
-			logger.Use().Error(exception.ConnectionTimeout)
+			logger.Use().Error(exception.ConnectionTimeout.Error())
 			return exception.ConnectionTimeout
 		}
 	}

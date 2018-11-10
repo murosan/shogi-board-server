@@ -8,9 +8,9 @@ import (
 	"sort"
 	"testing"
 
-	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
 	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 	"github.com/murosan/shogi-proxy-server/app/lib/test_helper"
+	"go.uber.org/zap"
 )
 
 func TestNewConfig(t *testing.T) {
@@ -18,7 +18,6 @@ func TestNewConfig(t *testing.T) {
 		json        string
 		enginePaths []string
 		engineNames []string
-		log         confModel.LogConfig
 	}{
 		{`
 {
@@ -26,14 +25,27 @@ func TestNewConfig(t *testing.T) {
     "com": "/home/user/path/to/engine"
   },
   "log": {
-    "output_type": "stdout",
-    "level": "debug"
+    "level": "debug",
+    "encoding": "console",
+    "encoderConfig": {
+      "messageKey": "Msg",
+      "levelKey": "Level",
+      "timeKey": "Time",
+      "nameKey": "Name",
+      "callerKey": "Caller",
+      "stacktraceKey": "St",
+      "levelEncoder": "color",
+      "timeEncoder": "iso8601",
+      "durationEncoder": "string",
+      "callerEncoder": "short"
+    },
+    "outputPaths": ["stdout"],
+    "errorOutputPaths": ["stderr"]
   }
 }
 `,
 			[]string{"/home/user/path/to/engine"},
 			[]string{"com"},
-			confModel.LogConfig{"stdout", "debug"},
 		},
 	}
 
@@ -54,10 +66,6 @@ func TestNewConfig(t *testing.T) {
 		} else {
 			failing(t, "EngineNames", i, c.engineNames, names)
 		}
-
-		if !matchesLogConf(conf.GetLogConf(), c.log) {
-			failing(t, "LogConfig", i, c.log, conf.GetLogConf())
-		}
 	}
 }
 
@@ -67,7 +75,7 @@ func TestNewConfig2(t *testing.T) {
 		json        string
 		enginePaths []string
 		engineNames []string
-		log         confModel.LogConfig
+		log         zap.Config
 	}{
 		`
 {
@@ -78,15 +86,11 @@ func TestNewConfig2(t *testing.T) {
 `,
 		[]string{"/home/user/path/to/engine"},
 		[]string{"com"},
-		confModel.LogConfig{"stdout", "debug"},
+		zap.Config{},
 	}
 
 	errMsg := "Expected panic, but there wasn't.\nInput: " + c.json
 	test_helper.MustPanic(t, func() { NewConfig([]byte(c.json)) }, errMsg)
-}
-
-func matchesLogConf(a, b confModel.LogConfig) bool {
-	return a.OutputType == b.OutputType && a.Level == b.Level
 }
 
 func failing(t *testing.T, key string, i int, expected, actual interface{}) {

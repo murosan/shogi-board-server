@@ -4,15 +4,10 @@
 
 package config
 
-// OutputType: stdout | file
-// Level: debug | info | warn | error
-type LogConfig struct {
-	OutputType string `json:"output_type"`
-	Level      string `json:"level"`
-}
+import "go.uber.org/zap"
 
 type Config interface {
 	GetEnginePath(string) string
 	GetEngineNames() []string
-	GetLogConf() LogConfig
+	GetLogConf() zap.Config
 }

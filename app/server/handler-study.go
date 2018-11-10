@@ -6,6 +6,7 @@ package server
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"strconv"
@@ -20,7 +21,7 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 	l, err := strconv.Atoi(r.Header.Get("Content-Length"))
 	if err != nil {
 		http.Error(w, err.Error(), 411) // Length Required
-		logger.Use().Errorf("Could not read Content-Length. %s", err)
+		logger.Use().Error("Could not read Content-Length.", zap.Error(err))
 		return
 	}
 
