@@ -6,6 +6,7 @@ package engine
 
 import (
 	"bufio"
+	"go.uber.org/zap"
 	"sync"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
@@ -63,7 +64,7 @@ func (e *engine) Unlock() { e.mux.Unlock() }
 
 // USIコマンドの実行
 func (e *engine) Exec(b []byte) error {
-	logger.Use().Info("[Exec] " + string(b))
+	logger.Use().Info("StdinPipe", zap.ByteString("Exec", b))
 	return e.cmd.Write(append(b, '\n'))
 }
 

@@ -23,42 +23,39 @@ const (
 	userAgent   = "User-Agent"
 )
 
-func (s *Server) Handling() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		uri := r.RequestURI
-		meth := r.Method
-		logger.Use().Info(
-			"Access",
-			zap.String("uri", uri),
-			zap.String("method", meth),
-			zap.String("addr", r.RemoteAddr),
-			zap.String("ua", r.Header.Get(userAgent)),
-		)
+func (s *Server) Handling(w http.ResponseWriter, r *http.Request) {
+	uri := r.RequestURI
+	logger.Use().Info(
+		"AccessLog",
+		zap.String("uri", uri),
+		zap.String("method", r.Method),
+		zap.String("addr", r.RemoteAddr),
+		zap.String("ua", r.Header.Get(userAgent)),
+	)
 
-		switch uri {
-		case IndexPath:
-			s.withMethod(get, w, r, s.ServeHome)
-		case ConnectPath:
-			s.withMethod(post, w, r, s.Connect)
-		case ClosePath:
-			s.withMethod(post, w, r, s.Close)
-		case ListOptPath:
-			s.withMethod(get, w, r, s.ListOption)
-		case SetOptPath:
-			s.withMethod(post, w, r, s.SetOption)
-		case SetPositionPath:
-			s.contentTypeCheck(appliJson, w, r, s.SetPosition)
-		case StartPath:
-			s.withMethod(post, w, r, s.Start)
-		case GetValuesPath:
-			s.withMethod(get, w, r, s.GetValues)
-		case InitAnalyze:
-			s.withMethod(post, w, r, s.InitAnalyze)
-		case StartAnalyze:
-			s.withMethod(post, w, r, s.StartAnalyze)
-		default:
-			s.notFound(w, r, uri)
-		}
+	switch uri {
+	case IndexPath:
+		s.withMethod(get, w, r, s.ServeHome)
+	case ConnectPath:
+		s.withMethod(post, w, r, s.Connect)
+	case ClosePath:
+		s.withMethod(post, w, r, s.Close)
+	case ListOptPath:
+		s.withMethod(get, w, r, s.ListOption)
+	case SetOptPath:
+		s.withMethod(post, w, r, s.SetOption)
+	case SetPositionPath:
+		s.contentTypeCheck(appliJson, w, r, s.SetPosition)
+	case StartPath:
+		s.withMethod(post, w, r, s.Start)
+	case GetValuesPath:
+		s.withMethod(get, w, r, s.GetValues)
+	case InitAnalyze:
+		s.withMethod(post, w, r, s.InitAnalyze)
+	case StartAnalyze:
+		s.withMethod(post, w, r, s.StartAnalyze)
+	default:
+		s.notFound(w, r, uri)
 	}
 }
 

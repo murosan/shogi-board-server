@@ -32,7 +32,7 @@ var (
 	// engine
 	ConnectionTimeout      = &Error{Code: "ConnectionTimeout"}
 	FailedToConnect        = &Error{Code: "FailedToConnect"}
-	FailedToShutdown       = &Error{Code: "FailedToShutdown"}
+	FailedToClose          = &Error{Code: "FailedToClose"}
 	EngineIsNotRunning     = &Error{Code: "EngineIsNotRunning"}
 	EngineIsAlreadyRunning = &Error{Code: "EngineIsAlreadyRunning"}
 	FailedToExecCommand    = &Error{Code: "FailedToExecCommand"}

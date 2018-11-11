@@ -7,7 +7,7 @@ package connector
 import "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 
 type ConnectionPool interface {
-	// config にある全ての Engine のコマンドを準備する
+	// config にある全ての Engine のコマンドを初期化する
 	Initialize()
 
 	// 名前を受け取って Engine を返す

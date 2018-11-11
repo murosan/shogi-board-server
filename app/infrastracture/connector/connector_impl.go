@@ -6,7 +6,6 @@ package connector
 
 import (
 	"bytes"
-	"go.uber.org/zap"
 	"regexp"
 	"time"
 
@@ -18,6 +17,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	"go.uber.org/zap"
 )
 
 var (
@@ -56,15 +56,19 @@ func (c *connector) Connect() error {
 	egn.Lock()
 	egn.SetState(state.Connected)
 	if e := c.Exec(usi.CmdUsi); e != nil {
+		logger.Use().Error("ExecUsiError", zap.Error(e))
 		return e
 	}
 	if e := c.waitFor(usi.ResOk, true); e != nil {
+		logger.Use().Error("WaitUsiOkError", zap.Error(e))
 		return e
 	}
 	if e := c.Exec(usi.CmdIsReady); e != nil {
+		logger.Use().Error("ExecIsReadyError", zap.Error(e))
 		return e
 	}
 	if e := c.waitFor(usi.ResReady, false); e != nil {
+		logger.Use().Error("WaitReadyOkError", zap.Error(e))
 		return e
 	}
 	egn.Unlock()
@@ -73,26 +77,27 @@ func (c *connector) Connect() error {
 }
 
 func (c *connector) Close() error {
+	defer c.pool.Remove()
 	egn := c.pool.NamedEngine()
 	if egn == nil || egn.GetState() == state.NotConnected {
 		return nil
 	}
 
 	// TODO: timeout
-	if err := egn.Close(); err != nil {
-		return err
-	}
-
-	c.pool.Remove()
-	return nil
+	return egn.Close()
 }
 
 func (c *connector) Exec(b []byte) error {
 	egn := c.pool.NamedEngine()
 	if egn.GetState() == state.NotConnected {
+		logger.Use().Debug("ExecFail", zap.Any("EngineState", state.NotConnected))
 		return exception.EngineIsNotRunning
 	}
-	return egn.Exec(b)
+	if err := egn.Exec(b); err != nil {
+		logger.Use().Error(exception.FailedToExecCommand.Error(), zap.Error(err))
+		return err
+	}
+	return nil
 }
 
 func (c *connector) catchOutput(ch chan []byte) {
@@ -121,7 +126,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 		s := egn.GetScanner()
 		for s.Scan() {
 			b := s.Bytes()
-			logger.Use().Info("[EngineOut] " + string(b))
+			logger.Use().Info("StdoutPipe", zap.ByteString("EngineOut", b))
 			c.egnOut <- b
 			if bytes.Equal(b, exitWord) {
 				return
