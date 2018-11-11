@@ -80,6 +80,7 @@ func (c *connector) Close() error {
 	defer c.pool.Remove()
 	egn := c.pool.NamedEngine()
 	if egn == nil || egn.GetState() == state.NotConnected {
+		logger.Use().Debug("Close", zap.Any("EngineState", state.NotConnected))
 		return nil
 	}
 
@@ -89,7 +90,7 @@ func (c *connector) Close() error {
 
 func (c *connector) Exec(b []byte) error {
 	egn := c.pool.NamedEngine()
-	if egn.GetState() == state.NotConnected {
+	if egn == nil || egn.GetState() == state.NotConnected {
 		logger.Use().Debug("ExecFail", zap.Any("EngineState", state.NotConnected))
 		return exception.EngineIsNotRunning
 	}
@@ -98,6 +99,15 @@ func (c *connector) Exec(b []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (c *connector) GetOptions() map[string]option.Option {
+	egn := c.pool.NamedEngine()
+	if egn == nil || egn.GetState() == state.NotConnected {
+		logger.Use().Debug("ListOptions", zap.Any("EngineState", state.NotConnected))
+		return make(map[string]option.Option)
+	}
+	return egn.GetOptions()
 }
 
 func (c *connector) catchOutput(ch chan []byte) {

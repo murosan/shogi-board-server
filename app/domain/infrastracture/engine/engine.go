@@ -20,6 +20,7 @@ type Engine interface {
 	SetAuthor(*[]byte)
 
 	SetOption(string, option.Option)
+	GetOptions() map[string]option.Option
 
 	SetState(state.State)
 	GetState() state.State

@@ -41,7 +41,7 @@ func (s *Server) Handling(w http.ResponseWriter, r *http.Request) {
 	case ClosePath:
 		s.withMethod(post, w, r, s.Close)
 	case ListOptPath:
-		s.withMethod(get, w, r, s.ListOption)
+		s.withMethod(get, w, r, s.GetOptionList)
 	case SetOptPath:
 		s.withMethod(post, w, r, s.SetOption)
 	case SetPositionPath:

@@ -54,6 +54,8 @@ func (e *engine) SetAuthor(b *[]byte) { e.author = *b }
 
 func (e *engine) SetOption(n string, o option.Option) { e.options[n] = o }
 
+func (e *engine) GetOptions() map[string]option.Option { return e.options }
+
 func (e *engine) SetState(s state.State) { e.state = s }
 
 func (e *engine) GetState() state.State { return e.state }

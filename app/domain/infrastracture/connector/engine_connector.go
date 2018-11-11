@@ -4,6 +4,8 @@
 
 package connector
 
+import "github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
+
 type Connector interface {
 	// 将棋エンジンと接続する
 	Connect() error
@@ -13,4 +15,6 @@ type Connector interface {
 
 	// 将棋エンジンにコマンドを実行する
 	Exec([]byte) error
+
+	GetOptions() map[string]option.Option
 }
