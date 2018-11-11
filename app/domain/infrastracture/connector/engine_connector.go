@@ -16,5 +16,5 @@ type Connector interface {
 	// 将棋エンジンにコマンドを実行する
 	Exec([]byte) error
 
-	GetOptions() map[string]option.Option
+	GetOptions() option.OptMap
 }

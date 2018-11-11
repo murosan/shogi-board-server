@@ -6,7 +6,6 @@ package engine
 
 import (
 	"bufio"
-	"go.uber.org/zap"
 	"sync"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
@@ -15,6 +14,7 @@ import (
 	engineModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	"go.uber.org/zap"
 )
 
 type engine struct {
@@ -26,7 +26,7 @@ type engine struct {
 	// その他の情報
 	name    []byte
 	author  []byte
-	options map[string]option.Option
+	options option.OptMap
 
 	// エンジンの出力を流し込む scanner
 	// Singleton で持っておく
@@ -39,7 +39,7 @@ func NewEngine(c command.OsCmd) engineModel.Engine {
 	return &engine{
 		cmd:     c,
 		state:   state.NotConnected,
-		options: make(map[string]option.Option),
+		options: *option.EmptyOptMap(),
 		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
 	}
 }
@@ -52,9 +52,24 @@ func (e *engine) GetAuthor() *[]byte { return &e.author }
 
 func (e *engine) SetAuthor(b *[]byte) { e.author = *b }
 
-func (e *engine) SetOption(n string, o option.Option) { e.options[n] = o }
+func (e *engine) SetOption(n string, opt option.Option) {
+	switch o := opt.(type) {
+	case option.Button:
+		e.options.Buttons[n] = o
+	case option.Check:
+		e.options.Checks[n] = o
+	case option.Spin:
+		e.options.Spins[n] = o
+	case option.Select:
+		e.options.Combos[n] = o
+	case option.String:
+		e.options.Strings[n] = o
+	case option.FileName:
+		e.options.FileNames[n] = o
+	}
+}
 
-func (e *engine) GetOptions() map[string]option.Option { return e.options }
+func (e *engine) GetOptions() option.OptMap { return e.options }
 
 func (e *engine) SetState(s state.State) { e.state = s }
 

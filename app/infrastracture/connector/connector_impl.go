@@ -101,11 +101,11 @@ func (c *connector) Exec(b []byte) error {
 	return nil
 }
 
-func (c *connector) GetOptions() map[string]option.Option {
+func (c *connector) GetOptions() option.OptMap {
 	egn := c.pool.NamedEngine()
 	if egn == nil || egn.GetState() == state.NotConnected {
 		logger.Use().Debug("ListOptions", zap.Any("EngineState", state.NotConnected))
-		return make(map[string]option.Option)
+		return *option.EmptyOptMap()
 	}
 	return egn.GetOptions()
 }
