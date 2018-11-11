@@ -6,12 +6,12 @@ package from_usi
 
 import (
 	"bytes"
+	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 	"strings"
 	"testing"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
-	"github.com/murosan/shogi-proxy-server/app/lib/byteutil"
 )
 
 var emp = []byte("")
@@ -51,8 +51,8 @@ func TestFromUsi_Option(t *testing.T) {
 		want option.Check
 		err  error
 	}{
-		{"option name UseBook type check default true", option.Check{Name: []byte("UseBook"), Val: true, Default: true}, nil},
-		{"   option name UseBook type check default true   ", option.Check{Name: []byte("UseBook"), Val: true, Default: true}, nil},
+		{"option name UseBook type check default true", option.Check{Name: "UseBook", Val: true, Default: true}, nil},
+		{"   option name UseBook type check default true   ", option.Check{Name: "UseBook", Val: true, Default: true}, nil},
 		{"option name UseBook type check default ", option.Check{}, exception.InvalidOptionSyntax},
 		{"option name UseBook type check default not_bool", option.Check{}, exception.InvalidOptionSyntax},
 		{"option name UseBook type check dlft true", option.Check{}, exception.InvalidOptionSyntax},
@@ -77,8 +77,8 @@ func TestParseOpt2(t *testing.T) {
 		want option.Spin
 		err  error
 	}{
-		{"option name Selectivity type spin default 2 min 0 max 4", option.Spin{[]byte("Selectivity"), 2, 2, 0, 4}, nil},
-		{"option name Selectivity type spin default -100 min -123456 max 54321 ", option.Spin{[]byte("Selectivity"), -100, -100, -123456, 54321}, nil},
+		{"option name Selectivity type spin default 2 min 0 max 4", option.Spin{Name: "Selectivity", Val: 2, Default: 2, Min: 0, Max: 4}, nil},
+		{"option name Selectivity type spin default -100 min -123456 max 54321 ", option.Spin{Name: "Selectivity", Val: -100, Default: -100, Min: -123456, Max: 54321}, nil},
 		{"option name Selectivity type spin min 0 max 4", option.Spin{}, exception.InvalidOptionSyntax},
 		{"option name Selectivity type spin default 2", option.Spin{}, exception.InvalidOptionSyntax},
 		{"option name Selectivity type spin min 0 max 4 default 2", option.Spin{}, exception.InvalidOptionSyntax},
@@ -105,7 +105,7 @@ func TestParseOpt3(t *testing.T) {
 	}{
 		{
 			"option name Style type combo default Normal var Solid var Normal var Risky",
-			option.Select{[]byte("Style"), 1, [][]byte{[]byte("Solid"), []byte("Normal"), []byte("Risky")}},
+			option.Select{Name: "Style", Index: 1, Vars: []string{"Solid", "Normal", "Risky"}},
 			nil,
 		},
 		{"option name Style type combo default None var Solid var Normal var Risky", option.Select{}, exception.InvalidOptionSyntax},
@@ -117,7 +117,7 @@ func TestParseOpt3(t *testing.T) {
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		switch v := o.(type) {
 		case option.Select:
-			if c.want.Index != v.Index || !byteutil.EqualBytes(c.want.Vars, v.Vars) {
+			if c.want.Index != v.Index || !stringutil.SliceEquals(c.want.Vars, v.Vars) {
 				t.Errorf("Mismatch values.\nInput: %v\nExpected: %v\nActual: %v", c.in, c.want, v)
 			}
 		}
@@ -131,10 +131,10 @@ func TestParseOpt4(t *testing.T) {
 		want option.Button
 		err  error
 	}{
-		{"option name ResetLearning type button", option.Button{[]byte("ResetLearning")}, nil},
-		{"option name <empty> type button", option.Button{[]byte("<empty>")}, nil}, // まぁいい
+		{"option name ResetLearning type button", option.Button{Name: "ResetLearning"}, nil},
+		{"option name <empty> type button", option.Button{Name: "<empty>"}, nil}, // まぁいい
 		{"option name ResetLearning type button sur", option.Button{}, exception.InvalidOptionSyntax},
-		{"option name 1 type button", option.Button{[]byte("1")}, nil},
+		{"option name 1 type button", option.Button{Name: "1"}, nil},
 	}
 	for _, c := range cases {
 		o, err := fu.Option([]byte(c.in))
@@ -149,7 +149,7 @@ func TestParseOpt5(t *testing.T) {
 		want option.String
 		err  error
 	}{
-		{"option name BookFile type string default public.bin", option.String{[]byte("BookFile"), []byte("public.bin"), []byte("public.bin")}, nil},
+		{"option name BookFile type string default public.bin", option.String{Name: "BookFile", Val: "public.bin", Default: "public.bin"}, nil},
 		{"option name BookFile type string default public.bin var a", option.String{}, exception.InvalidOptionSyntax},
 		{"option name BookFile type string", option.String{}, exception.InvalidOptionSyntax},
 		{"option name BookFile type string public.bin", option.String{}, exception.InvalidOptionSyntax},
@@ -159,7 +159,7 @@ func TestParseOpt5(t *testing.T) {
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		switch v := o.(type) {
 		case option.String:
-			if !bytes.Equal(v.Val, c.want.Val) || !bytes.Equal(v.Default, c.want.Default) {
+			if v.Val != c.want.Val || v.Default != c.want.Default {
 				t.Errorf("Mismatch values.\nInput: %v\nExpected: %v\nActual: %v", c.in, c.want, v)
 			}
 		}
@@ -173,7 +173,7 @@ func TestParseOpt6(t *testing.T) {
 		want option.FileName
 		err  error
 	}{
-		{"option name LearningFile type filename default <empty>", option.FileName{[]byte("LearningFile"), []byte("<empty>"), []byte("<empty>")}, nil},
+		{"option name LearningFile type filename default <empty>", option.FileName{Name: "LearningFile", Val: "<empty>", Default: "<empty>"}, nil},
 		{"option name LearningFile type filename default <empty> var a", option.FileName{}, exception.InvalidOptionSyntax},
 		{"option name LearningFile type filename", option.FileName{}, exception.InvalidOptionSyntax},
 		{"option name LearningFile type filename <empty>", option.FileName{}, exception.InvalidOptionSyntax},
@@ -183,7 +183,7 @@ func TestParseOpt6(t *testing.T) {
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		switch v := o.(type) {
 		case option.FileName:
-			if !bytes.Equal(v.Val, c.want.Val) || !bytes.Equal(v.Default, c.want.Default) {
+			if v.Val != c.want.Val || v.Default != c.want.Default {
 				t.Errorf("Mismatch values.\nInput: %v\nExpected: %v\nActual: %v", c.in, c.want, v)
 			}
 		}

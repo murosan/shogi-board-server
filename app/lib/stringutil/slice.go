@@ -4,6 +4,15 @@
 
 package stringutil
 
+func IndexOf(a []string, s string) int {
+	for i, b := range a {
+		if b == s {
+			return i
+		}
+	}
+	return -1
+}
+
 func SliceEquals(a, b []string) bool {
 	if (a == nil) != (b == nil) {
 		return false

@@ -5,19 +5,18 @@
 package option
 
 import (
-	"bytes"
+	"fmt"
 	"strconv"
 )
 
 var (
-	space = []byte(" ")
-	val   = []byte("value")
-	pref  = []byte("setoption name")
+	val  = "value"
+	pref = "setoption name"
 )
 
 type Option interface {
 	Usi() []byte
-	GetName() []byte
+	GetName() string
 }
 
 type OptMap struct {
@@ -41,30 +40,30 @@ func EmptyOptMap() *OptMap {
 }
 
 type Button struct {
-	Name []byte `json:"name"`
+	Name string `json:"name"`
 }
 
 func (b Button) Usi() []byte {
-	return bytes.Join([][]byte{pref, b.Name}, space)
+	return []byte(fmt.Sprintf("%s %s", pref, b.Name))
 }
 
-func (b Button) GetName() []byte { return b.Name }
+func (b Button) GetName() string { return b.Name }
 
 type Check struct {
-	Name    []byte `json:"name"`
+	Name    string `json:"name"`
 	Val     bool   `json:"val"`
 	Default bool   `json:"default"`
 }
 
 func (c Check) Usi() []byte {
 	b := []byte(strconv.FormatBool(c.Val))
-	return bytes.Join([][]byte{pref, c.Name, val, b}, space)
+	return []byte(fmt.Sprintf("%s %s %s %s", pref, c.Name, val, b))
 }
 
-func (c Check) GetName() []byte { return c.Name }
+func (c Check) GetName() string { return c.Name }
 
 type Spin struct {
-	Name    []byte
+	Name    string
 	Val     int `json:"val"`
 	Default int `json:"default"`
 	Min     int `json:"min"`
@@ -73,44 +72,44 @@ type Spin struct {
 
 func (s Spin) Usi() []byte {
 	b := strconv.Itoa(s.Val)
-	return bytes.Join([][]byte{pref, s.Name, val, []byte(b)}, space)
+	return []byte(fmt.Sprintf("%s %s %s %s", pref, s.Name, val, b))
 }
 
-func (s Spin) GetName() []byte { return s.Name }
+func (s Spin) GetName() string { return s.Name }
 
 // USIのcombo
 type Select struct {
-	Name  []byte   `json:"name"`
+	Name  string   `json:"name"`
 	Index int      `json:"index"`
-	Vars  [][]byte `json:"vars"`
+	Vars  []string `json:"vars"`
 }
 
 func (s Select) Usi() []byte {
-	return bytes.Join([][]byte{pref, s.Name, val, s.Vars[s.Index]}, space)
+	return []byte(fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Vars[s.Index]))
 }
 
-func (s Select) GetName() []byte { return s.Name }
+func (s Select) GetName() string { return s.Name }
 
 type String struct {
-	Name    []byte `json:"name"`
-	Val     []byte `json:"val"`
-	Default []byte
+	Name    string `json:"name"`
+	Val     string `json:"val"`
+	Default string
 }
 
 func (s String) Usi() []byte {
-	return bytes.Join([][]byte{pref, s.Name, val, s.Val}, space)
+	return []byte(fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Val))
 }
 
-func (s String) GetName() []byte { return s.Name }
+func (s String) GetName() string { return s.Name }
 
 type FileName struct {
-	Name    []byte `json:"name"`
-	Val     []byte `json:"val"`
-	Default []byte
+	Name    string `json:"name"`
+	Val     string `json:"val"`
+	Default string
 }
 
 func (f FileName) Usi() []byte {
-	return bytes.Join([][]byte{pref, f.Name, val, f.Val}, space)
+	return []byte(fmt.Sprintf("%s %s %s %s", pref, f.Name, val, f.Val))
 }
 
-func (f FileName) GetName() []byte { return f.Name }
+func (f FileName) GetName() string { return f.Name }
