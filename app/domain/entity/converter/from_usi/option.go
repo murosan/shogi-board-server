@@ -78,7 +78,6 @@ func (fu *FromUsi) parseCheck(b [][]byte) (option.Option, error) {
 
 	boolVal := d == "true"
 	return option.Check{Name: n, Val: boolVal, Default: boolVal}, nil
-
 }
 
 // spin type を Egn の Options にセットする

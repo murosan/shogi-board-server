@@ -63,11 +63,11 @@ func (c Check) Usi() []byte {
 func (c Check) GetName() string { return c.Name }
 
 type Spin struct {
-	Name    string
-	Val     int `json:"val"`
-	Default int `json:"default"`
-	Min     int `json:"min"`
-	Max     int `json:"max"`
+	Name    string `json:"name"`
+	Val     int    `json:"val"`
+	Default int    `json:"default"`
+	Min     int    `json:"min"`
+	Max     int    `json:"max"`
 }
 
 func (s Spin) Usi() []byte {
@@ -93,7 +93,7 @@ func (s Select) GetName() string { return s.Name }
 type String struct {
 	Name    string `json:"name"`
 	Val     string `json:"val"`
-	Default string
+	Default string `json:"default"`
 }
 
 func (s String) Usi() []byte {
@@ -105,7 +105,7 @@ func (s String) GetName() string { return s.Name }
 type FileName struct {
 	Name    string `json:"name"`
 	Val     string `json:"val"`
-	Default string
+	Default string `json:"default"`
 }
 
 func (f FileName) Usi() []byte {

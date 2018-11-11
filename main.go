@@ -29,7 +29,7 @@ func main() {
 
 	s := server.NewServer(conn, converter.UseFromJson(), converter.UseToUsi())
 
-	logger.Use().Info("Start Listening.", zap.String("address", *addr))
+	logger.Use().Info("Listening...", zap.String("address", *addr))
 	http.HandleFunc("/", s.Handling)
 	log.Fatalln(http.ListenAndServe(*addr, nil))
 }
