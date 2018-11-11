@@ -41,7 +41,7 @@ func EmptyOptMap() *OptMap {
 }
 
 type Button struct {
-	Name []byte
+	Name []byte `json:"name"`
 }
 
 func (b Button) Usi() []byte {
@@ -51,8 +51,9 @@ func (b Button) Usi() []byte {
 func (b Button) GetName() []byte { return b.Name }
 
 type Check struct {
-	Name         []byte
-	Val, Default bool
+	Name    []byte `json:"name"`
+	Val     bool   `json:"val"`
+	Default bool   `json:"default"`
 }
 
 func (c Check) Usi() []byte {
@@ -63,8 +64,11 @@ func (c Check) Usi() []byte {
 func (c Check) GetName() []byte { return c.Name }
 
 type Spin struct {
-	Name                   []byte
-	Val, Default, Min, Max int
+	Name    []byte
+	Val     int `json:"val"`
+	Default int `json:"default"`
+	Min     int `json:"min"`
+	Max     int `json:"max"`
 }
 
 func (s Spin) Usi() []byte {
@@ -76,9 +80,9 @@ func (s Spin) GetName() []byte { return s.Name }
 
 // USIのcombo
 type Select struct {
-	Name  []byte
-	Index int
-	Vars  [][]byte
+	Name  []byte   `json:"name"`
+	Index int      `json:"index"`
+	Vars  [][]byte `json:"vars"`
 }
 
 func (s Select) Usi() []byte {
@@ -88,7 +92,9 @@ func (s Select) Usi() []byte {
 func (s Select) GetName() []byte { return s.Name }
 
 type String struct {
-	Name, Val, Default []byte
+	Name    []byte `json:"name"`
+	Val     []byte `json:"val"`
+	Default []byte
 }
 
 func (s String) Usi() []byte {
@@ -98,7 +104,9 @@ func (s String) Usi() []byte {
 func (s String) GetName() []byte { return s.Name }
 
 type FileName struct {
-	Name, Val, Default []byte
+	Name    []byte `json:"name"`
+	Val     []byte `json:"val"`
+	Default []byte
 }
 
 func (f FileName) Usi() []byte {
