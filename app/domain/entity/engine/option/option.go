@@ -7,8 +7,6 @@ package option
 import (
 	"fmt"
 	"strconv"
-
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 )
 
 var (
@@ -17,7 +15,7 @@ var (
 )
 
 type Option interface {
-	Usi() []byte
+	UpdateAndGetUsi() (string, error)
 	GetName() string
 }
 
@@ -45,8 +43,8 @@ type Button struct {
 	Name string `json:"name"`
 }
 
-func (b Button) Usi() []byte {
-	return []byte(fmt.Sprintf("%s %s", pref, b.Name))
+func (b Button) UpdateAndGetUsi() (string, error) {
+	return fmt.Sprintf("%s %s", pref, b.Name), nil
 }
 
 func (b Button) GetName() string { return b.Name }
@@ -57,9 +55,9 @@ type Check struct {
 	Default bool   `json:"default"`
 }
 
-func (c Check) Usi() []byte {
+func (c Check) UpdateAndGetUsi() (string, error) {
 	b := []byte(strconv.FormatBool(c.Val))
-	return []byte(fmt.Sprintf("%s %s %s %s", pref, c.Name, val, b))
+	return fmt.Sprintf("%s %s %s %s", pref, c.Name, val, b), nil
 }
 
 func (c Check) GetName() string { return c.Name }
@@ -74,20 +72,12 @@ type Spin struct {
 	Max     int    `json:"max"`
 }
 
-func (s Spin) Usi() []byte {
+func (s Spin) UpdateAndGetUsi() (string, error) {
 	b := strconv.Itoa(s.Val)
-	return []byte(fmt.Sprintf("%s %s %s %s", pref, s.Name, val, b))
+	return fmt.Sprintf("%s %s %s %s", pref, s.Name, val, b), nil
 }
 
 func (s Spin) GetName() string { return s.Name }
-
-func (s *Spin) Update(i int) error {
-	if i < s.Min || i > s.Max {
-		return exception.InvalidOptionParameter
-	}
-	s.Val = i
-	return nil
-}
 
 // USIのcombo
 type Select struct {
@@ -96,16 +86,11 @@ type Select struct {
 	Vars  []string `json:"vars"`
 }
 
-func (s Select) Usi() []byte {
-	return []byte(fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Vars[s.Index]))
+func (s Select) UpdateAndGetUsi() (string, error) {
+	return fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Vars[s.Index]), nil
 }
 
 func (s Select) GetName() string { return s.Name }
-
-func (s *Select) Update(v string) error {
-	// TODO: Indexで持つのはよくないかもしれない
-	return nil
-}
 
 type String struct {
 	Name    string `json:"name"`
@@ -113,13 +98,11 @@ type String struct {
 	Default string `json:"default"`
 }
 
-func (s String) Usi() []byte {
-	return []byte(fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Val))
+func (s String) UpdateAndGetUsi() (string, error) {
+	return fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Val), nil
 }
 
 func (s String) GetName() string { return s.Name }
-
-func (s *String) Update(v string) { s.Val = v }
 
 type FileName struct {
 	Name    string `json:"name"`
@@ -127,10 +110,8 @@ type FileName struct {
 	Default string `json:"default"`
 }
 
-func (f FileName) Usi() []byte {
-	return []byte(fmt.Sprintf("%s %s %s %s", pref, f.Name, val, f.Val))
+func (f FileName) UpdateAndGetUsi() (string, error) {
+	return fmt.Sprintf("%s %s %s %s", pref, f.Name, val, f.Val), nil
 }
 
 func (f FileName) GetName() string { return f.Name }
-
-func (f *FileName) Update(v string) { f.Val = v }

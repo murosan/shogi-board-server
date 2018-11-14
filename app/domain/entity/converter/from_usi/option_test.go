@@ -6,12 +6,12 @@ package from_usi
 
 import (
 	"bytes"
-	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 	"strings"
 	"testing"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 )
 
 var emp = []byte("")
@@ -212,7 +212,9 @@ func basicOptionMatching(t *testing.T, in string, o1, o2 option.Option, e1, e2 e
 	}
 
 	// USIコマンドが想定通りかどうか
-	if !bytes.Equal(o1.Usi(), o2.Usi()) {
-		t.Errorf("Set value was not as expected.\nInput: %v\nExpected: %v\nActual: %v", in, string(o1.Usi()), string(o2.Usi()))
+	usi1, _ := o1.UpdateAndGetUsi()
+	usi2, _ := o2.UpdateAndGetUsi()
+	if usi1 != usi2 {
+		t.Errorf("Set value was not as expected.\nInput: %v\nExpected: %v\nActual: %v", in, usi1, usi2)
 	}
 }
