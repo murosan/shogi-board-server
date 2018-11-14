@@ -39,6 +39,7 @@ var (
 	FailedToStart          = &Error{Code: "FailedToStart"}
 	InvalidIdSyntax        = &Error{Code: "InvalidIdSyntax"}
 	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
+	InvalidOptionParameter = &Error{Code: "InvalidOptionParameter"}
 	UnknownOption          = &Error{Code: "UnknownOption"}
 	UnknownOptionType      = &Error{Code: "UnknownOptionType"}
 

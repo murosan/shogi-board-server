@@ -7,6 +7,8 @@ package option
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 )
 
 var (
@@ -62,6 +64,8 @@ func (c Check) Usi() []byte {
 
 func (c Check) GetName() string { return c.Name }
 
+func (c *Check) Update(b bool) { c.Val = b }
+
 type Spin struct {
 	Name    string `json:"name"`
 	Val     int    `json:"val"`
@@ -77,6 +81,14 @@ func (s Spin) Usi() []byte {
 
 func (s Spin) GetName() string { return s.Name }
 
+func (s *Spin) Update(i int) error {
+	if i < s.Min || i > s.Max {
+		return exception.InvalidOptionParameter
+	}
+	s.Val = i
+	return nil
+}
+
 // USIのcombo
 type Select struct {
 	Name  string   `json:"name"`
@@ -90,6 +102,11 @@ func (s Select) Usi() []byte {
 
 func (s Select) GetName() string { return s.Name }
 
+func (s *Select) Update(v string) error {
+	// TODO: Indexで持つのはよくないかもしれない
+	return nil
+}
+
 type String struct {
 	Name    string `json:"name"`
 	Val     string `json:"val"`
@@ -102,6 +119,8 @@ func (s String) Usi() []byte {
 
 func (s String) GetName() string { return s.Name }
 
+func (s *String) Update(v string) { s.Val = v }
+
 type FileName struct {
 	Name    string `json:"name"`
 	Val     string `json:"val"`
@@ -113,3 +132,5 @@ func (f FileName) Usi() []byte {
 }
 
 func (f FileName) GetName() string { return f.Name }
+
+func (f *FileName) Update(v string) { f.Val = v }
