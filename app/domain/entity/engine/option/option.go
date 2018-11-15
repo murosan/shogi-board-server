@@ -5,13 +5,13 @@
 package option
 
 import (
-	"fmt"
 	"strconv"
 )
 
 var (
-	val  = "value"
-	pref = "setoption name"
+	val   = "value"
+	pref  = "setoption name"
+	space = " "
 )
 
 type Option interface {
@@ -44,7 +44,7 @@ type Button struct {
 }
 
 func (b Button) UpdateAndGetUsi() (string, error) {
-	return fmt.Sprintf("%s %s", pref, b.Name), nil
+	return pref + space + b.Name, nil
 }
 
 func (b Button) GetName() string { return b.Name }
@@ -56,8 +56,8 @@ type Check struct {
 }
 
 func (c Check) UpdateAndGetUsi() (string, error) {
-	b := []byte(strconv.FormatBool(c.Val))
-	return fmt.Sprintf("%s %s %s %s", pref, c.Name, val, b), nil
+	b := strconv.FormatBool(c.Val)
+	return pref + space + c.Name + space + val + space + b, nil
 }
 
 func (c Check) GetName() string { return c.Name }
@@ -74,7 +74,7 @@ type Spin struct {
 
 func (s Spin) UpdateAndGetUsi() (string, error) {
 	b := strconv.Itoa(s.Val)
-	return fmt.Sprintf("%s %s %s %s", pref, s.Name, val, b), nil
+	return pref + space + s.Name + space + val + space + b, nil
 }
 
 func (s Spin) GetName() string { return s.Name }
@@ -87,7 +87,7 @@ type Select struct {
 }
 
 func (s Select) UpdateAndGetUsi() (string, error) {
-	return fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Vars[s.Index]), nil
+	return pref + space + s.Name + space + val + space + s.Vars[s.Index], nil
 }
 
 func (s Select) GetName() string { return s.Name }
@@ -99,7 +99,7 @@ type String struct {
 }
 
 func (s String) UpdateAndGetUsi() (string, error) {
-	return fmt.Sprintf("%s %s %s %s", pref, s.Name, val, s.Val), nil
+	return pref + space + s.Name + space + val + space + s.Val, nil
 }
 
 func (s String) GetName() string { return s.Name }
@@ -111,7 +111,7 @@ type FileName struct {
 }
 
 func (f FileName) UpdateAndGetUsi() (string, error) {
-	return fmt.Sprintf("%s %s %s %s", pref, f.Name, val, f.Val), nil
+	return pref + space + f.Name + space + val + space + f.Val, nil
 }
 
 func (f FileName) GetName() string { return f.Name }
