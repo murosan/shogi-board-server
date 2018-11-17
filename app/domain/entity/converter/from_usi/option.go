@@ -5,9 +5,9 @@
 package from_usi
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
@@ -20,43 +20,43 @@ import (
 // id author <AuthorName> をEngineにセットする
 // EngineNameやAuthorNameにスペースが入る場合もあるので最後にJoinしている
 // TODO: 正規表現でやるか検討
-func (fu *FromUsi) EngineID(b []byte) ([]byte, []byte, error) {
-	s := bytes.Split(bytes.TrimSpace(b), space)
-	if len(s) < 3 || !bytes.Equal(s[0], id) {
-		return nil, nil, exception.InvalidIdSyntax
+func (fu *FromUsi) EngineID(b string) (string, string, error) {
+	s := strings.Split(strings.TrimSpace(b), space)
+	if len(s) < 3 || s[0] != id {
+		return "", "", exception.InvalidIdSyntax
 	}
 
-	if bytes.Equal(s[1], name) {
-		return name, bytes.Join(s[2:], space), nil
+	if s[1] == name {
+		return name, strings.Join(s[2:], space), nil
 	}
 
-	if bytes.Equal(s[1], author) {
-		return author, bytes.Join(s[2:], space), nil
+	if s[1] == author {
+		return author, strings.Join(s[2:], space), nil
 	}
 
-	return nil, nil, exception.UnknownOption
+	return "", "", exception.UnknownOption
 }
 
 // 一行受け取って、EngineのOptionMapにセットする
 // パースできなかったらエラーを返す
-func (fu *FromUsi) Option(b []byte) (option.Option, error) {
-	s := bytes.Split(bytes.TrimSpace(b), space)
-	if len(s) < 5 || !bytes.Equal(s[0], opt) || !bytes.Equal(s[1], name) || !bytes.Equal(s[3], tpe) || len(s[4]) == 0 {
+func (fu *FromUsi) Option(b string) (option.Option, error) {
+	s := strings.Split(strings.TrimSpace(b), space)
+	if len(s) < 5 || s[0] != opt || s[1] != name || s[3] != tpe || len(s[4]) == 0 {
 		return nil, exception.InvalidOptionSyntax
 	}
 
 	switch string(s[4]) {
-	case "check":
+	case check:
 		return fu.parseCheck(s)
-	case "spin":
+	case spin:
 		return fu.parseSpin(s)
-	case "combo":
+	case combo:
 		return fu.parseSelect(s)
-	case "button":
+	case button:
 		return fu.parseButton(s)
-	case "string":
+	case str:
 		return fu.parseString(s)
-	case "filename":
+	case fileName:
 		return fu.parseFileName(s)
 	default:
 		return nil, exception.UnknownOptionType
@@ -67,8 +67,8 @@ func (fu *FromUsi) Option(b []byte) (option.Option, error) {
 // option name <string> type check default <bool>
 // このフォーマット以外は許容しない
 // default がなかったり、bool ではない時はエラー
-func (fu *FromUsi) parseCheck(b [][]byte) (*option.Check, error) {
-	if len(b) != 7 || !bytes.Equal(b[5], deflt) || len(b[2]) == 0 || len(b[6]) == 0 {
+func (fu *FromUsi) parseCheck(b []string) (*option.Check, error) {
+	if len(b) != 7 || b[5] != deflt || len(b[2]) == 0 || len(b[6]) == 0 {
 		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'check', but malformed. The format must be [option name <string> type check default <bool>]")
 	}
 
@@ -85,8 +85,8 @@ func (fu *FromUsi) parseCheck(b [][]byte) (*option.Check, error) {
 // option name <string> type spin default <int> min <int> max <int>
 // このフォーマット以外は許容しない
 // 各値がなかったり、int ではない時、min > max の時はエラー
-func (fu *FromUsi) parseSpin(b [][]byte) (*option.Spin, error) {
-	if len(b) != 11 || !bytes.Equal(b[5], deflt) || !bytes.Equal(b[7], min) || !bytes.Equal(b[9], max) || len(b[2]) == 0 {
+func (fu *FromUsi) parseSpin(b []string) (*option.Spin, error) {
+	if len(b) != 11 || b[5] != deflt || b[7] != min || b[9] != max || len(b[2]) == 0 {
 		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'spin', but malformed. The format must be [option name <string> type spin default <int> min <int> max <int>]")
 	}
 
@@ -110,7 +110,7 @@ func (fu *FromUsi) parseSpin(b [][]byte) (*option.Spin, error) {
 // option name <string> type combo default <string> rep(var <string>)
 // このフォーマット以外は許容しない
 // initial がない、var がない、default が var にない時はエラー
-func (fu *FromUsi) parseSelect(b [][]byte) (*option.Select, error) {
+func (fu *FromUsi) parseSelect(b []string) (*option.Select, error) {
 	if len(b) < 9 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'combo', but malformed. The format must be [option name <string> type combo default <string> rep(var <string>)]")
 	}
@@ -122,7 +122,7 @@ func (fu *FromUsi) parseSelect(b [][]byte) (*option.Select, error) {
 	)
 
 	i := 8
-	for i < len(b) && bytes.Equal(b[i-1], selOpt) {
+	for i < len(b) && b[i-1] == selOpt {
 		str := string(b[i])
 		vars = append(vars, str)
 		i += 2
@@ -137,7 +137,7 @@ func (fu *FromUsi) parseSelect(b [][]byte) (*option.Select, error) {
 
 // button type を Egn の Options にセットする
 // option name <string> type button
-func (fu *FromUsi) parseButton(b [][]byte) (*option.Button, error) {
+func (fu *FromUsi) parseButton(b []string) (*option.Button, error) {
 	if len(b) != 5 || len(b[2]) == 0 {
 		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'button', but malformed. The format must be [option name <string> type button]")
 	}
@@ -146,7 +146,7 @@ func (fu *FromUsi) parseButton(b [][]byte) (*option.Button, error) {
 
 // string type を Egn の Options にセットする
 // option name <string> type string default <string>
-func (fu *FromUsi) parseString(b [][]byte) (*option.String, error) {
+func (fu *FromUsi) parseString(b []string) (*option.String, error) {
 	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'string', but malformed. The format must be [option name <string> type string default <string>]")
 	}
@@ -154,7 +154,7 @@ func (fu *FromUsi) parseString(b [][]byte) (*option.String, error) {
 }
 
 // option name <string> type filename default <string>
-func (fu *FromUsi) parseFileName(b [][]byte) (*option.FileName, error) {
+func (fu *FromUsi) parseFileName(b []string) (*option.FileName, error) {
 	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
 		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'filename', but malformed. The format must be [option name <string> type filename default <string>]")
 	}

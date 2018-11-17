@@ -24,8 +24,8 @@ type engine struct {
 	state state.State
 
 	// その他の情報
-	name    []byte
-	author  []byte
+	name    string
+	author  string
 	options option.OptMap
 
 	// エンジンの出力を流し込む scanner
@@ -44,13 +44,13 @@ func NewEngine(c command.OsCmd) engineModel.Engine {
 	}
 }
 
-func (e *engine) GetName() *[]byte { return &e.name }
+func (e *engine) GetName() string { return e.name }
 
-func (e *engine) SetName(b *[]byte) { e.name = *b }
+func (e *engine) SetName(n string) { e.name = n }
 
-func (e *engine) GetAuthor() *[]byte { return &e.author }
+func (e *engine) GetAuthor() string { return e.author }
 
-func (e *engine) SetAuthor(b *[]byte) { e.author = *b }
+func (e *engine) SetAuthor(a string) { e.author = a }
 
 func (e *engine) SetOption(n string, opt option.Option) {
 	switch o := opt.(type) {

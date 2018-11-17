@@ -5,7 +5,6 @@
 package from_usi
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 
@@ -13,20 +12,20 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 )
 
-var emp = []byte("")
+var emp = ""
 
 func TestFromUsi_EngineID(t *testing.T) {
 	fu := NewFromUsi()
 	cases := []struct {
-		in, name, val []byte
+		in, name, val string
 		err           error
 	}{
-		{[]byte("id name computer_name"), name, []byte("computer_name"), nil},
-		{[]byte("id name "), emp, emp, exception.InvalidIdSyntax},
-		{[]byte("id neimu typo_key"), emp, emp, exception.UnknownOption},
-		{[]byte("id author computer_author"), author, []byte("computer_author"), nil},
-		{[]byte("id author"), []byte(""), emp, exception.InvalidIdSyntax},
-		{[]byte("id auther typo_key"), emp, emp, exception.UnknownOption},
+		{"id name computer_name", name, "computer_name", nil},
+		{"id name ", emp, emp, exception.InvalidIdSyntax},
+		{"id neimu typo_key", emp, emp, exception.UnknownOption},
+		{"id author computer_author", author, "computer_author", nil},
+		{"id author", emp, emp, exception.InvalidIdSyntax},
+		{"id auther typo_key", emp, emp, exception.UnknownOption},
 	}
 
 	for _, c := range cases {
@@ -34,10 +33,10 @@ func TestFromUsi_EngineID(t *testing.T) {
 		if e != c.err {
 			t.Errorf("Returned error was not as expected.\nInput: %v, Expected: %v, Actual: %v", string(c.in), c.err, e)
 		}
-		if !bytes.Equal(n, c.name) {
+		if n != c.name {
 			t.Errorf("name of OptionId was not as expected.\nInput: %v, Expected: %v, Actual: %v", string(c.in), string(c.name), string(n))
 		}
-		if !bytes.Equal(v, c.val) {
+		if v != c.val {
 			t.Errorf("Value of OptionId was not as expected.\nInput: %v, Expected: %v, Actual: %v", string(c.in), string(c.val), string(v))
 		}
 	}
@@ -58,7 +57,7 @@ func TestFromUsi_Option(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		o, err := fu.Option([]byte(c.in))
+		o, err := fu.Option(c.in)
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		//if o != c.want {
 		//	t.Errorf("Mismatch values.\nInput: %v\nExpected: %v\nActual: %v", c.in, c.want, o)
@@ -81,7 +80,7 @@ func TestParseOpt2(t *testing.T) {
 		{"option name Selectivity type spin default two min 0 max 4", nil, exception.InvalidOptionSyntax},
 	}
 	for _, c := range cases {
-		o, err := fu.Option([]byte(c.in))
+		o, err := fu.Option(c.in)
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		//switch v := o.(type) {
 		//case *option.Spin:
@@ -109,7 +108,7 @@ func TestParseOpt3(t *testing.T) {
 		{"option name Style type combo default Normal", nil, exception.InvalidOptionSyntax},
 	}
 	for _, c := range cases {
-		o, err := fu.Option([]byte(c.in))
+		o, err := fu.Option(c.in)
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		//switch v := o.(type) {
 		//case option.Select:
@@ -133,7 +132,7 @@ func TestParseOpt4(t *testing.T) {
 		{"option name 1 type button", option.NewButton("1"), nil},
 	}
 	for _, c := range cases {
-		o, err := fu.Option([]byte(c.in))
+		o, err := fu.Option(c.in)
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 	}
 }
@@ -151,7 +150,7 @@ func TestParseOpt5(t *testing.T) {
 		{"option name BookFile type string public.bin", nil, exception.InvalidOptionSyntax},
 	}
 	for _, c := range cases {
-		o, err := fu.Option([]byte(c.in))
+		o, err := fu.Option(c.in)
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		//switch v := o.(type) {
 		//case option.String:
@@ -175,7 +174,7 @@ func TestParseOpt6(t *testing.T) {
 		{"option name LearningFile type filename <empty>", nil, exception.InvalidOptionSyntax},
 	}
 	for _, c := range cases {
-		o, err := fu.Option([]byte(c.in))
+		o, err := fu.Option(c.in)
 		basicOptionMatching(t, c.in, o, c.want, err, c.err)
 		//switch v := o.(type) {
 		//case option.FileName:

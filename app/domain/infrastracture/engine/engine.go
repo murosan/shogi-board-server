@@ -13,11 +13,11 @@ import (
 
 // TODO
 type Engine interface {
-	GetName() *[]byte
-	SetName(*[]byte)
+	GetName() string
+	SetName(string)
 
-	GetAuthor() *[]byte
-	SetAuthor(*[]byte)
+	GetAuthor() string
+	SetAuthor(string)
 
 	SetOption(string, option.Option)
 	GetOptions() option.OptMap

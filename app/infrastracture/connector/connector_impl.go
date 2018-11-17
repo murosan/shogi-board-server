@@ -23,6 +23,8 @@ import (
 var (
 	idRegex  = regexp.MustCompile(`id.*`)
 	optRegex = regexp.MustCompile(`option.*`)
+	name     = "name"
+	author   = "author"
 )
 
 type connector struct {
@@ -155,16 +157,16 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 			}
 
 			if parseOpt && idRegex.Match(b) {
-				k, v, e := c.fu.EngineID(b)
+				k, v, e := c.fu.EngineID(string(b))
 				if e == nil {
-					c.setId(&k, &v)
+					c.setId(k, v)
 					continue
 				}
 				return e
 			}
 
 			if parseOpt && optRegex.Match(b) {
-				o, e := c.fu.Option(b)
+				o, e := c.fu.Option(string(b))
 				if e == nil {
 					c.setOption(o)
 					continue
@@ -178,12 +180,12 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 	}
 }
 
-func (c *connector) setId(k, v *[]byte) {
+func (c *connector) setId(k, v string) {
 	egn := c.pool.NamedEngine()
-	switch string(*k) {
-	case "name":
+	switch k {
+	case name:
 		egn.SetName(v)
-	case "author":
+	case author:
 		egn.SetAuthor(v)
 	default:
 		panic("unknown id name")
