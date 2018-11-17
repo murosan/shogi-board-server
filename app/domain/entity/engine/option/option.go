@@ -38,19 +38,23 @@ func EmptyOptMap() *OptMap {
 	}
 }
 
-type Button struct{ name string }
+// json化するために Name を大文字始まりにしているが、基本他からは触らない
+type Button struct {
+	Name string `json:"name"`
+}
 
 func NewButton(name string) *Button { return &Button{name} }
 
 func (b *Button) Usi() (string, error) {
-	return pref + b.name, nil
+	return pref + b.Name, nil
 }
 
-func (b *Button) GetName() string { return b.name }
+func (b *Button) GetName() string { return b.Name }
 
 type Check struct {
-	name         string
-	val, initial bool
+	Name    string `json:"name"`
+	Val     bool   `json:"val"`
+	Default bool   `json:"default"`
 }
 
 func NewCheck(name string, val, init bool) *Check {
@@ -58,15 +62,18 @@ func NewCheck(name string, val, init bool) *Check {
 }
 
 func (c *Check) Usi() (string, error) {
-	b := strconv.FormatBool(c.val)
-	return pref + c.name + val + b, nil
+	b := strconv.FormatBool(c.Val)
+	return pref + c.Name + val + b, nil
 }
 
-func (c *Check) GetName() string { return c.name }
+func (c *Check) GetName() string { return c.Name }
 
 type Spin struct {
-	name                   string
-	val, initial, min, max int
+	Name    string `json:"name"`
+	Val     int    `json:"val"`
+	Default int    `json:"default"`
+	Min     int    `json:"min"`
+	Max     int    `json:"max"`
 }
 
 func NewSpin(name string, val, init, min, max int) *Spin {
@@ -74,16 +81,18 @@ func NewSpin(name string, val, init, min, max int) *Spin {
 }
 
 func (s *Spin) Usi() (string, error) {
-	b := strconv.Itoa(s.val)
-	return pref + s.name + val + b, nil
+	b := strconv.Itoa(s.Val)
+	return pref + s.Name + val + b, nil
 }
 
-func (s *Spin) GetName() string { return s.name }
+func (s *Spin) GetName() string { return s.Name }
 
 // USIのcombo
 type Select struct {
-	name, val, initial string
-	vars               []string
+	Name    string   `json:"name"`
+	Val     string   `json:"val"`
+	Default string   `json:"default"`
+	Vars    []string `json:"vars"`
 }
 
 func NewSelect(name, val, init string, vars []string) *Select {
@@ -91,31 +100,39 @@ func NewSelect(name, val, init string, vars []string) *Select {
 }
 
 func (s *Select) Usi() (string, error) {
-	return pref + s.name + val + s.val, nil
+	return pref + s.Name + val + s.Val, nil
 }
 
-func (s *Select) GetName() string { return s.name }
+func (s *Select) GetName() string { return s.Name }
 
-type String struct{ name, val, initial string }
+type String struct {
+	Name    string `json:"name"`
+	Val     string `json:"val"`
+	Default string `json:"default"`
+}
 
 func NewString(name, val, init string) *String {
 	return &String{name, val, init}
 }
 
 func (s *String) Usi() (string, error) {
-	return pref + s.name + val + s.val, nil
+	return pref + s.Name + val + s.Val, nil
 }
 
-func (s *String) GetName() string { return s.name }
+func (s *String) GetName() string { return s.Name }
 
-type FileName struct{ name, val, initial string }
+type FileName struct {
+	Name    string `json:"name"`
+	Val     string `json:"val"`
+	Default string `json:"default"`
+}
 
 func NewFileName(name, val, init string) *FileName {
 	return &FileName{name, val, init}
 }
 
 func (f *FileName) Usi() (string, error) {
-	return pref + f.name + val + f.val, nil
+	return pref + f.Name + val + f.Val, nil
 }
 
-func (f *FileName) GetName() string { return f.name }
+func (f *FileName) GetName() string { return f.Name }
