@@ -31,7 +31,7 @@ func TestNewConfig(t *testing.T) {
       "messageKey": "Msg",
       "levelKey": "Level",
       "timeKey": "Time",
-      "nameKey": "Name",
+      "nameKey": "name",
       "callerKey": "Caller",
       "stacktraceKey": "St",
       "levelEncoder": "color",

@@ -42,10 +42,10 @@ func TestToUsi_Position(t *testing.T) {
 	for i, c := range cases {
 		b, e := tu.Position(c.in)
 		if e != nil {
-			t.Errorf("Error: %v\nIndex: %d", e.Error(), i)
+			t.Errorf("Error: %v\nindex: %d", e.Error(), i)
 		}
 		if !bytes.Equal(b, c.want) {
-			t.Errorf("Index: %d\nExpected: %v\nActual: %v", i, string(c.want), string(b))
+			t.Errorf("index: %d\nExpected: %v\nActual: %v", i, string(c.want), string(b))
 		}
 	}
 }

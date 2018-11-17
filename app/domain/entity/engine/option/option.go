@@ -9,109 +9,113 @@ import (
 )
 
 var (
-	val   = "value"
-	pref  = "setoption name"
-	space = " "
+	val  = " value "
+	pref = "setoption name "
 )
 
 type Option interface {
-	UpdateAndGetUsi() (string, error)
+	Usi() (string, error)
 	GetName() string
 }
 
 type OptMap struct {
-	Buttons   map[string]Button   `json:"buttons"`
-	Checks    map[string]Check    `json:"checks"`
-	Spins     map[string]Spin     `json:"spins"`
-	Combos    map[string]Select   `json:"combos"`
-	Strings   map[string]String   `json:"strings"`
-	FileNames map[string]FileName `json:"file_names"`
+	Buttons   map[string]*Button   `json:"buttons"`
+	Checks    map[string]*Check    `json:"checks"`
+	Spins     map[string]*Spin     `json:"spins"`
+	Combos    map[string]*Select   `json:"combos"`
+	Strings   map[string]*String   `json:"strings"`
+	FileNames map[string]*FileName `json:"file_names"`
 }
 
 func EmptyOptMap() *OptMap {
 	return &OptMap{
-		Buttons:   make(map[string]Button),
-		Checks:    make(map[string]Check),
-		Spins:     make(map[string]Spin),
-		Combos:    make(map[string]Select),
-		Strings:   make(map[string]String),
-		FileNames: make(map[string]FileName),
+		Buttons:   make(map[string]*Button),
+		Checks:    make(map[string]*Check),
+		Spins:     make(map[string]*Spin),
+		Combos:    make(map[string]*Select),
+		Strings:   make(map[string]*String),
+		FileNames: make(map[string]*FileName),
 	}
 }
 
-type Button struct {
-	Name string `json:"name"`
+type Button struct{ name string }
+
+func NewButton(name string) *Button { return &Button{name} }
+
+func (b *Button) Usi() (string, error) {
+	return pref + b.name, nil
 }
 
-func (b Button) UpdateAndGetUsi() (string, error) {
-	return pref + space + b.Name, nil
-}
-
-func (b Button) GetName() string { return b.Name }
+func (b *Button) GetName() string { return b.name }
 
 type Check struct {
-	Name    string `json:"name"`
-	Val     bool   `json:"val"`
-	Default bool   `json:"default"`
+	name         string
+	val, initial bool
 }
 
-func (c Check) UpdateAndGetUsi() (string, error) {
-	b := strconv.FormatBool(c.Val)
-	return pref + space + c.Name + space + val + space + b, nil
+func NewCheck(name string, val, init bool) *Check {
+	return &Check{name, val, init}
 }
 
-func (c Check) GetName() string { return c.Name }
+func (c *Check) Usi() (string, error) {
+	b := strconv.FormatBool(c.val)
+	return pref + c.name + val + b, nil
+}
 
-func (c *Check) Update(b bool) { c.Val = b }
+func (c *Check) GetName() string { return c.name }
 
 type Spin struct {
-	Name    string `json:"name"`
-	Val     int    `json:"val"`
-	Default int    `json:"default"`
-	Min     int    `json:"min"`
-	Max     int    `json:"max"`
+	name                   string
+	val, initial, min, max int
 }
 
-func (s Spin) UpdateAndGetUsi() (string, error) {
-	b := strconv.Itoa(s.Val)
-	return pref + space + s.Name + space + val + space + b, nil
+func NewSpin(name string, val, init, min, max int) *Spin {
+	return &Spin{name, val, init, min, max}
 }
 
-func (s Spin) GetName() string { return s.Name }
+func (s *Spin) Usi() (string, error) {
+	b := strconv.Itoa(s.val)
+	return pref + s.name + val + b, nil
+}
+
+func (s *Spin) GetName() string { return s.name }
 
 // USIのcombo
 type Select struct {
-	Name  string   `json:"name"`
-	Index int      `json:"index"`
-	Vars  []string `json:"vars"`
+	name, val, initial string
+	vars               []string
 }
 
-func (s Select) UpdateAndGetUsi() (string, error) {
-	return pref + space + s.Name + space + val + space + s.Vars[s.Index], nil
+func NewSelect(name, val, init string, vars []string) *Select {
+	return &Select{name, val, init, vars}
 }
 
-func (s Select) GetName() string { return s.Name }
-
-type String struct {
-	Name    string `json:"name"`
-	Val     string `json:"val"`
-	Default string `json:"default"`
+func (s *Select) Usi() (string, error) {
+	return pref + s.name + val + s.val, nil
 }
 
-func (s String) UpdateAndGetUsi() (string, error) {
-	return pref + space + s.Name + space + val + space + s.Val, nil
+func (s *Select) GetName() string { return s.name }
+
+type String struct{ name, val, initial string }
+
+func NewString(name, val, init string) *String {
+	return &String{name, val, init}
 }
 
-func (s String) GetName() string { return s.Name }
-
-type FileName struct {
-	Name    string `json:"name"`
-	Val     string `json:"val"`
-	Default string `json:"default"`
+func (s *String) Usi() (string, error) {
+	return pref + s.name + val + s.val, nil
 }
 
-func (f FileName) UpdateAndGetUsi() (string, error) {
-	return pref + space + f.Name + space + val + space + f.Val, nil
+func (s *String) GetName() string { return s.name }
+
+type FileName struct{ name, val, initial string }
+
+func NewFileName(name, val, init string) *FileName {
+	return &FileName{name, val, init}
 }
 
-func (f FileName) GetName() string { return f.Name }
+func (f *FileName) Usi() (string, error) {
+	return pref + f.name + val + f.val, nil
+}
+
+func (f *FileName) GetName() string { return f.name }

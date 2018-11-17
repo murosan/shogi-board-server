@@ -54,17 +54,17 @@ func (e *engine) SetAuthor(b *[]byte) { e.author = *b }
 
 func (e *engine) SetOption(n string, opt option.Option) {
 	switch o := opt.(type) {
-	case option.Button:
+	case *option.Button:
 		e.options.Buttons[n] = o
-	case option.Check:
+	case *option.Check:
 		e.options.Checks[n] = o
-	case option.Spin:
+	case *option.Spin:
 		e.options.Spins[n] = o
-	case option.Select:
+	case *option.Select:
 		e.options.Combos[n] = o
-	case option.String:
+	case *option.String:
 		e.options.Strings[n] = o
-	case option.FileName:
+	case *option.FileName:
 		e.options.FileNames[n] = o
 	}
 }

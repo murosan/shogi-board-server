@@ -6,11 +6,12 @@ package from_usi
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
-	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 )
 
 // TODO: byteじゃなくてstringにしてからsplitする
@@ -66,92 +67,96 @@ func (fu *FromUsi) Option(b []byte) (option.Option, error) {
 // option name <string> type check default <bool>
 // このフォーマット以外は許容しない
 // default がなかったり、bool ではない時はエラー
-func (fu *FromUsi) parseCheck(b [][]byte) (option.Option, error) {
+func (fu *FromUsi) parseCheck(b [][]byte) (*option.Check, error) {
 	if len(b) != 7 || !bytes.Equal(b[5], deflt) || len(b[2]) == 0 || len(b[6]) == 0 {
 		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'check', but malformed. The format must be [option name <string> type check default <bool>]")
 	}
 
 	n, d := string(b[2]), string(b[6])
 	if d != "true" && d != "false" {
-		return nil, exception.InvalidOptionSyntax.WithMsg("Default want of 'check' type was not bool. Received: " + string(d))
+		return nil, exception.InvalidOptionSyntax.WithMsg("initial want of 'check' type was not bool. Received: " + string(d))
 	}
 
 	boolVal := d == "true"
-	return option.Check{Name: n, Val: boolVal, Default: boolVal}, nil
+	return option.NewCheck(n, boolVal, boolVal), nil
 }
 
 // spin type を Egn の Options にセットする
 // option name <string> type spin default <int> min <int> max <int>
 // このフォーマット以外は許容しない
 // 各値がなかったり、int ではない時、min > max の時はエラー
-func (fu *FromUsi) parseSpin(b [][]byte) (option.Spin, error) {
+func (fu *FromUsi) parseSpin(b [][]byte) (*option.Spin, error) {
 	if len(b) != 11 || !bytes.Equal(b[5], deflt) || !bytes.Equal(b[7], min) || !bytes.Equal(b[9], max) || len(b[2]) == 0 {
-		return option.Spin{}, exception.InvalidOptionSyntax.WithMsg("Received option type was 'spin', but malformed. The format must be [option name <string> type spin default <int> min <int> max <int>]")
+		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'spin', but malformed. The format must be [option name <string> type spin default <int> min <int> max <int>]")
 	}
 
 	df, err := strconv.Atoi(string(b[6]))
 	if err != nil {
-		return option.Spin{}, exception.InvalidOptionSyntax.WithMsg("Default want of 'spin' type was not int. Received: " + string(min))
+		return nil, exception.InvalidOptionSyntax.WithMsg("initial want of 'spin' type was not int. Received: " + string(min))
 	}
 	mi, err := strconv.Atoi(string(b[8]))
 	if err != nil {
-		return option.Spin{}, exception.InvalidOptionSyntax.WithMsg("Min want of 'spin' type was not int. Received: " + string(min))
+		return nil, exception.InvalidOptionSyntax.WithMsg("min want of 'spin' type was not int. Received: " + string(min))
 	}
 	ma, err := strconv.Atoi(string(b[10]))
 	if err != nil {
-		return option.Spin{}, exception.InvalidOptionSyntax.WithMsg("Max want of 'spin' type was not int. Received: " + string(min))
+		return nil, exception.InvalidOptionSyntax.WithMsg("max want of 'spin' type was not int. Received: " + string(min))
 	}
 
-	return option.Spin{Name: string(b[2]), Val: df, Default: df, Min: mi, Max: ma}, nil
+	return option.NewSpin(string(b[2]), df, df, mi, ma), nil
 }
 
 // select type を Egn の Options にセットする
 // option name <string> type combo default <string> rep(var <string>)
 // このフォーマット以外は許容しない
-// Default がない、var がない、default が var にない時はエラー
-func (fu *FromUsi) parseSelect(b [][]byte) (option.Select, error) {
+// initial がない、var がない、default が var にない時はエラー
+func (fu *FromUsi) parseSelect(b [][]byte) (*option.Select, error) {
 	if len(b) < 9 || len(b[2]) == 0 || len(b[6]) == 0 {
-		return option.Select{}, exception.InvalidOptionSyntax.WithMsg("Received option type was 'combo', but malformed. The format must be [option name <string> type combo default <string> rep(var <string>)]")
+		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'combo', but malformed. The format must be [option name <string> type combo default <string> rep(var <string>)]")
 	}
 
-	s := option.Select{Name: string(b[2])}
+	var (
+		name = string(b[2])
+		init = string(b[6]) // デフォルト。TODO: もうちょい方法を考える。正規表現でやるかなぁ・・・
+		vars []string
+	)
 
 	i := 8
 	for i < len(b) && bytes.Equal(b[i-1], selOpt) {
-		s.Vars = append(s.Vars, string(b[i]))
+		str := string(b[i])
+		vars = append(vars, str)
 		i += 2
 	}
 
-	s.Index = stringutil.IndexOf(s.Vars, string(b[6]))
-	if s.Index == -1 {
-		return option.Select{}, exception.InvalidOptionSyntax.WithMsg("Default want of 'combo' type was not found in vars.")
+	if stringutil.IndexOf(vars, init) == -1 {
+		return nil, exception.InvalidOptionSyntax.WithMsg(fmt.Sprintf("Default value of Select was not in vars. default: %s, vars: %v", init, vars))
 	}
 
-	return s, nil
+	return option.NewSelect(name, init, init, vars), nil
 }
 
 // button type を Egn の Options にセットする
 // option name <string> type button
-func (fu *FromUsi) parseButton(b [][]byte) (option.Button, error) {
+func (fu *FromUsi) parseButton(b [][]byte) (*option.Button, error) {
 	if len(b) != 5 || len(b[2]) == 0 {
-		return option.Button{}, exception.InvalidOptionSyntax.WithMsg("Received option type was 'button', but malformed. The format must be [option name <string> type button]")
+		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'button', but malformed. The format must be [option name <string> type button]")
 	}
-	return option.Button{Name: string(b[2])}, nil
+	return option.NewButton(string(b[2])), nil
 }
 
 // string type を Egn の Options にセットする
 // option name <string> type string default <string>
-func (fu *FromUsi) parseString(b [][]byte) (option.String, error) {
+func (fu *FromUsi) parseString(b [][]byte) (*option.String, error) {
 	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
-		return option.String{}, exception.InvalidOptionSyntax.WithMsg("Received option type was 'string', but malformed. The format must be [option name <string> type string default <string>]")
+		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'string', but malformed. The format must be [option name <string> type string default <string>]")
 	}
-	return option.String{Name: string(b[2]), Val: string(b[6]), Default: string(b[6])}, nil
+	return option.NewString(string(b[2]), string(b[6]), string(b[6])), nil
 }
 
 // option name <string> type filename default <string>
-func (fu *FromUsi) parseFileName(b [][]byte) (option.FileName, error) {
+func (fu *FromUsi) parseFileName(b [][]byte) (*option.FileName, error) {
 	if len(b) != 7 || len(b[2]) == 0 || len(b[6]) == 0 {
-		return option.FileName{}, exception.InvalidOptionSyntax.WithMsg("Received option type was 'filename', but malformed. The format must be [option name <string> type filename default <string>]")
+		return nil, exception.InvalidOptionSyntax.WithMsg("Received option type was 'filename', but malformed. The format must be [option name <string> type filename default <string>]")
 	}
-	return option.FileName{Name: string(b[2]), Val: string(b[6]), Default: string(b[6])}, nil
+	return option.NewFileName(string(b[2]), string(b[6]), string(b[6])), nil
 }
