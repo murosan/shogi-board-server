@@ -7,11 +7,11 @@ package from_usi
 import (
 	"bytes"
 	"fmt"
-	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 )
 
 // TODO: byteじゃなくてstringにしてからsplitする
