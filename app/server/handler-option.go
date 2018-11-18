@@ -20,7 +20,7 @@ func (s *Server) GetOptionList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Use().Info("GetOptionList", zap.ByteString("marshaled value", d))
+	logger.Use().Info("GetOptions", zap.ByteString("Marshaled value", d))
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(d)
 }
