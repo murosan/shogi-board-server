@@ -14,8 +14,7 @@ import (
 )
 
 // id name <EngineName>
-// id author <AuthorName> をEngineにセットする
-// EngineNameやAuthorNameにスペースが入る場合もあるので最後にJoinしている
+// id author <AuthorName> をパースする
 func (fu *FromUsi) EngineID(s string) (string, string, error) {
 	if res := nameRegex.FindAllStringSubmatch(s, -1); len(res) != 0 {
 		return name, res[0][1], nil
@@ -28,8 +27,10 @@ func (fu *FromUsi) EngineID(s string) (string, string, error) {
 	return "", "", exception.UnknownOption
 }
 
-// 一行受け取って、EngineのOptionMapにセットする
-// パースできなかったらエラーを返す
+// エンジンのオプションをパースする
+// @param s string 一行のオプションのUSI文字列
+// @returns Option オプション。Button|Check|Select|Spin|String|FileName
+//          error パースに失敗した場合はエラー。成功時は nil
 func (fu *FromUsi) Option(s string) (option.Option, error) {
 	t := strings.TrimSpace(s)
 
