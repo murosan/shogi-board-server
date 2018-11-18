@@ -64,10 +64,8 @@ func (fu *FromUsi) parseCheck(s string) (*option.Check, error) {
 		return nil, invalidSyntax(s, parseErrorCheck)
 	}
 
-	name := res[0][1]
 	b := res[0][2] == "true"
-
-	return option.NewCheck(name, b, b), nil
+	return option.NewCheck(res[0][1], b, b), nil
 }
 
 // spin type を Egn の Options にセットする
@@ -79,8 +77,6 @@ func (fu *FromUsi) parseSpin(s string) (*option.Spin, error) {
 	if len(res) == 0 || len(res[0]) < 5 {
 		return nil, invalidSyntax(s, parseErrorSpin)
 	}
-
-	name := res[0][1]
 
 	init, err := strconv.Atoi(res[0][2])
 	if err != nil {
@@ -98,10 +94,10 @@ func (fu *FromUsi) parseSpin(s string) (*option.Spin, error) {
 	}
 
 	if min > max {
-		return nil, invalidSyntax(s, fmt.Sprintf("%s Min value is not lesser than or equal Max. Min: %d, Max: %d", s, min, max))
+		return nil, invalidSyntax(s, fmt.Sprintf("%s Min value is not lesser than or equal to Max. Min: %d, Max: %d", s, min, max))
 	}
 
-	return option.NewSpin(name, init, init, min, max), nil
+	return option.NewSpin(res[0][1], init, init, min, max), nil
 }
 
 // select type を Egn の Options にセットする
@@ -114,7 +110,6 @@ func (fu *FromUsi) parseSelect(s string) (*option.Select, error) {
 		return nil, invalidSyntax(s, parseErrorSelect)
 	}
 
-	name := res[0][1]
 	init := res[0][2]
 	vars := strings.Split(res[0][3], selVar)
 
@@ -122,22 +117,20 @@ func (fu *FromUsi) parseSelect(s string) (*option.Select, error) {
 		return nil, invalidSyntax(s, parseErrorSelect+" Number of vars must be at least one.")
 	}
 
-	vars = vars[1:] // 先頭は空白なので削る(var xxx)
-	invalidInitValue := true
+	vars = vars[1:] // 先頭は空白なので削る
+	valid := false  // デフォルト値がvarsに含まれているかどうか
 
 	for i, v := range vars {
 		vars[i] = strings.TrimSpace(v)
-		if vars[i] == init {
-			invalidInitValue = false
-		}
+		valid = valid || vars[i] == init
 	}
 
 	// vars にデフォルト値がない場合はエラー
-	if invalidInitValue {
+	if !valid {
 		return nil, invalidSyntax(s, fmt.Sprintf("%s Default value of Select was not in vars. Default: %s, Vars: %v", parseErrorSelect, init, vars))
 	}
 
-	return option.NewSelect(name, init, init, vars), nil
+	return option.NewSelect(res[0][1], init, init, vars), nil
 }
 
 // button type を Egn の Options にセットする
