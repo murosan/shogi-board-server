@@ -6,16 +6,26 @@ package option
 
 import (
 	"strconv"
+
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
 )
 
 var (
-	val  = " value "
 	pref = "setoption name "
+	val  = " value "
 )
 
 type Option interface {
-	Usi() (string, error)
+	// オプション名を返す
 	GetName() string
+
+	// USI形式の文字列を返す
+	Usi() string
+
+	// 新しい値をオプションにセットして、更新されたUSI形式の文字列を返す
+	// 新しい値が不正ならエラー
+	Set(interface{}) (string, error)
 }
 
 type OptMap struct {
@@ -44,12 +54,11 @@ type Button struct {
 }
 
 func NewButton(name string) *Button { return &Button{name} }
-
-func (b *Button) Usi() (string, error) {
-	return pref + b.Name, nil
+func (b *Button) GetName() string   { return b.Name }
+func (b *Button) Usi() string       { return pref + b.Name }
+func (b *Button) Set(_ interface{}) (string, error) {
+	return b.Usi(), nil
 }
-
-func (b *Button) GetName() string { return b.Name }
 
 type Check struct {
 	Name    string `json:"name"`
@@ -60,13 +69,18 @@ type Check struct {
 func NewCheck(name string, val, init bool) *Check {
 	return &Check{name, val, init}
 }
-
-func (c *Check) Usi() (string, error) {
-	b := strconv.FormatBool(c.Val)
-	return pref + c.Name + val + b, nil
-}
-
 func (c *Check) GetName() string { return c.Name }
+func (c *Check) Usi() string {
+	return pref + c.Name + val + strconv.FormatBool(c.Val)
+}
+func (c *Check) Set(i interface{}) (string, error) {
+	switch b := i.(type) {
+	case bool:
+		c.Val = b
+		return c.Usi(), nil
+	}
+	return "", exception.InvalidOptionParameter
+}
 
 type Spin struct {
 	Name    string `json:"name"`
@@ -79,13 +93,20 @@ type Spin struct {
 func NewSpin(name string, val, init, min, max int) *Spin {
 	return &Spin{name, val, init, min, max}
 }
-
-func (s *Spin) Usi() (string, error) {
-	b := strconv.Itoa(s.Val)
-	return pref + s.Name + val + b, nil
-}
-
 func (s *Spin) GetName() string { return s.Name }
+func (s *Spin) Usi() string {
+	return pref + s.Name + val + strconv.Itoa(s.Val)
+}
+func (s *Spin) Set(i interface{}) (string, error) {
+	switch n := i.(type) {
+	case int:
+		if s.Min <= n && n <= s.Max {
+			s.Val = n
+			return s.Usi(), nil
+		}
+	}
+	return "", exception.InvalidOptionParameter
+}
 
 // USIのcombo
 type Select struct {
@@ -98,12 +119,18 @@ type Select struct {
 func NewSelect(name, val, init string, vars []string) *Select {
 	return &Select{name, val, init, vars}
 }
-
-func (s *Select) Usi() (string, error) {
-	return pref + s.Name + val + s.Val, nil
-}
-
 func (s *Select) GetName() string { return s.Name }
+func (s *Select) Usi() string     { return pref + s.Name + val + s.Val }
+func (s *Select) Set(i interface{}) (string, error) {
+	switch v := i.(type) {
+	case string:
+		if stringutil.SliceContains(s.Vars, v) {
+			s.Val = v
+			return s.Usi(), nil
+		}
+	}
+	return "", exception.InvalidOptionParameter
+}
 
 type String struct {
 	Name    string `json:"name"`
@@ -114,12 +141,16 @@ type String struct {
 func NewString(name, val, init string) *String {
 	return &String{name, val, init}
 }
-
-func (s *String) Usi() (string, error) {
-	return pref + s.Name + val + s.Val, nil
-}
-
 func (s *String) GetName() string { return s.Name }
+func (s *String) Usi() string     { return pref + s.Name + val + s.Val }
+func (s *String) Set(i interface{}) (string, error) {
+	switch v := i.(type) {
+	case string:
+		s.Val = v
+		return s.Usi(), nil
+	}
+	return "", exception.InvalidOptionParameter
+}
 
 type FileName struct {
 	Name    string `json:"name"`
@@ -130,9 +161,13 @@ type FileName struct {
 func NewFileName(name, val, init string) *FileName {
 	return &FileName{name, val, init}
 }
-
-func (f *FileName) Usi() (string, error) {
-	return pref + f.Name + val + f.Val, nil
-}
-
 func (f *FileName) GetName() string { return f.Name }
+func (f *FileName) Usi() string     { return pref + f.Name + val + f.Val }
+func (f *FileName) Set(i interface{}) (string, error) {
+	switch v := i.(type) {
+	case string:
+		f.Val = v
+		return f.Usi(), nil
+	}
+	return "", exception.InvalidOptionParameter
+}

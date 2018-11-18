@@ -4,13 +4,13 @@
 
 package stringutil
 
-func IndexOf(a []string, s string) int {
-	for i, b := range a {
-		if b == s {
-			return i
+func SliceContains(a []string, b string) bool {
+	for _, s := range a {
+		if s == b {
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
 func SliceEquals(a, b []string) bool {

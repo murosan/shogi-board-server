@@ -34,6 +34,9 @@ func (fu *FromUsi) EngineID(s string) (string, string, error) {
 func (fu *FromUsi) Option(s string) (option.Option, error) {
 	t := strings.TrimSpace(s)
 
+	if buttonRegex.MatchString(t) {
+		return fu.parseButton(t)
+	}
 	if checkRegex.MatchString(t) {
 		return fu.parseCheck(t)
 	}
@@ -43,9 +46,6 @@ func (fu *FromUsi) Option(s string) (option.Option, error) {
 	if selectRegex.MatchString(t) {
 		return fu.parseSelect(t)
 	}
-	if buttonRegex.MatchString(t) {
-		return fu.parseButton(t)
-	}
 	if stringRegex.MatchString(t) {
 		return fu.parseString(t)
 	}
@@ -54,6 +54,17 @@ func (fu *FromUsi) Option(s string) (option.Option, error) {
 	}
 
 	return nil, invalidSyntax(s, optionTypeDescription)
+}
+
+// button type を Egn の Options にセットする
+// option name <string> type button
+func (fu *FromUsi) parseButton(s string) (*option.Button, error) {
+	res := buttonRegex.FindAllStringSubmatch(s, -1)
+	if len(res) == 0 || len(res[0]) < 2 {
+		return nil, invalidSyntax(s, parseErrorButton)
+	}
+
+	return option.NewButton(res[0][1]), nil
 }
 
 // check type を Egn の Options にセットする
@@ -132,17 +143,6 @@ func (fu *FromUsi) parseSelect(s string) (*option.Select, error) {
 	}
 
 	return option.NewSelect(res[0][1], init, init, vars), nil
-}
-
-// button type を Egn の Options にセットする
-// option name <string> type button
-func (fu *FromUsi) parseButton(s string) (*option.Button, error) {
-	res := buttonRegex.FindAllStringSubmatch(s, -1)
-	if len(res) == 0 || len(res[0]) < 2 {
-		return nil, invalidSyntax(s, parseErrorButton)
-	}
-
-	return option.NewButton(res[0][1]), nil
 }
 
 // string type を Egn の Options にセットする

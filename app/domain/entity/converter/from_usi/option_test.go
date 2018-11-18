@@ -61,6 +61,24 @@ func TestFromUsi_Option(t *testing.T) {
 	fu := NewFromUsi()
 	cases := []struct {
 		in   string
+		want *option.Button
+		err  error
+	}{
+		{"option name ResetLearning type button", option.NewButton("ResetLearning"), nil},
+		{"option name <empty> type button", option.NewButton("<empty>"), nil}, // まぁいい
+		{"option name ResetLearning type button sur", nil, exception.InvalidOptionSyntax},
+		{"option name 1 type button", option.NewButton("1"), nil},
+	}
+	for _, c := range cases {
+		o, err := fu.Option(c.in)
+		basicOptionMatching(t, c.in, o, c.want, err, c.err)
+	}
+}
+
+func TestFromUsi_Option2(t *testing.T) {
+	fu := NewFromUsi()
+	cases := []struct {
+		in   string
 		want *option.Check
 		err  error
 	}{
@@ -77,7 +95,7 @@ func TestFromUsi_Option(t *testing.T) {
 	}
 }
 
-func TestParseOpt2(t *testing.T) {
+func TestFromUsi_Option3(t *testing.T) {
 	fu := NewFromUsi()
 	cases := []struct {
 		in   string
@@ -97,7 +115,7 @@ func TestParseOpt2(t *testing.T) {
 	}
 }
 
-func TestParseOpt3(t *testing.T) {
+func TestFromUsi_Option4(t *testing.T) {
 	fu := NewFromUsi()
 	cases := []struct {
 		in   string
@@ -124,25 +142,7 @@ func TestParseOpt3(t *testing.T) {
 	}
 }
 
-func TestParseOpt4(t *testing.T) {
-	fu := NewFromUsi()
-	cases := []struct {
-		in   string
-		want *option.Button
-		err  error
-	}{
-		{"option name ResetLearning type button", option.NewButton("ResetLearning"), nil},
-		{"option name <empty> type button", option.NewButton("<empty>"), nil}, // まぁいい
-		{"option name ResetLearning type button sur", nil, exception.InvalidOptionSyntax},
-		{"option name 1 type button", option.NewButton("1"), nil},
-	}
-	for _, c := range cases {
-		o, err := fu.Option(c.in)
-		basicOptionMatching(t, c.in, o, c.want, err, c.err)
-	}
-}
-
-func TestParseOpt5(t *testing.T) {
+func TestFromUsi_Option5(t *testing.T) {
 	fu := NewFromUsi()
 	cases := []struct {
 		in   string
@@ -160,7 +160,7 @@ func TestParseOpt5(t *testing.T) {
 	}
 }
 
-func TestParseOpt6(t *testing.T) {
+func TestFromUsi_Option6(t *testing.T) {
 	fu := NewFromUsi()
 	cases := []struct {
 		in   string
@@ -208,8 +208,8 @@ Actual:   %v`, in, e2, e1)
 	}
 
 	// USIコマンドが想定通りかどうか
-	usi1, _ := o1.Usi()
-	usi2, _ := o2.Usi()
+	usi1 := o1.Usi()
+	usi2 := o2.Usi()
 	if usi1 != usi2 {
 		t.Errorf(`
 Set value was not as expected.
