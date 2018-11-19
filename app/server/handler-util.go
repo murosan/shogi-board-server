@@ -17,10 +17,11 @@ const (
 	get  = "GET"
 	post = "POST"
 
-	appliJson = "application/json"
+	mimeJson = "application/json"
 
-	contentType = "Content-Type"
-	userAgent   = "User-Agent"
+	contentType   = "Content-Type"
+	contentLength = "Content-Length"
+	userAgent     = "User-Agent"
 )
 
 func (s *Server) Handling(w http.ResponseWriter, r *http.Request) {
@@ -43,9 +44,9 @@ func (s *Server) Handling(w http.ResponseWriter, r *http.Request) {
 	case ListOptPath:
 		s.withMethod(get, w, r, s.GetOptionList)
 	case SetOptPath:
-		s.withMethod(post, w, r, s.SetOption)
+		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.SetOption))
 	case SetPositionPath:
-		s.contentTypeCheck(appliJson, w, r, s.SetPosition)
+		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.SetPosition))
 	case StartPath:
 		s.withMethod(post, w, r, s.Start)
 	case GetValuesPath:
@@ -59,14 +60,16 @@ func (s *Server) Handling(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) contentTypeCheck(tpe string, w http.ResponseWriter, r *http.Request, h http.HandlerFunc) {
-	ct := r.Header.Get(contentType)
-	if ct != tpe {
-		s.badRequest(w, fmt.Sprintf("%s must be %s, but got %s", contentType, tpe, ct))
-		return
-	}
+func (s *Server) contentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ct := r.Header.Get(contentType)
+		if ct != tpe {
+			s.badRequest(w, fmt.Sprintf("%s must be %s, but got %s", contentType, tpe, ct))
+			return
+		}
 
-	h(w, r)
+		h(w, r)
+	}
 }
 
 func (s *Server) withMethod(meth string, w http.ResponseWriter, r *http.Request, h http.HandlerFunc) {

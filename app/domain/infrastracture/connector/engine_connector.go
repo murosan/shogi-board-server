@@ -17,4 +17,6 @@ type Connector interface {
 	Exec([]byte) error
 
 	GetOptions() option.OptMap
+
+	SetNewOptionValue(option.OptionSetValue) error
 }

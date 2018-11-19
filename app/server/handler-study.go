@@ -18,10 +18,10 @@ import (
 
 // Content-Type は application/json である必要がある
 func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
-	l, err := strconv.Atoi(r.Header.Get("Content-Length"))
+	l, err := strconv.Atoi(r.Header.Get(contentLength))
 	if err != nil {
 		http.Error(w, err.Error(), 411) // Length Required
-		logger.Use().Error("Could not read Content-Length.", zap.Error(err))
+		logger.Use().Error("Could not read "+contentLength, zap.Error(err))
 		return
 	}
 

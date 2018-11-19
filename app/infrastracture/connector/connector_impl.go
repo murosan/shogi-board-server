@@ -112,6 +112,13 @@ func (c *connector) GetOptions() option.OptMap {
 	return egn.GetOptions()
 }
 
+func (c *connector) SetNewOptionValue(v option.OptionSetValue) error {
+	//egn := c.pool.NamedEngine()
+	//opts := egn.GetOptions()
+	// TODO
+	return nil
+}
+
 func (c *connector) catchOutput(ch chan []byte) {
 	egn := c.pool.NamedEngine()
 	s := egn.GetScanner()

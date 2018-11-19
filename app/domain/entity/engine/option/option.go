@@ -28,26 +28,6 @@ type Option interface {
 	Set(interface{}) (string, error)
 }
 
-type OptMap struct {
-	Buttons   map[string]*Button   `json:"buttons"`
-	Checks    map[string]*Check    `json:"checks"`
-	Spins     map[string]*Spin     `json:"spins"`
-	Combos    map[string]*Select   `json:"combos"`
-	Strings   map[string]*String   `json:"strings"`
-	FileNames map[string]*FileName `json:"file_names"`
-}
-
-func EmptyOptMap() *OptMap {
-	return &OptMap{
-		Buttons:   make(map[string]*Button),
-		Checks:    make(map[string]*Check),
-		Spins:     make(map[string]*Spin),
-		Combos:    make(map[string]*Select),
-		Strings:   make(map[string]*String),
-		FileNames: make(map[string]*FileName),
-	}
-}
-
 // json化するために Name を大文字始まりにしているが、基本他からは触らない
 type Button struct {
 	Name string `json:"name"`
