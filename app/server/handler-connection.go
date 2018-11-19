@@ -11,7 +11,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
 )
 
-func (s *Server) Connect(w http.ResponseWriter, r *http.Request) {
+func (s *server) connect(w http.ResponseWriter, r *http.Request) {
 	if err := s.conn.Connect(); err != nil {
 		http.Error(w, exception.FailedToConnect.WithMsg(err.Error()).Error(), http.StatusInternalServerError)
 		return
@@ -21,7 +21,7 @@ func (s *Server) Connect(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (s *Server) Close(w http.ResponseWriter, r *http.Request) {
+func (s *server) close(w http.ResponseWriter, r *http.Request) {
 	if err := s.conn.Close(); err != nil {
 		http.Error(w, exception.FailedToClose.WithMsg(err.Error()).Error(), http.StatusInternalServerError)
 		return

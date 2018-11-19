@@ -6,6 +6,6 @@ package server
 
 import "net/http"
 
-func (s *Server) ServeHome(w http.ResponseWriter, r *http.Request) {
+func (s *server) serveHome(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "home.html")
 }

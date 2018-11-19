@@ -17,7 +17,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *Server) GetOptionList(w http.ResponseWriter, r *http.Request) {
+func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
 	d, err := json.Marshal(s.conn.GetOptions())
 	if err != nil {
 		logger.Use().Error("Failed to marshal option list.", zap.Error(err))
@@ -30,7 +30,7 @@ func (s *Server) GetOptionList(w http.ResponseWriter, r *http.Request) {
 	w.Write(d)
 }
 
-func (s *Server) SetOption(w http.ResponseWriter, r *http.Request) {
+func (s *server) setOption(w http.ResponseWriter, r *http.Request) {
 	l, err := strconv.Atoi(r.Header.Get(contentLength))
 	if err != nil {
 		http.Error(w, err.Error(), 411) // Length Required

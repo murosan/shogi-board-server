@@ -24,7 +24,7 @@ const (
 	userAgent     = "User-Agent"
 )
 
-func (s *Server) Handling(w http.ResponseWriter, r *http.Request) {
+func (s *server) Handling(w http.ResponseWriter, r *http.Request) {
 	uri := r.RequestURI
 	logger.Use().Info(
 		"AccessLog",
@@ -36,31 +36,31 @@ func (s *Server) Handling(w http.ResponseWriter, r *http.Request) {
 
 	switch uri {
 	case IndexPath:
-		s.withMethod(get, w, r, s.ServeHome)
+		s.withMethod(get, w, r, s.serveHome)
 	case ConnectPath:
-		s.withMethod(post, w, r, s.Connect)
+		s.withMethod(post, w, r, s.connect)
 	case ClosePath:
-		s.withMethod(post, w, r, s.Close)
+		s.withMethod(post, w, r, s.close)
 	case ListOptPath:
-		s.withMethod(get, w, r, s.GetOptionList)
+		s.withMethod(get, w, r, s.getOptionList)
 	case SetOptPath:
-		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.SetOption))
+		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.setOption))
 	case SetPositionPath:
-		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.SetPosition))
+		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.setPosition))
 	case StartPath:
-		s.withMethod(post, w, r, s.Start)
+		s.withMethod(post, w, r, s.start)
 	case GetValuesPath:
-		s.withMethod(get, w, r, s.GetValues)
+		s.withMethod(get, w, r, s.getValues)
 	case InitAnalyze:
-		s.withMethod(post, w, r, s.InitAnalyze)
+		s.withMethod(post, w, r, s.initAnalyze)
 	case StartAnalyze:
-		s.withMethod(post, w, r, s.StartAnalyze)
+		s.withMethod(post, w, r, s.startAnalyze)
 	default:
 		s.notFound(w, r, uri)
 	}
 }
 
-func (s *Server) contentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFunc {
+func (s *server) contentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ct := r.Header.Get(contentType)
 		if ct != tpe {
@@ -72,7 +72,7 @@ func (s *Server) contentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFu
 	}
 }
 
-func (s *Server) withMethod(meth string, w http.ResponseWriter, r *http.Request, h http.HandlerFunc) {
+func (s *server) withMethod(meth string, w http.ResponseWriter, r *http.Request, h http.HandlerFunc) {
 	if r.Method != meth {
 		logger.Use().Debug(fmt.Sprintf("%s, uri: %s\n", exception.MethodNotAllowed, r.RequestURI))
 		s.badRequest(w, exception.MethodNotAllowed.Error())
@@ -82,17 +82,17 @@ func (s *Server) withMethod(meth string, w http.ResponseWriter, r *http.Request,
 	h(w, r)
 }
 
-func (s *Server) internalServerError(w http.ResponseWriter, e error) {
+func (s *server) internalServerError(w http.ResponseWriter, e error) {
 	logger.Use().Error(exception.InternalServerError.Error(), zap.Error(e))
 	http.Error(w, e.Error(), http.StatusInternalServerError)
 }
 
-func (s *Server) badRequest(w http.ResponseWriter, m string) {
+func (s *server) badRequest(w http.ResponseWriter, m string) {
 	logger.Use().Debug(m)
 	http.Error(w, m, http.StatusBadRequest)
 }
 
-func (s *Server) notFound(w http.ResponseWriter, r *http.Request, uri string) {
+func (s *server) notFound(w http.ResponseWriter, r *http.Request, uri string) {
 	logger.Use().Debug(exception.NotFound.Error(), zap.String("uri", uri))
 	http.NotFound(w, r)
 }

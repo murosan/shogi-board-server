@@ -11,14 +11,15 @@ import (
 )
 
 // TODO: Usecase にちゃんと実装し直す
-type Server struct {
+type server struct {
 	conn connector.Connector
 	fj   *from_json.FromJson
 	tu   *to_usi.ToUsi
 }
 
-func NewServer(conn connector.Connector, fj *from_json.FromJson, tu *to_usi.ToUsi) *Server {
-	return &Server{
+// TODO: interface の方返すかどうか微妙だ・・
+func NewServer(conn connector.Connector, fj *from_json.FromJson, tu *to_usi.ToUsi) ShogiProxyServer {
+	return &server{
 		conn,
 		fj,
 		tu,

@@ -6,7 +6,6 @@ package server
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"strconv"
@@ -14,10 +13,11 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	"go.uber.org/zap"
 )
 
 // Content-Type は application/json である必要がある
-func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
+func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 	l, err := strconv.Atoi(r.Header.Get(contentLength))
 	if err != nil {
 		http.Error(w, err.Error(), 411) // Length Required
@@ -54,7 +54,7 @@ func (s *Server) SetPosition(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (s *Server) Start(w http.ResponseWriter, r *http.Request) {
+func (s *server) start(w http.ResponseWriter, r *http.Request) {
 	if err := s.conn.Exec(usi.CmdNewGame); err != nil {
 		s.internalServerError(w, err)
 		return
@@ -66,6 +66,6 @@ func (s *Server) Start(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (s *Server) GetValues(w http.ResponseWriter, r *http.Request) {
+func (s *server) getValues(w http.ResponseWriter, r *http.Request) {
 	// TODO
 }

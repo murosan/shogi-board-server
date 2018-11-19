@@ -6,10 +6,10 @@ package server
 
 import "net/http"
 
-func (s *Server) InitAnalyze(w http.ResponseWriter, r *http.Request) {
+func (s *server) initAnalyze(w http.ResponseWriter, r *http.Request) {
 	// TODO
 }
 
-func (s *Server) StartAnalyze(w http.ResponseWriter, r *http.Request) {
+func (s *server) startAnalyze(w http.ResponseWriter, r *http.Request) {
 	// TODO
 }
