@@ -23,6 +23,7 @@ var (
 )
 
 func main() {
+	flag.Parse()
 	config.InitConfig(*configPath)
 	conn := connector.UseConnector()
 	defer conn.Close() // for safety
