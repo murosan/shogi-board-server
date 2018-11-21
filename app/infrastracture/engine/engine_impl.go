@@ -52,22 +52,7 @@ func (e *engine) GetAuthor() string { return e.author }
 
 func (e *engine) SetAuthor(a string) { e.author = a }
 
-func (e *engine) SetOption(n string, opt option.Option) {
-	switch o := opt.(type) {
-	case *option.Button:
-		e.options.Buttons[n] = o
-	case *option.Check:
-		e.options.Checks[n] = o
-	case *option.Spin:
-		e.options.Spins[n] = o
-	case *option.Select:
-		e.options.Combos[n] = o
-	case *option.String:
-		e.options.Strings[n] = o
-	case *option.FileName:
-		e.options.FileNames[n] = o
-	}
-}
+func (e *engine) SetOption(n string, opt option.Option) { e.options.Push(opt) }
 
 func (e *engine) GetOptions() option.OptMap { return e.options }
 

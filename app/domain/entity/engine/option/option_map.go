@@ -4,6 +4,11 @@
 
 package option
 
+import (
+	"fmt"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+)
+
 type OptMap struct {
 	Buttons   map[string]*Button   `json:"buttons"`
 	Checks    map[string]*Check    `json:"checks"`
@@ -22,4 +27,52 @@ func EmptyOptMap() *OptMap {
 		Strings:   make(map[string]*String),
 		FileNames: make(map[string]*FileName),
 	}
+}
+
+// 新しいオプションを追加する
+func (om *OptMap) Push(o Option) {
+	switch t := o.(type) {
+	case *Button:
+		om.Buttons[t.GetName()] = t
+	case *Check:
+		om.Checks[t.GetName()] = t
+	case *Spin:
+		om.Spins[t.GetName()] = t
+	case *Select:
+		om.Combos[t.GetName()] = t
+	case *String:
+		om.Strings[t.GetName()] = t
+	case *FileName:
+		om.FileNames[t.GetName()] = t
+	default:
+		panic(exception.UnknownOption)
+	}
+}
+
+// TODO: オプションの名前をまとめて変数から使うとか整理する
+func (om *OptMap) Remove(v OptionSetValue) (string, error) {
+	var (
+		opt Option
+		ok  bool
+	)
+	switch v.Type {
+	case "button":
+		opt, ok = om.Buttons[v.Name]
+	case "check":
+		opt, ok = om.Checks[v.Name]
+	case "spin":
+		opt, ok = om.Spins[v.Name]
+	case "select":
+		opt, ok = om.Combos[v.Name]
+	case "string":
+		opt, ok = om.Strings[v.Name]
+	case "filename":
+		opt, ok = om.FileNames[v.Name]
+	}
+
+	if ok {
+		opt.Set(v.Value)
+	}
+
+	return "", exception.UnknownOption.WithMsg(fmt.Sprintf("OptionName %s was not found.", v.Name))
 }

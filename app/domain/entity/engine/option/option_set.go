@@ -5,6 +5,12 @@
 package option
 
 type OptionSetValue struct {
-	Name  string      `json:"name"`
+	// オプション名
+	Name string `json:"name"`
+
+	// button, check, spin, combo, string, filename のどれか
+	Type string `json:"type"`
+
+	// 新しい値
 	Value interface{} `json:"value"`
 }
