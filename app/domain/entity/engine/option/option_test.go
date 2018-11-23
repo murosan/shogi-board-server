@@ -343,13 +343,13 @@ Actual: %s
 
 func setTestHelper(t *testing.T, i int, o Option, set interface{}, want string, e error) {
 	t.Helper()
-	usi, err := o.Set(set)
+	usi, err := o.Update(set)
 	errMatches := err == e
 	if err != nil && e != nil {
 		errMatches = strings.Contains(err.Error(), e.Error())
 	}
 	if usi != want || !errMatches {
-		t.Errorf(`Option.Set was not as expected
+		t.Errorf(`Option.Update was not as expected
 index:       %d
 Input:       %v
 SetVal:      %v

@@ -30,7 +30,7 @@ func EmptyOptMap() *OptMap {
 }
 
 // 新しいオプションを追加する
-func (om *OptMap) Push(o Option) {
+func (om *OptMap) Append(o Option) {
 	switch t := o.(type) {
 	case *Button:
 		om.Buttons[t.GetName()] = t
@@ -50,7 +50,7 @@ func (om *OptMap) Push(o Option) {
 }
 
 // TODO: オプションの名前をまとめて変数から使うとか整理する
-func (om *OptMap) Remove(v OptionSetValue) (string, error) {
+func (om *OptMap) Update(v OptionSetValue) (string, error) {
 	var (
 		opt Option
 		ok  bool
@@ -71,7 +71,7 @@ func (om *OptMap) Remove(v OptionSetValue) (string, error) {
 	}
 
 	if ok {
-		opt.Set(v.Value)
+		return opt.Update(v.Value)
 	}
 
 	return "", exception.UnknownOption.WithMsg(fmt.Sprintf("OptionName %s was not found.", v.Name))

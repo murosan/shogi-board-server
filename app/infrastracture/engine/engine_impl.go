@@ -52,7 +52,7 @@ func (e *engine) GetAuthor() string { return e.author }
 
 func (e *engine) SetAuthor(a string) { e.author = a }
 
-func (e *engine) SetOption(n string, opt option.Option) { e.options.Push(opt) }
+func (e *engine) SetOption(n string, opt option.Option) { e.options.Append(opt) }
 
 func (e *engine) GetOptions() option.OptMap { return e.options }
 

@@ -212,7 +212,7 @@ Actual:   %v`, in, e2, e1)
 	usi2 := o2.Usi()
 	if usi1 != usi2 {
 		t.Errorf(`
-Set value was not as expected.
+Update value was not as expected.
 Input:    %v
 Expected: %v
 Actual:   %v`, in, usi2, usi1)

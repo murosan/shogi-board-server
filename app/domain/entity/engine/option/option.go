@@ -25,7 +25,7 @@ type Option interface {
 
 	// 新しい値をオプションにセットして、更新されたUSI形式の文字列を返す
 	// 新しい値が不正ならエラー
-	Set(interface{}) (string, error)
+	Update(interface{}) (string, error)
 }
 
 // json化するために Name を大文字始まりにしているが、基本他からは触らない
@@ -36,7 +36,7 @@ type Button struct {
 func NewButton(name string) *Button { return &Button{name} }
 func (b *Button) GetName() string   { return b.Name }
 func (b *Button) Usi() string       { return pref + b.Name }
-func (b *Button) Set(_ interface{}) (string, error) {
+func (b *Button) Update(_ interface{}) (string, error) {
 	return b.Usi(), nil
 }
 
@@ -53,7 +53,7 @@ func (c *Check) GetName() string { return c.Name }
 func (c *Check) Usi() string {
 	return pref + c.Name + val + strconv.FormatBool(c.Val)
 }
-func (c *Check) Set(i interface{}) (string, error) {
+func (c *Check) Update(i interface{}) (string, error) {
 	switch b := i.(type) {
 	case bool:
 		c.Val = b
@@ -77,7 +77,7 @@ func (s *Spin) GetName() string { return s.Name }
 func (s *Spin) Usi() string {
 	return pref + s.Name + val + strconv.Itoa(s.Val)
 }
-func (s *Spin) Set(i interface{}) (string, error) {
+func (s *Spin) Update(i interface{}) (string, error) {
 	switch n := i.(type) {
 	case int:
 		if s.Min <= n && n <= s.Max {
@@ -101,7 +101,7 @@ func NewSelect(name, val, init string, vars []string) *Select {
 }
 func (s *Select) GetName() string { return s.Name }
 func (s *Select) Usi() string     { return pref + s.Name + val + s.Val }
-func (s *Select) Set(i interface{}) (string, error) {
+func (s *Select) Update(i interface{}) (string, error) {
 	switch v := i.(type) {
 	case string:
 		if stringutil.SliceContains(s.Vars, v) {
@@ -123,7 +123,7 @@ func NewString(name, val, init string) *String {
 }
 func (s *String) GetName() string { return s.Name }
 func (s *String) Usi() string     { return pref + s.Name + val + s.Val }
-func (s *String) Set(i interface{}) (string, error) {
+func (s *String) Update(i interface{}) (string, error) {
 	switch v := i.(type) {
 	case string:
 		s.Val = v
@@ -143,7 +143,7 @@ func NewFileName(name, val, init string) *FileName {
 }
 func (f *FileName) GetName() string { return f.Name }
 func (f *FileName) Usi() string     { return pref + f.Name + val + f.Val }
-func (f *FileName) Set(i interface{}) (string, error) {
+func (f *FileName) Update(i interface{}) (string, error) {
 	switch v := i.(type) {
 	case string:
 		f.Val = v
