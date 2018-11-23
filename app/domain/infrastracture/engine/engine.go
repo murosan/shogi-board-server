@@ -21,6 +21,7 @@ type Engine interface {
 
 	SetOption(string, option.Option)
 	GetOptions() option.OptMap
+	UpdateOption(option.UpdateOptionValue) error
 
 	SetState(state.State)
 	GetState() state.State

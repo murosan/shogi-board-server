@@ -37,6 +37,7 @@ var (
 	EngineIsAlreadyRunning = &Error{Code: "EngineIsAlreadyRunning"}
 	FailedToExecCommand    = &Error{Code: "FailedToExecCommand"}
 	FailedToStart          = &Error{Code: "FailedToStart"}
+	FailedToUpdateOption   = &Error{Code: "FailedToUpdateOption"}
 	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
 	InvalidOptionParameter = &Error{Code: "InvalidOptionParameter"}
 	UnknownOption          = &Error{Code: "UnknownOption"}

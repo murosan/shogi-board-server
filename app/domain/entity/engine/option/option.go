@@ -5,6 +5,7 @@
 package option
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
@@ -78,14 +79,20 @@ func (s *Spin) Usi() string {
 	return pref + s.Name + val + strconv.Itoa(s.Val)
 }
 func (s *Spin) Update(i interface{}) (string, error) {
-	switch n := i.(type) {
-	case int:
-		if s.Min <= n && n <= s.Max {
-			s.Val = n
-			return s.Usi(), nil
-		}
+	fn, ok := i.(float64)
+	if !ok {
+		return "", exception.InvalidOptionParameter.WithMsg("[spin] Value type must be int.")
 	}
-	return "", exception.InvalidOptionParameter
+
+	n := int(fn)
+	if s.Min <= n && n <= s.Max {
+		s.Val = n
+		return s.Usi(), nil
+	}
+	format := "[spin] Value must be greater than or equal to %d" +
+		"and lesser than or equal to %d. But got: %d"
+	msg := fmt.Sprintf(format, s.Min, s.Max, n)
+	return "", exception.InvalidOptionParameter.WithMsg(msg)
 }
 
 // USIのcombo

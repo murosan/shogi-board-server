@@ -13,7 +13,7 @@ var (
 	ClosePath   = "/close"
 
 	ListOptPath = "/option/list"
-	SetOptPath  = "/option/set"
+	SetOptPath  = "/option/update"
 
 	StartPath = "/start"
 

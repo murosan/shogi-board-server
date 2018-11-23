@@ -10,6 +10,7 @@ import (
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	engineModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
@@ -55,6 +56,15 @@ func (e *engine) SetAuthor(a string) { e.author = a }
 func (e *engine) SetOption(n string, opt option.Option) { e.options.Append(opt) }
 
 func (e *engine) GetOptions() option.OptMap { return e.options }
+
+func (e *engine) UpdateOption(v option.UpdateOptionValue) error {
+	u, err := e.options.Update(v)
+	if err != nil {
+		logger.Use().Error("EngineUpdateOption", zap.Error(exception.FailedToUpdateOption))
+		return err
+	}
+	return e.Exec([]byte(u))
+}
 
 func (e *engine) SetState(s state.State) { e.state = s }
 

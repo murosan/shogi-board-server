@@ -44,7 +44,7 @@ func (s *server) Handling(w http.ResponseWriter, r *http.Request) {
 	case ListOptPath:
 		s.withMethod(get, w, r, s.getOptionList)
 	case SetOptPath:
-		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.setOption))
+		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.updateOption))
 	case SetPositionPath:
 		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.setPosition))
 	case StartPath:
@@ -72,9 +72,18 @@ func (s *server) contentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFu
 	}
 }
 
-func (s *server) withMethod(meth string, w http.ResponseWriter, r *http.Request, h http.HandlerFunc) {
+func (s *server) withMethod(
+	meth string,
+	w http.ResponseWriter,
+	r *http.Request,
+	h http.HandlerFunc,
+) {
 	if r.Method != meth {
-		logger.Use().Debug(fmt.Sprintf("%s, uri: %s\n", exception.MethodNotAllowed, r.RequestURI))
+		logger.Use().Debug(
+			fmt.Sprintf(
+				"%s, uri: %s\n",
+				exception.MethodNotAllowed,
+				r.RequestURI))
 		s.badRequest(w, exception.MethodNotAllowed.Error())
 		return
 	}

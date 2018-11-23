@@ -7,6 +7,8 @@ package option
 import (
 	"fmt"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	"go.uber.org/zap"
 )
 
 type OptMap struct {
@@ -50,7 +52,7 @@ func (om *OptMap) Append(o Option) {
 }
 
 // TODO: オプションの名前をまとめて変数から使うとか整理する
-func (om *OptMap) Update(v OptionSetValue) (string, error) {
+func (om *OptMap) Update(v UpdateOptionValue) (string, error) {
 	var (
 		opt Option
 		ok  bool
@@ -70,9 +72,16 @@ func (om *OptMap) Update(v OptionSetValue) (string, error) {
 		opt, ok = om.FileNames[v.Name]
 	}
 
+	logger.Use().Debug(
+		"OptMap_Update",
+		zap.Any("SpecifiedOption", opt),
+		zap.Bool("Ok", ok),
+	)
 	if ok {
 		return opt.Update(v.Value)
 	}
 
-	return "", exception.UnknownOption.WithMsg(fmt.Sprintf("OptionName %s was not found.", v.Name))
+	msg := fmt.Sprintf("OptionName %s was not found.", v.Name)
+	logger.Use().Error("OptMap_Update. Type was not valid", zap.String("msg", msg))
+	return "", exception.UnknownOption.WithMsg(msg)
 }

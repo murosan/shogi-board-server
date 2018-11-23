@@ -16,7 +16,9 @@ type Connector interface {
 	// 将棋エンジンにコマンドを実行する
 	Exec([]byte) error
 
+	// 将棋エンジンのオプション一覧を取得
 	GetOptions() option.OptMap
 
-	SetNewOptionValue(option.OptionSetValue) error
+	// オプションの値を更新する
+	SetNewOptionValue(option.UpdateOptionValue) error
 }

@@ -4,7 +4,7 @@
 
 package option
 
-type OptionSetValue struct {
+type UpdateOptionValue struct {
 	// オプション名
 	Name string `json:"name"`
 

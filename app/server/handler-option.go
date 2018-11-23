@@ -30,7 +30,7 @@ func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
 	w.Write(d)
 }
 
-func (s *server) setOption(w http.ResponseWriter, r *http.Request) {
+func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
 	l, err := strconv.Atoi(r.Header.Get(contentLength))
 	if err != nil {
 		http.Error(w, err.Error(), 411) // Length Required
@@ -47,13 +47,17 @@ func (s *server) setOption(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var osv option.OptionSetValue
+	var osv option.UpdateOptionValue
 	if err := json.Unmarshal(body, &osv); err != nil {
 		s.internalServerError(w, err)
 		return
 	}
+	logger.Use().Info("UpdateOptionBody", zap.Any("Unmarshal", osv))
 
-	s.conn.GetOptions()
+	if err := s.conn.SetNewOptionValue(osv); err != nil {
+		s.internalServerError(w, err)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
