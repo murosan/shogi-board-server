@@ -55,6 +55,7 @@ func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
 	logger.Use().Info("UpdateOptionBody", zap.Any("Unmarshal", osv))
 
 	if err := s.conn.SetNewOptionValue(osv); err != nil {
+		// TODO: InternalServerError ではないな・・
 		s.internalServerError(w, err)
 		return
 	}

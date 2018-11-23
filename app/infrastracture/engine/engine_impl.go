@@ -60,7 +60,7 @@ func (e *engine) GetOptions() option.OptMap { return e.options }
 func (e *engine) UpdateOption(v option.UpdateOptionValue) error {
 	u, err := e.options.Update(v)
 	if err != nil {
-		logger.Use().Error("EngineUpdateOption", zap.Error(exception.FailedToUpdateOption))
+		logger.Use().Warn("EngineUpdateOption", zap.Error(exception.FailedToUpdateOption))
 		return err
 	}
 	return e.Exec([]byte(u))

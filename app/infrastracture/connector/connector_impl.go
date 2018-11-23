@@ -106,7 +106,7 @@ func (c *connector) Exec(b []byte) error {
 func (c *connector) GetOptions() option.OptMap {
 	egn := c.pool.NamedEngine()
 	if egn == nil || egn.GetState() == state.NotConnected {
-		logger.Use().Debug("ListOptions", zap.Any("EngineState", state.NotConnected))
+		logger.Use().Debug("GetOptions", zap.Any("EngineState", state.NotConnected))
 		return *option.EmptyOptMap()
 	}
 	return egn.GetOptions()
@@ -114,6 +114,10 @@ func (c *connector) GetOptions() option.OptMap {
 
 func (c *connector) SetNewOptionValue(v option.UpdateOptionValue) error {
 	egn := c.pool.NamedEngine()
+	if egn == nil || egn.GetState() == state.NotConnected {
+		logger.Use().Debug("SetNewOptionValue", zap.Any("EngineState", state.NotConnected))
+		return exception.EngineIsNotRunning
+	}
 	return egn.UpdateOption(v)
 }
 

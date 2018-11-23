@@ -88,7 +88,7 @@ func (s *Spin) Update(i interface{}) (string, error) {
 	n := int(fn)
 	if n < s.Min || n > s.Max {
 		return "", exception.InvalidOptionParameter.WithMsg(fmt.Sprintf(
-			"[spin] Value must be greater than or equal to %d"+
+			"[spin] Value must be greater than or equal to %d, "+
 				"and lesser than or equal to %d. But got: %d", s.Min, s.Max, n))
 	}
 

@@ -72,16 +72,18 @@ func (om *OptMap) Update(v UpdateOptionValue) (string, error) {
 		opt, ok = om.FileNames[v.Name]
 	}
 
-	logger.Use().Debug(
-		"OptMap_Update",
-		zap.Any("SpecifiedOption", opt),
-		zap.Bool("Ok", ok),
-	)
+	log("SpecifiedOption", opt)
 	if ok {
-		return opt.Update(v.Value)
+		s, e := opt.Update(v.Value)
+		log("UpdatedOption", opt)
+		return s, e
 	}
 
 	msg := fmt.Sprintf("OptionName %s was not found.", v.Name)
-	logger.Use().Error("OptMap_Update. Type was not valid", zap.String("msg", msg))
+	logger.Use().Warn("OptMap_Update. Type was not valid", zap.String("msg", msg))
 	return "", exception.UnknownOption.WithMsg(msg)
+}
+
+func log(key string, opt Option) {
+	logger.Use().Debug("OptMap_Update", zap.Any(key, opt))
 }
