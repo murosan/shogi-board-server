@@ -55,12 +55,13 @@ func (c *Check) Usi() string {
 	return pref + c.Name + val + strconv.FormatBool(c.Val)
 }
 func (c *Check) Update(i interface{}) (string, error) {
-	switch b := i.(type) {
-	case bool:
-		c.Val = b
-		return c.Usi(), nil
+	b, ok := i.(bool)
+	if !ok {
+		return "", exception.InvalidOptionParameter.WithMsg("[check] Value type must be bool")
 	}
-	return "", exception.InvalidOptionParameter
+
+	c.Val = b
+	return c.Usi(), nil
 }
 
 type Spin struct {
@@ -79,20 +80,20 @@ func (s *Spin) Usi() string {
 	return pref + s.Name + val + strconv.Itoa(s.Val)
 }
 func (s *Spin) Update(i interface{}) (string, error) {
-	fn, ok := i.(float64)
+	fn, ok := i.(float64) // json を interface{} でパースすると float64 になってしまう
 	if !ok {
 		return "", exception.InvalidOptionParameter.WithMsg("[spin] Value type must be int.")
 	}
 
 	n := int(fn)
-	if s.Min <= n && n <= s.Max {
-		s.Val = n
-		return s.Usi(), nil
+	if n < s.Min || n > s.Max {
+		return "", exception.InvalidOptionParameter.WithMsg(fmt.Sprintf(
+			"[spin] Value must be greater than or equal to %d"+
+				"and lesser than or equal to %d. But got: %d", s.Min, s.Max, n))
 	}
-	format := "[spin] Value must be greater than or equal to %d" +
-		"and lesser than or equal to %d. But got: %d"
-	msg := fmt.Sprintf(format, s.Min, s.Max, n)
-	return "", exception.InvalidOptionParameter.WithMsg(msg)
+
+	s.Val = n
+	return s.Usi(), nil
 }
 
 // USIのcombo
@@ -109,14 +110,19 @@ func NewSelect(name, val, init string, vars []string) *Select {
 func (s *Select) GetName() string { return s.Name }
 func (s *Select) Usi() string     { return pref + s.Name + val + s.Val }
 func (s *Select) Update(i interface{}) (string, error) {
-	switch v := i.(type) {
-	case string:
-		if stringutil.SliceContains(s.Vars, v) {
-			s.Val = v
-			return s.Usi(), nil
-		}
+	v, ok := i.(string)
+	if !ok {
+		return "", exception.InvalidOptionParameter.WithMsg("[select] Value type must be string.")
 	}
-	return "", exception.InvalidOptionParameter
+
+	if !stringutil.SliceContains(s.Vars, v) {
+		return "", exception.InvalidOptionParameter.WithMsg(fmt.Sprintf(
+			"[select] Value was not in vars."+
+				"Value: %s\nVars: %v", v, s.Vars))
+	}
+
+	s.Val = v
+	return s.Usi(), nil
 }
 
 type String struct {
@@ -131,12 +137,12 @@ func NewString(name, val, init string) *String {
 func (s *String) GetName() string { return s.Name }
 func (s *String) Usi() string     { return pref + s.Name + val + s.Val }
 func (s *String) Update(i interface{}) (string, error) {
-	switch v := i.(type) {
-	case string:
-		s.Val = v
-		return s.Usi(), nil
+	v, ok := i.(string)
+	if !ok {
+		return "", exception.InvalidOptionParameter.WithMsg("[string] Value type must be string.")
 	}
-	return "", exception.InvalidOptionParameter
+	s.Val = v
+	return s.Usi(), nil
 }
 
 type FileName struct {
@@ -151,10 +157,10 @@ func NewFileName(name, val, init string) *FileName {
 func (f *FileName) GetName() string { return f.Name }
 func (f *FileName) Usi() string     { return pref + f.Name + val + f.Val }
 func (f *FileName) Update(i interface{}) (string, error) {
-	switch v := i.(type) {
-	case string:
-		f.Val = v
-		return f.Usi(), nil
+	v, ok := i.(string)
+	if !ok {
+		return "", exception.InvalidOptionParameter.WithMsg("[filename] Value type must be string.")
 	}
-	return "", exception.InvalidOptionParameter
+	f.Val = v
+	return f.Usi(), nil
 }

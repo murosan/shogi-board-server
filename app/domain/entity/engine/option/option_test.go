@@ -43,7 +43,7 @@ func TestButton_Usi(t *testing.T) {
 	}
 }
 
-func TestButton_Set(t *testing.T) {
+func TestButton_Update(t *testing.T) {
 	cases := []struct {
 		in   *Button
 		set  interface{}
@@ -93,7 +93,7 @@ func TestCheck_Usi(t *testing.T) {
 	}
 }
 
-func TestCheck_Set(t *testing.T) {
+func TestCheck_Update(t *testing.T) {
 	cases := []struct {
 		in   *Check
 		set  interface{}
@@ -142,19 +142,19 @@ func TestSpin_Usi(t *testing.T) {
 	}
 }
 
-func TestSpin_Set(t *testing.T) {
+func TestSpin_Update(t *testing.T) {
 	cases := []struct {
 		in   *Spin
-		set  interface{}
+		set  interface{} // json.Unmarshal すると float64 になる
 		want string
 		err  error
 	}{
-		{NewSpin("spn-nm", 123, 0, -100, 1000), 567, "setoption name spn-nm value 567", nil},
-		{NewSpin("spn-nm2", -500, -100, -10000, 1000), -101, "setoption name spn-nm2 value -101", nil},
-		{NewSpin("spn-nm2", -500, -100, -10000, 1000), 1000, "setoption name spn-nm2 value 1000", nil},
-		{NewSpin("spn-nm2", -500, -100, -10000, 1000), -10000, "setoption name spn-nm2 value -10000", nil},
-		{NewSpin("spn-nm2", -500, -100, -10000, 1000), 1001, "", exception.InvalidOptionParameter},
-		{NewSpin("spn-nm2", -500, -100, -10000, 1000), -10001, "", exception.InvalidOptionParameter},
+		{NewSpin("spn-nm", 123, 0, -100, 1000), float64(567), "setoption name spn-nm value 567", nil},
+		{NewSpin("spn-nm2", -500, -100, -10000, 1000), float64(-101), "setoption name spn-nm2 value -101", nil},
+		{NewSpin("spn-nm2", -500, -100, -10000, 1000), float64(1000), "setoption name spn-nm2 value 1000", nil},
+		{NewSpin("spn-nm2", -500, -100, -10000, 1000), float64(-10000), "setoption name spn-nm2 value -10000", nil},
+		{NewSpin("spn-nm2", -500, -100, -10000, 1000), float64(1001), "", exception.InvalidOptionParameter},
+		{NewSpin("spn-nm2", -500, -100, -10000, 1000), float64(-10001), "", exception.InvalidOptionParameter},
 		{NewSpin("spn-nm2", -500, -100, -10000, 1000), "string", "", exception.InvalidOptionParameter},
 	}
 
@@ -193,7 +193,7 @@ func TestSelect_Usi(t *testing.T) {
 	}
 }
 
-func TestSelect_Set(t *testing.T) {
+func TestSelect_Update(t *testing.T) {
 	cases := []struct {
 		in   *Select
 		set  interface{}
@@ -244,7 +244,7 @@ func TestString_Usi(t *testing.T) {
 	}
 }
 
-func TestString_Set(t *testing.T) {
+func TestString_Update(t *testing.T) {
 	cases := []struct {
 		in   *String
 		set  interface{}
@@ -296,7 +296,7 @@ func TestFileName_Usi(t *testing.T) {
 	}
 }
 
-func TestFileName_Set(t *testing.T) {
+func TestFileName_Update(t *testing.T) {
 	cases := []struct {
 		in   *FileName
 		set  interface{}
