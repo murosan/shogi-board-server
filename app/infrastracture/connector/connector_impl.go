@@ -78,6 +78,7 @@ func (c *connector) Connect() error {
 	return nil
 }
 
+// TODO: エンジンに接続済か確認する処理はどうにか共通化して綺麗にしたい
 func (c *connector) Close() error {
 	defer c.pool.Remove()
 	egn := c.pool.NamedEngine()
