@@ -4,7 +4,10 @@
 
 package connector
 
-import "github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
+import (
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
+)
 
 type Connector interface {
 	// 将棋エンジンと接続する
@@ -23,4 +26,6 @@ type Connector interface {
 	SetNewOptionValue(option.UpdateOptionValue) error
 
 	Start() error
+
+	StateEquals(state state.State) bool
 }

@@ -6,6 +6,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"io"
 	"net/http"
 	"strconv"
@@ -41,6 +42,18 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	nowThinking := s.conn.StateEquals(state.Thinking)
+
+	// 思考中なら stop
+	if nowThinking {
+		err := s.conn.Exec(usi.CmdStop)
+		if err != nil {
+			s.internalServerError(w, err)
+			return
+		}
+		// TODO: Stop中のStateにする
+	}
+
 	usiCmd, err := s.tu.Position(pos)
 	if err != nil {
 		s.internalServerError(w, err)
@@ -51,10 +64,17 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 		s.internalServerError(w, err)
 		return
 	}
+
+	// さっき思考中だったら再スタート
+	if nowThinking {
+		s.start(w, r)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 }
 
 func (s *server) start(w http.ResponseWriter, r *http.Request) {
+
 	if err := s.conn.Exec(usi.CmdNewGame); err != nil {
 		s.internalServerError(w, err)
 		return

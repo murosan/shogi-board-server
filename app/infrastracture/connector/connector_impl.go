@@ -120,6 +120,10 @@ func (c *connector) Start() error {
 		logger.Use().Debug("Start", zap.Any("EngineState", state.NotConnected))
 		return exception.EngineIsNotRunning
 	}
+	if egn.GetState() == state.Thinking {
+		logger.Use().Debug("Start. Engine is thinking. Nothing to do.")
+		return nil
+	}
 	egn.SetState(state.Thinking)
 	go c.waitInf()
 	return c.Exec(usi.CmdGoInf)
@@ -132,6 +136,11 @@ func (c *connector) SetNewOptionValue(v option.UpdateOptionValue) error {
 		return exception.EngineIsNotRunning
 	}
 	return egn.UpdateOption(v)
+}
+
+func (c *connector) StateEquals(s state.State) bool {
+	egn := c.pool.NamedEngine()
+	return egn != nil && egn.GetState() == s
 }
 
 func (c *connector) catchOutput(ch chan []byte) {
