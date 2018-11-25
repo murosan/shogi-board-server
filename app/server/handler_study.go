@@ -59,7 +59,7 @@ func (s *server) start(w http.ResponseWriter, r *http.Request) {
 		s.internalServerError(w, err)
 		return
 	}
-	if err := s.conn.Exec(usi.CmdGoInf); err != nil {
+	if err := s.conn.Start(); err != nil {
 		s.internalServerError(w, err)
 		return
 	}

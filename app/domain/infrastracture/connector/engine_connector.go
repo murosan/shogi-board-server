@@ -21,4 +21,6 @@ type Connector interface {
 
 	// オプションの値を更新する
 	SetNewOptionValue(option.UpdateOptionValue) error
+
+	Start() error
 }

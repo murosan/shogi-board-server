@@ -57,6 +57,7 @@ func (c *connector) Connect() error {
 
 	egn.Lock()
 	egn.SetState(state.Connected)
+	go c.catchOutput(c.egnOut)
 	if e := c.Exec(usi.CmdUsi); e != nil {
 		logger.Use().Error("ExecUsiError", zap.Error(e))
 		return e
@@ -113,6 +114,17 @@ func (c *connector) GetOptions() option.OptMap {
 	return egn.GetOptions()
 }
 
+func (c *connector) Start() error {
+	egn := c.pool.NamedEngine()
+	if egn == nil || egn.GetState() == state.NotConnected {
+		logger.Use().Debug("Start", zap.Any("EngineState", state.NotConnected))
+		return exception.EngineIsNotRunning
+	}
+	egn.SetState(state.Thinking)
+	go c.waitInf()
+	return c.Exec(usi.CmdGoInf)
+}
+
 func (c *connector) SetNewOptionValue(v option.UpdateOptionValue) error {
 	egn := c.pool.NamedEngine()
 	if egn == nil || egn.GetState() == state.NotConnected {
@@ -128,11 +140,21 @@ func (c *connector) catchOutput(ch chan []byte) {
 
 	for s.Scan() {
 		b := s.Bytes()
+		logger.Use().Info("StdoutPipe", zap.ByteString("EngineOut", b))
 		ch <- b
 	}
 
 	if s.Err() != nil {
 		logger.Use().Debug("scan:" + s.Err().Error())
+	}
+}
+
+func (c *connector) waitInf() {
+	for {
+		select {
+		case b := <-c.egnOut:
+			logger.Use().Info("receive", zap.String("msg", string(b)))
+		}
 	}
 }
 
@@ -142,18 +164,6 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 		time.Sleep(time.Second * 10)
 		timeout <- struct{}{}
 		close(timeout)
-	}()
-	go func() {
-		egn := c.pool.NamedEngine()
-		s := egn.GetScanner()
-		for s.Scan() {
-			b := s.Bytes()
-			logger.Use().Info("StdoutPipe", zap.ByteString("EngineOut", b))
-			c.egnOut <- b
-			if bytes.Equal(b, exitWord) {
-				return
-			}
-		}
 	}()
 	for {
 		select {
@@ -178,7 +188,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 			if parseOpt && optRegex.Match(b) {
 				o, e := c.fu.Option(string(b))
 				if e == nil {
-					c.setOption(o)
+					c.appendOption(o)
 					continue
 				}
 				return e
@@ -202,6 +212,6 @@ func (c *connector) setId(k, v string) {
 	}
 }
 
-func (c *connector) setOption(o option.Option) {
+func (c *connector) appendOption(o option.Option) {
 	c.pool.NamedEngine().SetOption(string(o.GetName()), o)
 }
