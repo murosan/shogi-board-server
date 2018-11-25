@@ -6,44 +6,45 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
 func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
-	d, err := json.Marshal(s.conn.GetOptions())
-	if err != nil {
-		logger.Use().Error("Failed to marshal option list.", zap.Error(err))
-		s.internalServerError(w, err)
-		return
-	}
+	s.conn.WithEngine("", func(e engine.Engine) {
+		if e == nil || e.GetState() == state.NotConnected {
+			// TODO: internal server error ではないな
+			s.internalServerError(w, exception.EngineIsNotRunning)
+			return
+		}
 
-	logger.Use().Info("GetOptions", zap.ByteString("Marshaled value", d))
-	w.Header().Set(contentType, mimeJson)
-	w.Write(d)
+		d, err := json.Marshal(e.GetOptions())
+		if err != nil {
+			logger.Use().Error("Failed to marshal option list.", zap.Error(err))
+			s.internalServerError(w, err)
+			return
+		}
+
+		logger.Use().Info("GetOptions", zap.ByteString("Marshaled value", d))
+		w.Header().Set(contentType, mimeJson)
+		w.Write(d)
+	})
 }
 
 func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
-	l, err := strconv.Atoi(r.Header.Get(contentLength))
-	if err != nil {
+	body, err := s.readJsonBody(r)
+	if err != nil && err == exception.ContentLengthRequired {
 		http.Error(w, err.Error(), 411) // Length Required
-		logger.Use().Error("Could not read "+contentLength, zap.Error(err))
 		return
 	}
-
-	body := make([]byte, l)
-	l, err = r.Body.Read(body)
-	if err != nil && err != io.EOF {
-		m := fmt.Sprintf("%v\ncaused by:\n%v", exception.FailedToReadBody.Error(), err.Error())
-		http.Error(w, m, http.StatusInternalServerError)
-		logger.Use().Error(m)
+	if err != nil && err == exception.FailedToReadBody {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -54,11 +55,17 @@ func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Use().Info("UpdateOptionBody", zap.Any("Unmarshal", osv))
 
-	if err := s.conn.SetNewOptionValue(osv); err != nil {
-		// TODO: InternalServerError ではないな・・
-		s.internalServerError(w, err)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+	s.conn.WithEngine("", func(e engine.Engine) {
+		if e == nil || e.GetState() == state.NotConnected {
+			// TODO: internal server error ではないな
+			s.internalServerError(w, exception.EngineIsNotRunning)
+			return
+		}
+		if err := e.UpdateOption(osv); err != nil {
+			// TODO: InternalServerError ではないな・・
+			s.internalServerError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	})
 }

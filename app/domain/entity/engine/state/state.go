@@ -13,7 +13,7 @@ const (
 	// 接続済み. usinewgame 前
 	Connected State = 2
 
-	// usinewgame の後、go コマンドを待っている状態
+	// usinewgame の後、思考中ではない
 	StandBy State = 3
 
 	// 思考中

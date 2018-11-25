@@ -6,7 +6,9 @@ package server
 
 import (
 	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
@@ -89,6 +91,29 @@ func (s *server) withMethod(
 	}
 
 	h(w, r)
+}
+
+// JSONのbodyを読み取ってバイト配列にして返す
+// error1: exception.ContentLengthRequired
+//         HttpHeaderにContent-Lengthがなかったり、int にできなかったエラー
+// error2: exception.FailedToReadBody
+//         body の読み取りに失敗したエラー
+func (s *server) readJsonBody(r *http.Request) ([]byte, error) {
+	l, err := strconv.Atoi(r.Header.Get(contentLength))
+	if err != nil {
+		logger.Use().Error("Could not read "+contentLength, zap.Error(err))
+		return nil, exception.ContentLengthRequired
+	}
+
+	body := make([]byte, l)
+	l, err = r.Body.Read(body)
+	if err != nil && err != io.EOF {
+		m := fmt.Sprintf("%v\ncaused by:\n%v", exception.FailedToReadBody.Error(), err.Error())
+		logger.Use().Error(m)
+		return nil, exception.FailedToReadBody
+	}
+
+	return body, nil
 }
 
 func (s *server) internalServerError(w http.ResponseWriter, e error) {

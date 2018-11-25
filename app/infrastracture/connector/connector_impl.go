@@ -16,6 +16,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
+	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"go.uber.org/zap"
 )
@@ -58,7 +59,7 @@ func (c *connector) Connect() error {
 	egn.Lock()
 	egn.SetState(state.Connected)
 	go c.catchOutput(c.egnOut)
-	if e := c.Exec(usi.CmdUsi); e != nil {
+	if e := egn.Exec(usi.CmdUsi); e != nil {
 		logger.Use().Error("ExecUsiError", zap.Error(e))
 		return e
 	}
@@ -66,7 +67,7 @@ func (c *connector) Connect() error {
 		logger.Use().Error("WaitUsiOkError", zap.Error(e))
 		return e
 	}
-	if e := c.Exec(usi.CmdIsReady); e != nil {
+	if e := egn.Exec(usi.CmdIsReady); e != nil {
 		logger.Use().Error("ExecIsReadyError", zap.Error(e))
 		return e
 	}
@@ -75,7 +76,6 @@ func (c *connector) Connect() error {
 		return e
 	}
 	egn.Unlock()
-	// TODO: 出力を受け取り続けるやつ
 	return nil
 }
 
@@ -92,55 +92,9 @@ func (c *connector) Close() error {
 	return egn.Close()
 }
 
-func (c *connector) Exec(b []byte) error {
-	egn := c.pool.NamedEngine()
-	if egn == nil || egn.GetState() == state.NotConnected {
-		logger.Use().Debug("ExecFail", zap.Any("EngineState", state.NotConnected))
-		return exception.EngineIsNotRunning
-	}
-	if err := egn.Exec(b); err != nil {
-		logger.Use().Error(exception.FailedToExecCommand.Error(), zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-func (c *connector) GetOptions() option.OptMap {
-	egn := c.pool.NamedEngine()
-	if egn == nil || egn.GetState() == state.NotConnected {
-		logger.Use().Debug("GetOptions", zap.Any("EngineState", state.NotConnected))
-		return *option.EmptyOptMap()
-	}
-	return egn.GetOptions()
-}
-
-func (c *connector) Start() error {
-	egn := c.pool.NamedEngine()
-	if egn == nil || egn.GetState() == state.NotConnected {
-		logger.Use().Debug("Start", zap.Any("EngineState", state.NotConnected))
-		return exception.EngineIsNotRunning
-	}
-	if egn.GetState() == state.Thinking {
-		logger.Use().Debug("Start. Engine is thinking. Nothing to do.")
-		return nil
-	}
-	egn.SetState(state.Thinking)
-	go c.waitInf()
-	return c.Exec(usi.CmdGoInf)
-}
-
-func (c *connector) SetNewOptionValue(v option.UpdateOptionValue) error {
-	egn := c.pool.NamedEngine()
-	if egn == nil || egn.GetState() == state.NotConnected {
-		logger.Use().Debug("SetNewOptionValue", zap.Any("EngineState", state.NotConnected))
-		return exception.EngineIsNotRunning
-	}
-	return egn.UpdateOption(v)
-}
-
-func (c *connector) StateEquals(s state.State) bool {
-	egn := c.pool.NamedEngine()
-	return egn != nil && egn.GetState() == s
+func (c *connector) WithEngine(name string, f func(engine.Engine)) {
+	egn := c.pool.NamedEngine( /* name */ )
+	f(egn)
 }
 
 func (c *connector) catchOutput(ch chan []byte) {
@@ -177,30 +131,24 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 	for {
 		select {
 		case b := <-c.egnOut:
-			if len(b) == 0 {
-				continue
-			}
-
-			if bytes.Equal(b, exitWord) {
-				return nil
-			}
-
 			if parseOpt && idRegex.Match(b) {
 				k, v, e := c.fu.EngineID(string(b))
-				if e == nil {
-					c.setId(k, v)
-					continue
+				if e != nil {
+					return e
 				}
-				return e
+				c.setId(k, v)
 			}
 
 			if parseOpt && optRegex.Match(b) {
 				o, e := c.fu.Option(string(b))
-				if e == nil {
-					c.appendOption(o)
-					continue
+				if e != nil {
+					return e
 				}
-				return e
+				c.appendOption(o)
+			}
+
+			if bytes.Equal(b, exitWord) {
+				return nil
 			}
 		case <-timeout:
 			logger.Use().Error(exception.ConnectionTimeout.Error())
