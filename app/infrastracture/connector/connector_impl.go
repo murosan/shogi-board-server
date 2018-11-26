@@ -92,9 +92,13 @@ func (c *connector) Close() error {
 	return egn.Close()
 }
 
-func (c *connector) WithEngine(name string, f func(engine.Engine)) {
-	egn := c.pool.NamedEngine( /* name */ )
-	f(egn)
+func (c *connector) WithEngine(name string, f func(engine.Engine)) error {
+	e := c.pool.NamedEngine( /* name */ )
+	if e == nil || e.GetState() == state.NotConnected {
+		return exception.EngineIsNotRunning
+	}
+	f(e)
+	return nil
 }
 
 func (c *connector) catchOutput(ch chan []byte) {

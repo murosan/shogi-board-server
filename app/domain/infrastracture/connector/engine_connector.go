@@ -15,5 +15,5 @@ type Connector interface {
 	// 接続を切る
 	Close() error
 
-	WithEngine(string, func(engine.Engine))
+	WithEngine(string, func(engine.Engine)) error
 }

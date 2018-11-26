@@ -37,12 +37,7 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.conn.WithEngine("", func(e engine.Engine) {
-		if e == nil || e.GetState() == state.NotConnected {
-			// TODO: internal server error ではないな
-			s.internalServerError(w, exception.EngineIsNotRunning)
-			return
-		}
+	er := s.conn.WithEngine("", func(e engine.Engine) {
 		isThinking := e.GetState() == state.Thinking
 		// 思考中なら stop
 		if isThinking {
@@ -63,35 +58,45 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 	})
+
+	if er != nil {
+		s.internalServerError(w, er)
+	}
 }
 
 func (s *server) start(w http.ResponseWriter, r *http.Request) {
-	s.conn.WithEngine("", func(e engine.Engine) {
-		if e == nil || e.GetState() == state.NotConnected {
-			// TODO: internal server error ではないな
-			s.internalServerError(w, exception.EngineIsNotRunning)
+	err := s.conn.WithEngine("", func(e engine.Engine) {
+		stt := e.GetState()
+		if stt == state.Thinking {
+			logger.Use().Debug("Engine is thinking. Nothing to do.")
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 
-		switch e.GetState() {
-		case state.Connected: // usinewgame 前なら実行
+		// usinewgame 前なら実行
+		if stt == state.Connected {
 			if err := e.Exec(usi.CmdNewGame); err != nil {
 				s.internalServerError(w, err)
 				return
 			}
-		case state.StandBy: // 思考開始
+			e.SetState(state.StandBy)
+		}
+
+		// 思考開始
+		if stt == state.StandBy {
 			if err := e.Exec(usi.CmdGoInf); err != nil {
 				s.internalServerError(w, err)
 				return
 			}
-		case state.Thinking:
-			logger.Use().Debug("Engine is thinking. Nothing to do.")
-		default:
-			panic("unknown engine state.")
+			e.SetState(state.Thinking)
 		}
 
 		w.WriteHeader(http.StatusOK)
 	})
+
+	if err != nil {
+		s.internalServerError(w, err)
+	}
 }
 
 func (s *server) getValues(w http.ResponseWriter, r *http.Request) {

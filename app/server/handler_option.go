@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
@@ -17,13 +16,7 @@ import (
 )
 
 func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
-	s.conn.WithEngine("", func(e engine.Engine) {
-		if e == nil || e.GetState() == state.NotConnected {
-			// TODO: internal server error ではないな
-			s.internalServerError(w, exception.EngineIsNotRunning)
-			return
-		}
-
+	err := s.conn.WithEngine("", func(e engine.Engine) {
 		d, err := json.Marshal(e.GetOptions())
 		if err != nil {
 			logger.Use().Error("Failed to marshal option list.", zap.Error(err))
@@ -35,6 +28,9 @@ func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(contentType, mimeJson)
 		w.Write(d)
 	})
+	if err != nil {
+		s.internalServerError(w, err)
+	}
 }
 
 func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
@@ -55,12 +51,7 @@ func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Use().Info("UpdateOptionBody", zap.Any("Unmarshal", osv))
 
-	s.conn.WithEngine("", func(e engine.Engine) {
-		if e == nil || e.GetState() == state.NotConnected {
-			// TODO: internal server error ではないな
-			s.internalServerError(w, exception.EngineIsNotRunning)
-			return
-		}
+	er := s.conn.WithEngine("", func(e engine.Engine) {
 		if err := e.UpdateOption(osv); err != nil {
 			// TODO: InternalServerError ではないな・・
 			s.internalServerError(w, err)
@@ -68,4 +59,7 @@ func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 	})
+	if er != nil {
+		s.internalServerError(w, er)
+	}
 }
