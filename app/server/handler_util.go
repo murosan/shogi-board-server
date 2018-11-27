@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +27,7 @@ const (
 
 func (s *server) Handling(w http.ResponseWriter, r *http.Request) {
 	uri := r.RequestURI
-	logger.Use().Info(
+	s.log.Info(
 		"AccessLog",
 		zap.String("uri", uri),
 		zap.String("method", r.Method),
@@ -62,11 +61,19 @@ func (s *server) Handling(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *server) contentTypeCheck(tpe string, h http.HandlerFunc) http.HandlerFunc {
+func (s *server) contentTypeCheck(
+	tpe string,
+	h http.HandlerFunc,
+) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ct := r.Header.Get(contentType)
 		if ct != tpe {
-			s.badRequest(w, fmt.Sprintf("%s must be %s, but got %s", contentType, tpe, ct))
+			s.badRequest(w, fmt.Sprintf(
+				"%s must be %s, but got %s",
+				contentType,
+				tpe,
+				ct,
+			))
 			return
 		}
 
@@ -81,7 +88,7 @@ func (s *server) withMethod(
 	h http.HandlerFunc,
 ) {
 	if r.Method != meth {
-		logger.Use().Debug(
+		s.log.Debug(
 			fmt.Sprintf(
 				"%s, uri: %s\n",
 				exception.MethodNotAllowed,
@@ -101,15 +108,19 @@ func (s *server) withMethod(
 func (s *server) readJsonBody(r *http.Request) ([]byte, error) {
 	l, err := strconv.Atoi(r.Header.Get(contentLength))
 	if err != nil {
-		logger.Use().Error("Could not read "+contentLength, zap.Error(err))
+		s.log.Error("Could not read "+contentLength, zap.Error(err))
 		return nil, exception.ContentLengthRequired
 	}
 
 	body := make([]byte, l)
 	l, err = r.Body.Read(body)
 	if err != nil && err != io.EOF {
-		m := fmt.Sprintf("%v\ncaused by:\n%v", exception.FailedToReadBody.Error(), err.Error())
-		logger.Use().Error(m)
+		m := fmt.Sprintf(
+			"%v\ncaused by:\n%v",
+			exception.FailedToReadBody.Error(),
+			err.Error(),
+		)
+		s.log.Error(m)
 		return nil, exception.FailedToReadBody
 	}
 
@@ -117,16 +128,16 @@ func (s *server) readJsonBody(r *http.Request) ([]byte, error) {
 }
 
 func (s *server) internalServerError(w http.ResponseWriter, e error) {
-	logger.Use().Error(exception.InternalServerError.Error(), zap.Error(e))
+	s.log.Error(exception.InternalServerError.Error(), zap.Error(e))
 	http.Error(w, e.Error(), http.StatusInternalServerError)
 }
 
 func (s *server) badRequest(w http.ResponseWriter, m string) {
-	logger.Use().Debug(m)
+	s.log.Debug(m)
 	http.Error(w, m, http.StatusBadRequest)
 }
 
 func (s *server) notFound(w http.ResponseWriter, r *http.Request, uri string) {
-	logger.Use().Debug(exception.NotFound.Error(), zap.String("uri", uri))
+	s.log.Debug(exception.NotFound.Error(), zap.String("uri", uri))
 	http.NotFound(w, r)
 }

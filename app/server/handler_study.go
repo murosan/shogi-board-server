@@ -5,15 +5,14 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
-	"net/http"
 )
 
-// Content-Type は application/json である必要がある
 func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 	body, err := s.readJsonBody(r)
 	if err != nil && err == exception.ContentLengthRequired {
@@ -40,6 +39,7 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 	er := s.conn.WithEngine("", func(e engine.Engine) {
 		isThinking := e.GetState() == state.Thinking
 		// 思考中なら stop
+		// TODO: bestmove受け取ったかどうかはどう判断するかなぁ・・
 		if isThinking {
 			if err := e.Exec(usi.CmdStop); err != nil {
 				s.internalServerError(w, err)
@@ -68,7 +68,7 @@ func (s *server) start(w http.ResponseWriter, r *http.Request) {
 	err := s.conn.WithEngine("", func(e engine.Engine) {
 		stt := e.GetState()
 		if stt == state.Thinking {
-			logger.Use().Debug("Engine is thinking. Nothing to do.")
+			s.log.Debug("Engine is thinking. Nothing to do.")
 			w.WriteHeader(http.StatusOK)
 			return
 		}

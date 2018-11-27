@@ -28,7 +28,12 @@ func main() {
 	conn := connector.UseConnector()
 	defer conn.Close() // for safety
 
-	s := server.NewServer(conn, converter.UseFromJson(), converter.UseToUsi())
+	s := server.NewServer(
+		conn,
+		converter.UseFromJson(),
+		converter.UseToUsi(),
+		logger.Use(),
+	)
 
 	logger.Use().Info("Listening...", zap.String("address", *addr))
 	http.HandleFunc("/", s.Handling)

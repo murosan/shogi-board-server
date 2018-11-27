@@ -11,7 +11,6 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
@@ -19,12 +18,12 @@ func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
 	err := s.conn.WithEngine("", func(e engine.Engine) {
 		d, err := json.Marshal(e.GetOptions())
 		if err != nil {
-			logger.Use().Error("Failed to marshal option list.", zap.Error(err))
+			s.log.Error("Failed to marshal option list.", zap.Error(err))
 			s.internalServerError(w, err)
 			return
 		}
 
-		logger.Use().Info("GetOptions", zap.ByteString("Marshaled value", d))
+		s.log.Info("GetOptions", zap.ByteString("Marshaled value", d))
 		w.Header().Set(contentType, mimeJson)
 		w.Write(d)
 	})
@@ -49,7 +48,7 @@ func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
 		s.internalServerError(w, err)
 		return
 	}
-	logger.Use().Info("UpdateOptionBody", zap.Any("Unmarshal", osv))
+	s.log.Info("UpdateOptionBody", zap.Any("Unmarshal", osv))
 
 	er := s.conn.WithEngine("", func(e engine.Engine) {
 		if err := e.UpdateOption(osv); err != nil {
