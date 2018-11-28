@@ -11,10 +11,10 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	engineModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
@@ -34,14 +34,17 @@ type engine struct {
 	sc *bufio.Scanner
 
 	mux sync.Mutex
+
+	log logger.Log
 }
 
-func NewEngine(c command.OsCmd) engineModel.Engine {
+func NewEngine(c command.OsCmd, log logger.Log) engineModel.Engine {
 	return &engine{
 		cmd:     c,
 		state:   state.NotConnected,
 		options: *option.EmptyOptMap(),
 		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
+		log:     log,
 	}
 }
 
@@ -60,7 +63,7 @@ func (e *engine) GetOptions() option.OptMap { return e.options }
 func (e *engine) UpdateOption(v option.UpdateOptionValue) error {
 	u, err := e.options.Update(v)
 	if err != nil {
-		logger.Use().Warn("EngineUpdateOption", zap.Error(exception.FailedToUpdateOption))
+		e.log.Warn("EngineUpdateOption", zap.Error(exception.FailedToUpdateOption))
 		return err
 	}
 	return e.Exec([]byte(u))
@@ -76,7 +79,7 @@ func (e *engine) Unlock() { e.mux.Unlock() }
 
 // USIコマンドの実行
 func (e *engine) Exec(b []byte) error {
-	logger.Use().Info("StdinPipe", zap.ByteString("Exec", b))
+	e.log.Info("StdinPipe", zap.ByteString("Exec", b))
 	return e.cmd.Write(append(b, '\n'))
 }
 

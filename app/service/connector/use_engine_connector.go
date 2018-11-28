@@ -9,14 +9,20 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/infrastracture/connector"
 	"github.com/murosan/shogi-proxy-server/app/service/config"
 	"github.com/murosan/shogi-proxy-server/app/service/converter"
+	"github.com/murosan/shogi-proxy-server/app/service/logger"
 )
 
 var c connModel.Connector = nil
 
 func UseConnector() connModel.Connector {
 	if c == nil {
-		p := connector.NewConnectionPool(config.UseConfig())
-		c = connector.NewConnector(config.UseConfig(), p, converter.UseFromUsi())
+		p := connector.NewConnectionPool(config.UseConfig(), logger.Use())
+		c = connector.NewConnector(
+			config.UseConfig(),
+			p,
+			converter.UseFromUsi(),
+			logger.Use(),
+		)
 	}
 	return c
 }

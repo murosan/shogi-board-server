@@ -14,10 +14,10 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
@@ -32,25 +32,31 @@ type connector struct {
 	conf config.Config
 	pool conn.ConnectionPool
 	fu   *from_usi.FromUsi
+	log  logger.Log
 
 	// TODO: 2つのエンジンから受け取る方法を考える
 	egnOut chan []byte
 }
 
-func NewConnector(c config.Config, p conn.ConnectionPool, fu *from_usi.FromUsi) conn.Connector {
-	return &connector{c, p, fu, make(chan []byte)}
+func NewConnector(
+	c config.Config,
+	p conn.ConnectionPool,
+	fu *from_usi.FromUsi,
+	log logger.Log,
+) conn.Connector {
+	return &connector{c, p, fu, log, make(chan []byte)}
 }
 
 func (c *connector) Connect() error {
 	if c.pool.NamedEngine() != nil {
-		logger.Use().Debug(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
+		c.log.Debug(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
 		return nil
 	}
 
 	c.pool.Initialize() // TODO: Nameを渡して2つのエンジンを使えるように
 	egn := c.pool.NamedEngine()
 	stt := egn.GetState()
-	logger.Use().Debug("Connect", zap.Any("EngineState", stt))
+	c.log.Debug("Connect", zap.Any("EngineState", stt))
 
 	if e := egn.Start(); e != nil {
 		return e
@@ -60,19 +66,19 @@ func (c *connector) Connect() error {
 	egn.SetState(state.Connected)
 	go c.catchOutput(c.egnOut)
 	if e := egn.Exec(usi.CmdUsi); e != nil {
-		logger.Use().Error("ExecUsiError", zap.Error(e))
+		c.log.Error("ExecUsiError", zap.Error(e))
 		return e
 	}
 	if e := c.waitFor(usi.ResOk, true); e != nil {
-		logger.Use().Error("WaitUsiOkError", zap.Error(e))
+		c.log.Error("WaitUsiOkError", zap.Error(e))
 		return e
 	}
 	if e := egn.Exec(usi.CmdIsReady); e != nil {
-		logger.Use().Error("ExecIsReadyError", zap.Error(e))
+		c.log.Error("ExecIsReadyError", zap.Error(e))
 		return e
 	}
 	if e := c.waitFor(usi.ResReady, false); e != nil {
-		logger.Use().Error("WaitReadyOkError", zap.Error(e))
+		c.log.Error("WaitReadyOkError", zap.Error(e))
 		return e
 	}
 	egn.Unlock()
@@ -84,7 +90,7 @@ func (c *connector) Close() error {
 	defer c.pool.Remove()
 	egn := c.pool.NamedEngine()
 	if egn == nil || egn.GetState() == state.NotConnected {
-		logger.Use().Debug("Close", zap.Any("EngineState", state.NotConnected))
+		c.log.Debug("Close", zap.Any("EngineState", state.NotConnected))
 		return nil
 	}
 
@@ -107,12 +113,12 @@ func (c *connector) catchOutput(ch chan []byte) {
 
 	for s.Scan() {
 		b := s.Bytes()
-		logger.Use().Info("StdoutPipe", zap.ByteString("EngineOut", b))
+		c.log.Info("StdoutPipe", zap.ByteString("EngineOut", b))
 		ch <- b
 	}
 
 	if s.Err() != nil {
-		logger.Use().Debug("scan:" + s.Err().Error())
+		c.log.Debug("scan:" + s.Err().Error())
 	}
 }
 
@@ -120,7 +126,7 @@ func (c *connector) waitInf() {
 	for {
 		select {
 		case b := <-c.egnOut:
-			logger.Use().Info("receive", zap.String("msg", string(b)))
+			c.log.Info("receive", zap.String("msg", string(b)))
 		}
 	}
 }
@@ -155,7 +161,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 				return nil
 			}
 		case <-timeout:
-			logger.Use().Error(exception.ConnectionTimeout.Error())
+			c.log.Error(exception.ConnectionTimeout.Error())
 			return exception.ConnectionTimeout
 		}
 	}
