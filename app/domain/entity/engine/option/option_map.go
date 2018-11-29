@@ -6,7 +6,7 @@ package option
 
 import (
 	"fmt"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	"github.com/murosan/shogi-proxy-server/app/service/logger"
 	"go.uber.org/zap"
 )

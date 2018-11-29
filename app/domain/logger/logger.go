@@ -5,7 +5,7 @@
 package logger
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	"github.com/murosan/shogi-proxy-server/app/domain/config"
 	"go.uber.org/zap"
 )
 

@@ -7,7 +7,7 @@ package config
 import (
 	"encoding/json"
 
-	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	confModel "github.com/murosan/shogi-proxy-server/app/domain/config"
 	"go.uber.org/zap"
 )
 

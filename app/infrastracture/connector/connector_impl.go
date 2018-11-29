@@ -9,15 +9,15 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	"github.com/murosan/shogi-proxy-server/app/domain/config"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/converter/from_usi"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
+	"github.com/murosan/shogi-proxy-server/app/domain/logger"
 	"go.uber.org/zap"
 )
 

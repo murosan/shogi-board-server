@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 )
 

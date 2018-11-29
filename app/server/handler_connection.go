@@ -5,7 +5,7 @@
 package server
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	"net/http"
 )
 

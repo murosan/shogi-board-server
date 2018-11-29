@@ -10,11 +10,11 @@ import (
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	engineModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
+	"github.com/murosan/shogi-proxy-server/app/domain/logger"
 	"go.uber.org/zap"
 )
 

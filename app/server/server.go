@@ -7,11 +7,10 @@ package server
 import (
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/converter/from_json"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/converter/to_usi"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
+	"github.com/murosan/shogi-proxy-server/app/domain/logger"
 )
 
-// TODO: Usecase にちゃんと実装し直す
 type server struct {
 	conn connector.Connector
 	fj   *from_json.FromJson

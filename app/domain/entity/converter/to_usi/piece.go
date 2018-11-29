@@ -7,8 +7,8 @@ package to_usi
 import (
 	"strconv"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 )
 
 // TODO: USIの文字列もentityに移す。byteで返すかどうか

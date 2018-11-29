@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 
 	"github.com/murosan/shogi-proxy-server/app/config"
-	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	confModel "github.com/murosan/shogi-proxy-server/app/domain/config"
 )
 
 var c confModel.Config = nil

@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 )
 
 func (fj *FromJson) Position(j []byte) (p shogi.Position, e error) {

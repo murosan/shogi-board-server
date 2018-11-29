@@ -5,12 +5,12 @@
 package connector
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
 	"os/exec"
 
-	confModel "github.com/murosan/shogi-proxy-server/app/domain/entity/config"
+	confModel "github.com/murosan/shogi-proxy-server/app/domain/config"
 	connModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
 	egnModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
+	"github.com/murosan/shogi-proxy-server/app/domain/logger"
 	"github.com/murosan/shogi-proxy-server/app/infrastracture/engine"
 	"github.com/murosan/shogi-proxy-server/app/infrastracture/os/command"
 	"github.com/murosan/shogi-proxy-server/app/service/config"

@@ -5,7 +5,7 @@
 package logger
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/logger"
+	"github.com/murosan/shogi-proxy-server/app/domain/logger"
 	"github.com/murosan/shogi-proxy-server/app/service/config"
 )
 

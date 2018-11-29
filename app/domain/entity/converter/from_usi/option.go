@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 )
 
 // id name <EngineName>

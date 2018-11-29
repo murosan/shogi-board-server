@@ -7,8 +7,8 @@ package from_json
 import (
 	"testing"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 )
 
 func TestFromJson_Position(t *testing.T) {
