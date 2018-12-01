@@ -16,6 +16,7 @@ var (
 	SetOptPath  = "/option/update"
 
 	StartPath = "/start"
+	StopPath  = "/stop"
 
 	SetPositionPath = "/position/set"
 

@@ -5,6 +5,7 @@
 package server
 
 import (
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
@@ -39,12 +40,15 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 	er := s.conn.WithEngine("", func(e engine.Engine) {
 		isThinking := e.GetState() == state.Thinking
 		// 思考中なら stop
-		// TODO: bestmove受け取ったかどうかはどう判断するかなぁ・・
+		// FIXME: bestmove受け取ったとかは知らん
+		// せめてどの配置に対するbestmoveなのかぐらい教えてくれよ
+		// 誰かいい方法教えて・・
 		if isThinking {
 			if err := e.Exec(usi.CmdStop); err != nil {
 				s.internalServerError(w, err)
 				return
 			}
+
 			e.SetState(state.StandBy)
 		}
 		if err := e.Exec(setPosUsi); err != nil {
@@ -73,7 +77,7 @@ func (s *server) start(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// usinewgame 前なら実行
+		// usinewgame 前なら usinewgame
 		if stt == state.Connected {
 			if err := e.Exec(usi.CmdNewGame); err != nil {
 				s.internalServerError(w, err)
@@ -94,6 +98,22 @@ func (s *server) start(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	if err != nil {
+		s.internalServerError(w, err)
+	}
+}
+
+func (s *server) stop(w http.ResponseWriter, r *http.Request) {
+	err := s.conn.WithEngine("", func(e engine.Engine) {
+		// 細かいことは後から考える。とりあえず stop してしまう
+		if err := e.Exec(usi.CmdStop); err != nil {
+			s.log.Error("Failed to exec stop", zap.Error(err))
+			s.internalServerError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+	})
 	if err != nil {
 		s.internalServerError(w, err)
 	}
