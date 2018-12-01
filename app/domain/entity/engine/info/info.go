@@ -5,4 +5,5 @@
 package info
 
 type Info struct {
+	Depth int `json:"depth"`
 }

@@ -17,7 +17,7 @@ type OptMap struct {
 	Spins     map[string]*Spin     `json:"spins"`
 	Combos    map[string]*Select   `json:"combos"`
 	Strings   map[string]*String   `json:"strings"`
-	FileNames map[string]*FileName `json:"file_names"`
+	Filenames map[string]*FileName `json:"filenames"`
 }
 
 func EmptyOptMap() *OptMap {
@@ -27,7 +27,7 @@ func EmptyOptMap() *OptMap {
 		Spins:     make(map[string]*Spin),
 		Combos:    make(map[string]*Select),
 		Strings:   make(map[string]*String),
-		FileNames: make(map[string]*FileName),
+		Filenames: make(map[string]*FileName),
 	}
 }
 
@@ -45,7 +45,7 @@ func (om *OptMap) Append(o Option) {
 	case *String:
 		om.Strings[t.GetName()] = t
 	case *FileName:
-		om.FileNames[t.GetName()] = t
+		om.Filenames[t.GetName()] = t
 	default:
 		panic(exception.UnknownOption)
 	}
@@ -69,7 +69,7 @@ func (om *OptMap) Update(v UpdateOptionValue) (string, error) {
 	case "string":
 		opt, ok = om.Strings[v.Name]
 	case "filename":
-		opt, ok = om.FileNames[v.Name]
+		opt, ok = om.Filenames[v.Name]
 	}
 
 	log("SpecifiedOption", opt)

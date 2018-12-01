@@ -31,10 +31,10 @@ func TestFromJson_Position(t *testing.T) {
     [0, 6, 5, 0, 0, 0, 0, 0, 0],
     [2, 3, 4, 0, 8, 5, 4, 3, 2]
   ],
-  "cap_0": [3, 0, 0, 0, 0, 0, 0],
-  "cap_1": [2, 0, 0, 0, 0, 0, 0],
+  "cap0": [3, 0, 0, 0, 0, 0, 0],
+  "cap1": [2, 0, 0, 0, 0, 0, 0],
   "turn": 1,
-  "move_count": 100
+  "moveCount": 100
 }`),
 			shogi.Position{
 				Pos: [9][9]int{

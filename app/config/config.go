@@ -12,7 +12,7 @@ import (
 )
 
 type config struct {
-	EnginePath map[string]string `json:"engine_path"`
+	EnginePath map[string]string `json:"enginePath"`
 	Log        zap.Config        `json:"Log"`
 }
 

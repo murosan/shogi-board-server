@@ -79,7 +79,7 @@ func TestNewConfig2(t *testing.T) {
 	}{
 		`
 {
-  "engine_path": {
+  "enginePath": {
     "com": "/home/user/path/to/engine",
   }
 }

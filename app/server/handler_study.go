@@ -40,9 +40,7 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 	er := s.conn.WithEngine("", func(e engine.Engine) {
 		isThinking := e.GetState() == state.Thinking
 		// 思考中なら stop
-		// FIXME: bestmove受け取ったとかは知らん
-		// せめてどの配置に対するbestmoveなのかぐらい教えてくれよ
-		// 誰かいい方法教えて・・
+		// TODO: bestmove受け取ったかなど知らん
 		if isThinking {
 			if err := e.Exec(usi.CmdStop); err != nil {
 				s.internalServerError(w, err)

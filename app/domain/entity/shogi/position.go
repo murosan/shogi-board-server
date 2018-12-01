@@ -14,8 +14,8 @@ package shogi
 //}
 type Position struct {
 	Pos       [9][9]int `json:"pos"`
-	Cap0      [7]int    `json:"cap_0"`
-	Cap1      [7]int    `json:"cap_1"`
+	Cap0      [7]int    `json:"cap0"`
+	Cap1      [7]int    `json:"cap1"`
 	Turn      int       `json:"turn"`
-	MoveCount int       `json:"move_count"`
+	MoveCount int       `json:"moveCount"`
 }
