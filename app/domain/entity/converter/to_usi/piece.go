@@ -11,7 +11,6 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 )
 
-// TODO: USIの文字列もentityに移す。byteで返すかどうか
 func (tu *ToUsi) Piece(i int) (s string, e error) {
 	switch i {
 	case shogi.Fu0:

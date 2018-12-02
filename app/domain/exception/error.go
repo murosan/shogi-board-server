@@ -21,6 +21,7 @@ func (e *Error) WithMsg(m string) *Error {
 	return &Error{e.Code, m}
 }
 
+// TODO: 適当すぎるのでちゃんと全部Newできるようにする
 var (
 	// http
 	NotFound              = &Error{Code: "NotFound"}
@@ -44,5 +45,8 @@ var (
 	UnknownOption          = &Error{Code: "UnknownOption"}
 
 	// usi
-	InvalidPieceId = &Error{Code: "InvalidPieceId"}
+	InvalidPieceId      = &Error{Code: "InvalidPieceId"}
+	InvalidRowNumber    = &Error{Code: "InvalidRowNumber"}
+	InvalidColumnNumber = &Error{Code: "InvalidColumnNumber"}
+	UnknownCharacter    = &Error{Code: "UnknownCharacter"}
 )
