@@ -10,7 +10,7 @@ import (
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-proxy-server/app/domain/exception"
-	"github.com/murosan/shogi-proxy-server/app/lib/intutil"
+	"github.com/murosan/shogi-proxy-server/app/lib/test_helper"
 )
 
 func TestFromUsi_Move(t *testing.T) {
@@ -76,7 +76,7 @@ Actual:   %v
 `, i, in, err, e)
 	}
 
-	if !moveEquals(res, want) {
+	if !test_helper.MoveEquals(res, want) {
 		t.Errorf(`(From Usi: Parse Move) The value was not as expected.
 Index:    %d
 Input:    %s
@@ -84,14 +84,4 @@ Expected: %v
 Actual:   %v
 `, i, in, want, res)
 	}
-}
-
-func moveEquals(a, b *shogi.Move) bool {
-	if a == nil || b == nil {
-		return false
-	}
-	return intutil.SliceEquals(a.Source, b.Source) &&
-		intutil.SliceEquals(a.Dest, b.Dest) &&
-		a.PieceId == b.PieceId &&
-		a.Extra == b.Extra
 }
