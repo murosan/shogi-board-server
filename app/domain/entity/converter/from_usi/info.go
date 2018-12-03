@@ -4,6 +4,8 @@
 
 package from_usi
 
-func Info(b []byte) {
+import "github.com/murosan/shogi-proxy-server/app/domain/entity/engine/result"
 
+func (fu *FromUsi) Info(s string) (*result.Info, error) {
+	return &result.Info{}, nil
 }

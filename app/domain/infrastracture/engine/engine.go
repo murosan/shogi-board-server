@@ -8,6 +8,7 @@ import (
 	"bufio"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/result"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 )
 
@@ -25,6 +26,9 @@ type Engine interface {
 
 	SetState(state.State)
 	GetState() state.State
+
+	SetResult(i *result.Info, key int)
+	FlushResult()
 
 	Lock()
 	Unlock()

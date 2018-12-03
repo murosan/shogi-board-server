@@ -5,13 +5,13 @@
 package server
 
 import (
-	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
+	"go.uber.org/zap"
 )
 
 func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
@@ -49,10 +49,14 @@ func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
 
 			e.SetState(state.StandBy)
 		}
+
 		if err := e.Exec(setPosUsi); err != nil {
 			s.internalServerError(w, err)
 			return
 		}
+
+		e.FlushResult()
+
 		// さっき思考中だったら再スタート
 		if isThinking {
 			s.start(w, r)
@@ -109,6 +113,7 @@ func (s *server) stop(w http.ResponseWriter, r *http.Request) {
 			s.internalServerError(w, err)
 			return
 		}
+		e.FlushResult()
 		w.WriteHeader(http.StatusOK)
 		return
 	})

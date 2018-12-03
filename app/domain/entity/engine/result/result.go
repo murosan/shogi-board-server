@@ -4,8 +4,17 @@
 
 package result
 
+// 将棋エンジンの思考結果を保持しておく型
 type Result struct {
+	// TODO: 心の底から slice にしたい
+	// エンジンから必ず順番通り&抜け番なしに出力される保証がない
+	// &最大数が分からない(MultiPVがあるか分からないし、
+	// MultiPVという名前かどうかも不明だ)
 	Values map[int]*Info `json:"values"`
+}
+
+func NewResult() *Result {
+	return &Result{make(map[int]*Info)}
 }
 
 // Values に値を追加する

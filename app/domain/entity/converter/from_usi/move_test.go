@@ -43,11 +43,11 @@ func TestFromUsi_Move(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		helper(t, i, c.in, c.want, c.err)
+		moveHelper(t, i, c.in, c.want, c.err)
 	}
 }
 
-func helper(t *testing.T, i int, in string, want *shogi.Move, err error) {
+func moveHelper(t *testing.T, i int, in string, want *shogi.Move, err error) {
 	t.Helper()
 
 	res, e := NewFromUsi().Move(in)

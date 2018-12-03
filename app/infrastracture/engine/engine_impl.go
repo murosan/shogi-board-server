@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/result"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
 	"github.com/murosan/shogi-proxy-server/app/domain/exception"
@@ -29,6 +30,9 @@ type engine struct {
 	author  string
 	options option.OptMap
 
+	// エンジンの思考結果を貯めておくところ
+	result *result.Result
+
 	// エンジンの出力を流し込む scanner
 	// Singleton で持っておく
 	sc *bufio.Scanner
@@ -43,6 +47,7 @@ func NewEngine(c command.OsCmd, log logger.Log) engineModel.Engine {
 		cmd:     c,
 		state:   state.NotConnected,
 		options: *option.EmptyOptMap(),
+		result:  result.NewResult(),
 		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
 		log:     log,
 	}
@@ -72,6 +77,10 @@ func (e *engine) UpdateOption(v option.UpdateOptionValue) error {
 func (e *engine) SetState(s state.State) { e.state = s }
 
 func (e *engine) GetState() state.State { return e.state }
+
+func (e *engine) SetResult(i *result.Info, key int) { e.result.Set(i, key) }
+
+func (e *engine) FlushResult() { e.result.Flush() }
 
 func (e *engine) Lock() { e.mux.Lock() }
 
