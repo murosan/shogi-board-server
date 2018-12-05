@@ -5,12 +5,11 @@
 package from_usi
 
 import (
-	"fmt"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
 	"strings"
 	"testing"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/result"
+	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-proxy-server/app/lib/test_helper"
 )
 
@@ -34,8 +33,7 @@ func TestFromUsi_Info(t *testing.T) {
 					{[]int{-1, -1}, []int{3, 7}, 2, false},
 					{[]int{3, 2}, []int{3, 3}, 0, false},
 				},
-			},
-			-1, nil},
+			}, 0, nil},
 	}
 
 	for i, c := range cases {
@@ -45,44 +43,37 @@ func TestFromUsi_Info(t *testing.T) {
 
 func infoHelper(t *testing.T, i int, in string, want *result.Info, mpv int, err error) {
 	t.Helper()
-
+	msg := ""
 	res, mpvKey, e := NewFromUsi().Info(in)
-	fmt.Println(res)
 
 	if (e == nil && err != nil) || (e != nil && err == nil) {
-		t.Errorf(`(From Usi: Paese Info) Expected error, but was not as expected.
-Index:    %d
-Input:    %s
-Expected: %v
-Actual:   %v
-`, i, in, err, e)
+		msg = "Expected error, but was not as expected."
+		infoErrorPrintHelper(t, i, msg, in, err, e)
 	}
 
 	// エラーだったが、想定と違った。
 	if e != nil && err != nil && !strings.Contains(string(e.Error()), string(err.Error())) {
-		t.Errorf(`(From Usi: Paese Info) Expected error, but was not as expected.
-Index:    %d
-Input:    %s
-Expected: %v
-Actual:   %v
-`, i, in, err, e)
+		msg = "Expected error, but was not as expected."
+		infoErrorPrintHelper(t, i, msg, in, err, e)
 	}
 
 	if mpvKey != mpv {
-		t.Errorf(`(From Usi: Parse Info) The multipv index value was not as expected.
-Index:    %d
-Input:    %s
-Expected: %v
-Actual:   %v
-`, i, in, mpv, mpvKey)
+		msg = "The multipv index value was not as expected."
+		infoErrorPrintHelper(t, i, msg, in, mpv, mpvKey)
 	}
 
 	if !test_helper.InfoEquals(res, want) {
-		t.Errorf(`(From Usi: Parse Info) The value was not as expected.
+		msg = "The value was not as expected."
+		infoErrorPrintHelper(t, i, msg, in, want, res)
+	}
+}
+
+func infoErrorPrintHelper(t *testing.T, i int, msg, in string, expected, actual interface{}) {
+	t.Helper()
+	t.Errorf(`(From Usi: Parse Info) %s
 Index:    %d
 Input:    %s
 Expected: %v
 Actual:   %v
-`, i, in, want, res)
-	}
+`, msg, i, in, expected, actual)
 }

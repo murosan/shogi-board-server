@@ -17,12 +17,11 @@ import (
 // Info をパース
 // return
 //   r *result.Info パースした結果。失敗したら nil
-//   mpv int multipvならその値。multipvじゃなければ -1
+//   mpv int multipvならその値。multipvじゃなければ 0
 //   err error エラー
 func (fu *FromUsi) Info(s string) (r *result.Info, mpv int, err error) {
 	a := strings.Split(s, " ")
 	r = result.NewInfo()
-	mpv = -1
 
 	// panic をリカバーしてエラーをセット
 	defer func() {
