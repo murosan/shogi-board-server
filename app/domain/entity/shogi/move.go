@@ -25,16 +25,6 @@ type Move struct {
 	// TODO: 盤上の駒を動かすときもないとおかしいので、そのうち入るようにする
 	PieceId int `json:"pieceId"`
 
-	// 成、打、""
-	// '不成' は入らない。USIでは出力されないから。
-	Extra Extra `json:"extra"`
+	// 成ったかどうか。成: true, 不成: false
+	IsPromoted bool `json:"isPromoted"`
 }
-
-type Extra string
-
-var (
-	FromCaptured Extra = "打"
-	Promote      Extra = "成"
-	//NotPromote   Extra = "不成"
-	None Extra = ""
-)

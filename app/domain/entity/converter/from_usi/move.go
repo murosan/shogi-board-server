@@ -5,6 +5,7 @@
 package from_usi
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -12,11 +13,15 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 )
 
-func (fu *FromUsi) Move(s string) (*shogi.Move, error) {
+func (fu *FromUsi) Move(s string) (m *shogi.Move, err error) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			m = nil
+			err = exception.UnknownCharacter.WithMsg(fmt.Sprintf("%v", rec))
+		}
+	}()
+
 	a := strings.Split(strings.TrimSpace(s), "")
-	if len(a) < 4 {
-		return nil, exception.UnknownCharacter
-	}
 
 	if strings.Contains(s, "*") {
 		// 持ち駒から
@@ -25,77 +30,38 @@ func (fu *FromUsi) Move(s string) (*shogi.Move, error) {
 			return nil, exception.UnknownCharacter
 		}
 
-		column, err := fu.column(a[2])
-		if err != nil {
-			return nil, exception.UnknownCharacter
-		}
-
-		row, err := fu.row(a[3])
-		if err != nil {
-			return nil, exception.UnknownCharacter
-		}
-
 		return &shogi.Move{
 			Source:  []int{-1, -1},
-			Dest:    []int{column, row},
+			Dest:    []int{fu.column(a[2]), fu.row(a[3])},
 			PieceId: piece,
-			Extra:   shogi.FromCaptured,
 		}, nil
 	}
 
-	sourceCol, err := fu.column(a[0])
-	if err != nil {
-		return nil, exception.UnknownCharacter
-	}
-
-	sourceRow, err := fu.row(a[1])
-	if err != nil {
-		return nil, exception.UnknownCharacter
-	}
-
-	destCol, err := fu.column(a[2])
-	if err != nil {
-		return nil, exception.UnknownCharacter
-	}
-
-	destRow, err := fu.row(a[3])
-	if err != nil {
-		return nil, exception.UnknownCharacter
-	}
-
-	extra := shogi.None
-	if len(a) == 5 {
-		if a[4] != "+" {
-			return nil, exception.UnknownCharacter
-		}
-		extra = shogi.Promote
-	}
-
 	return &shogi.Move{
-		Source: []int{sourceCol, sourceRow},
-		Dest:   []int{destCol, destRow},
-		Extra:  extra,
+		Source:     []int{fu.column(a[0]), fu.row(a[1])},
+		Dest:       []int{fu.column(a[2]), fu.row(a[3])},
+		IsPromoted: len(a) == 5 && a[4] == "+",
 	}, nil
 }
 
-func (fu *FromUsi) column(s string) (int, error) {
+func (fu *FromUsi) column(s string) int {
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		return 0, err
+		panic(err)
 	}
 	if i < 1 || i > 9 {
-		return 0, exception.InvalidColumnNumber
+		panic(exception.InvalidColumnNumber)
 	}
-	return i - 1, nil // 0-8 にする
+	return i - 1 // 0-8 にする
 }
 
-func (fu *FromUsi) row(s string) (int, error) {
+func (fu *FromUsi) row(s string) int {
 	if len(s) != 1 {
-		return 0, exception.InvalidRowNumber
+		panic(exception.InvalidRowNumber)
 	}
 	r := []rune(s)[0]
 	if r < 97 || r > 105 {
-		return 0, exception.InvalidRowNumber
+		panic(exception.InvalidRowNumber)
 	}
-	return int(r - 97), nil
+	return int(r - 97)
 }

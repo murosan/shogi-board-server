@@ -37,8 +37,6 @@ var (
 	FailedToClose          = &Error{Code: "FailedToClose"}
 	EngineIsNotRunning     = &Error{Code: "EngineIsNotRunning"}
 	EngineIsAlreadyRunning = &Error{Code: "EngineIsAlreadyRunning"}
-	FailedToExecCommand    = &Error{Code: "FailedToExecCommand"}
-	FailedToStart          = &Error{Code: "FailedToStart"}
 	FailedToUpdateOption   = &Error{Code: "FailedToUpdateOption"}
 	InvalidOptionSyntax    = &Error{Code: "InvalidOptionSyntax"}
 	InvalidOptionParameter = &Error{Code: "InvalidOptionParameter"}
@@ -49,4 +47,5 @@ var (
 	InvalidRowNumber    = &Error{Code: "InvalidRowNumber"}
 	InvalidColumnNumber = &Error{Code: "InvalidColumnNumber"}
 	UnknownCharacter    = &Error{Code: "UnknownCharacter"}
+	FailedToParseInfo   = &Error{Code: "FailedToParseInfo"}
 )

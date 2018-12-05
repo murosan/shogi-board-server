@@ -9,17 +9,14 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/lib/intutil"
 )
 
-func MoveEquals(a, b *shogi.Move) bool {
-	if a == nil || b == nil {
-		return false
-	}
+func MoveEquals(a, b shogi.Move) bool {
 	return intutil.SliceEquals(a.Source, b.Source) &&
 		intutil.SliceEquals(a.Dest, b.Dest) &&
 		a.PieceId == b.PieceId &&
-		a.Extra == b.Extra
+		a.IsPromoted == b.IsPromoted
 }
 
-func MoveSliceEquals(a, b []*shogi.Move) (r bool) {
+func MoveSliceEquals(a, b []shogi.Move) (r bool) {
 	if len(a) != len(b) {
 		return
 	}
