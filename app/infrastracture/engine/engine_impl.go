@@ -46,7 +46,7 @@ func NewEngine(c command.OsCmd, log logger.Log) engineModel.Engine {
 	return &engine{
 		cmd:     c,
 		state:   state.NotConnected,
-		options: *option.EmptyOptMap(),
+		options: *option.NewOptMap(),
 		result:  result.NewResult(),
 		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
 		log:     log,

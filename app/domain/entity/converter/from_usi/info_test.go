@@ -21,12 +21,13 @@ func TestFromUsi_Info(t *testing.T) {
 		mpv  int
 		err  error
 	}{
-		{"info time 1141 depth 3 nodes 135125 score cp -1521 pv 3a3b L*4h 4c4d",
+		{"info time 1141 depth 3 seldepth 3 nodes 135125 score cp -1521 pv 3a3b L*4h 4c4d",
 			&result.Info{
 				Values: map[string]int{
-					result.Time:  1141,
-					result.Depth: 3,
-					result.Nodes: 135125,
+					result.Time:     1141,
+					result.Depth:    3,
+					result.SelDepth: 3,
+					result.Nodes:    135125,
 				},
 				Score: -1521,
 				Moves: []shogi.Move{
@@ -101,6 +102,8 @@ func TestFromUsi_Info(t *testing.T) {
 				},
 			}, 4, nil},
 		{"info score cp aaa multipv 4 pv 5g6h 8b8f P*8g 8f5f",
+			nil, 0, exception.FailedToParseInfo},
+		{"info score cp 4 multipv 4 pv 5g6h 8b8f P*8g 8f5z",
 			nil, 0, exception.FailedToParseInfo},
 	}
 

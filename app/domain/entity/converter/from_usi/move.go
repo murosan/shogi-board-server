@@ -56,9 +56,6 @@ func (fu *FromUsi) column(s string) int {
 }
 
 func (fu *FromUsi) row(s string) int {
-	if len(s) != 1 {
-		panic(exception.InvalidRowNumber)
-	}
 	r := []rune(s)[0]
 	if r < 97 || r > 105 {
 		panic(exception.InvalidRowNumber)

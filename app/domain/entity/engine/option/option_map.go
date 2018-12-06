@@ -20,7 +20,7 @@ type OptMap struct {
 	Filenames map[string]*FileName `json:"filenames"`
 }
 
-func EmptyOptMap() *OptMap {
+func NewOptMap() *OptMap {
 	return &OptMap{
 		Buttons:   make(map[string]*Button),
 		Checks:    make(map[string]*Check),
@@ -51,7 +51,6 @@ func (om *OptMap) Append(o Option) {
 	}
 }
 
-// TODO: オプションの名前をまとめて変数から使うとか整理する
 func (om *OptMap) Update(v UpdateOptionValue) (string, error) {
 	var (
 		opt Option

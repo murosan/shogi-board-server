@@ -5,6 +5,9 @@
 package stringutil
 
 func SliceContains(a []string, b string) bool {
+	if a == nil {
+		return false
+	}
 	for _, s := range a {
 		if s == b {
 			return true

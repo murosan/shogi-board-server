@@ -23,11 +23,16 @@ func TestIndexOfBytes(t *testing.T) {
 		{arr, one, 0},
 		{arr, three, 2},
 		{arr, []byte("four"), -1},
+		{nil, []byte("four"), -1},
+		{arr, nil, -1},
 	}
 
 	for i, c := range cases {
 		if r := IndexOfBytes(c.b, c.t); r != c.want {
-			t.Errorf("Result was not as expected.\nIndex: %v\nExpected: %v\nActual: %v", i, c.want, r)
+			t.Errorf(`Result was not as expected.
+Index:    %v
+Expected: %v
+Actual:   %v`, i, c.want, r)
 		}
 	}
 }
@@ -39,13 +44,19 @@ func TestEqualBytes(t *testing.T) {
 	}{
 		{arr, arr, true},
 		{[][]byte{}, [][]byte{}, true},
-		{arr, [][]byte{one, two, []byte("threee")}, false,},
-		{arr, [][]byte{one, two}, false,},
+		{arr, [][]byte{one, two, []byte("threee")}, false},
+		{arr, [][]byte{one, two}, false},
+		{nil, [][]byte{one, two}, false},
+		{arr, nil, false},
+		{nil, nil, true},
 	}
 
 	for i, c := range cases {
 		if r := EqualBytes(c.in1, c.in2); r != c.want {
-			t.Errorf("Result was not as expected.\nIndex: %v\nExpected: %v\nActual: %v", i, c.want, r)
+			t.Errorf(`Result was not as expected.
+Index:    %v
+Expected: %v
+Actual:   %v`, i, c.want, r)
 		}
 	}
 }
