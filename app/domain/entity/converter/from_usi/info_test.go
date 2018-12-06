@@ -10,6 +10,7 @@ import (
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/result"
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
+	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	"github.com/murosan/shogi-proxy-server/app/lib/test_helper"
 )
 
@@ -34,6 +35,73 @@ func TestFromUsi_Info(t *testing.T) {
 					{[]int{3, 2}, []int{3, 3}, 0, false},
 				},
 			}, 0, nil},
+		{"info nodes 120000 nps 116391 hashfull 104",
+			&result.Info{
+				Values: map[string]int{
+					result.Nodes:    120000,
+					result.Nps:      116391,
+					result.HashFull: 104,
+				},
+				Score: 0,
+				Moves: []shogi.Move{},
+			}, 0, nil},
+		{"info score cp 156 multipv 1 pv P*5h 4g5g 5h5g 8b8f",
+			&result.Info{
+				Values: map[string]int{},
+				Score:  156,
+				Moves: []shogi.Move{
+					{[]int{-1, -1}, []int{4, 7}, 1, false},
+					{[]int{3, 6}, []int{4, 6}, 0, false},
+					{[]int{4, 7}, []int{4, 6}, 0, false},
+					{[]int{7, 1}, []int{7, 5}, 0, false},
+				},
+			}, 1, nil},
+		{"info score cp -99 multipv 2 pv 2d4d 3c4e 8h5e N*7f",
+			&result.Info{
+				Values: map[string]int{},
+				Score:  -99,
+				Moves: []shogi.Move{
+					{[]int{1, 3}, []int{3, 3}, 0, false},
+					{[]int{2, 2}, []int{3, 4}, 0, false},
+					{[]int{7, 7}, []int{4, 4}, 0, false},
+					{[]int{-1, -1}, []int{6, 5}, 3, false},
+				},
+			}, 2, nil},
+		{"info score cp -157 multipv 3 pv 5g5f 4g4f 4e3c+ 4c3c",
+			&result.Info{
+				Values: map[string]int{},
+				Score:  -157,
+				Moves: []shogi.Move{
+					{[]int{4, 6}, []int{4, 5}, 0, false},
+					{[]int{3, 6}, []int{3, 5}, 0, false},
+					{[]int{3, 4}, []int{2, 2}, 0, true},
+					{[]int{3, 2}, []int{2, 2}, 0, false},
+				},
+			}, 3, nil},
+		{"info score cp -157 str multipv 3 lalala... pv 5g5f 4g4f 4e3c+ 4c3c",
+			&result.Info{
+				Values: map[string]int{},
+				Score:  -157,
+				Moves: []shogi.Move{
+					{[]int{4, 6}, []int{4, 5}, 0, false},
+					{[]int{3, 6}, []int{3, 5}, 0, false},
+					{[]int{3, 4}, []int{2, 2}, 0, true},
+					{[]int{3, 2}, []int{2, 2}, 0, false},
+				},
+			}, 3, nil},
+		{"info score cp -225 multipv 4 pv 5g6h 8b8f P*8g 8f5f",
+			&result.Info{
+				Values: map[string]int{},
+				Score:  -225,
+				Moves: []shogi.Move{
+					{[]int{4, 6}, []int{5, 7}, 0, false},
+					{[]int{7, 1}, []int{7, 5}, 0, false},
+					{[]int{-1, -1}, []int{7, 6}, 1, false},
+					{[]int{7, 5}, []int{4, 5}, 0, false},
+				},
+			}, 4, nil},
+		{"info score cp aaa multipv 4 pv 5g6h 8b8f P*8g 8f5f",
+			nil, 0, exception.FailedToParseInfo},
 	}
 
 	for i, c := range cases {
@@ -49,6 +117,11 @@ func infoHelper(t *testing.T, i int, in string, want *result.Info, mpv int, err 
 	if (e == nil && err != nil) || (e != nil && err == nil) {
 		msg = "Expected error, but was not as expected."
 		infoErrorPrintHelper(t, i, msg, in, err, e)
+	}
+
+	// 想定通りのエラー
+	if e != nil && err != nil && strings.Contains(string(e.Error()), string(err.Error())) {
+		return
 	}
 
 	// エラーだったが、想定と違った。

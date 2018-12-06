@@ -14,7 +14,7 @@ import (
 	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 )
 
-// Info をパース
+// Info をパース(info string は渡さない)
 // return
 //   r *result.Info パースした結果。失敗したら nil
 //   mpv int multipvならその値。multipvじゃなければ 0

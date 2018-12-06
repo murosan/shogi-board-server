@@ -16,14 +16,14 @@ func MoveEquals(a, b shogi.Move) bool {
 		a.IsPromoted == b.IsPromoted
 }
 
-func MoveSliceEquals(a, b []shogi.Move) (r bool) {
+func MoveSliceEquals(a, b []shogi.Move) bool {
 	if len(a) != len(b) {
-		return
+		return false
 	}
 	for i, v := range a {
-		if MoveEquals(v, b[i]) {
-			return true
+		if !MoveEquals(v, b[i]) {
+			return false
 		}
 	}
-	return
+	return true
 }
