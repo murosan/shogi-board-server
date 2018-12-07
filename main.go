@@ -31,6 +31,7 @@ func main() {
 	s := server.NewServer(
 		conn,
 		converter.UseFromJson(),
+		converter.UseFromUsi(),
 		converter.UseToUsi(),
 		logger.Use(),
 	)

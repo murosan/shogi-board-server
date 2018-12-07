@@ -20,7 +20,7 @@ var (
 
 	SetPositionPath = "/position/set"
 
-	GetValuesPath = "/study/values/list"
+	GetResultPath = "/result/get"
 
 	InitAnalyze  = "/analyze/init"
 	StartAnalyze = "/analyze/start"

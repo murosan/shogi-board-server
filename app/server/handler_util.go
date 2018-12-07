@@ -52,8 +52,8 @@ func (s *server) Handling(w http.ResponseWriter, r *http.Request) {
 		s.withMethod(post, w, r, s.start)
 	case StopPath:
 		s.withMethod(post, w, r, s.stop)
-	case GetValuesPath:
-		s.withMethod(get, w, r, s.getValues)
+	case GetResultPath:
+		s.withMethod(get, w, r, s.getResult)
 	case InitAnalyze:
 		s.withMethod(post, w, r, s.initAnalyze)
 	case StartAnalyze:

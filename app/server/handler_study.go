@@ -5,6 +5,8 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 
 	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
@@ -94,6 +96,30 @@ func (s *server) start(w http.ResponseWriter, r *http.Request) {
 				s.internalServerError(w, err)
 				return
 			}
+
+			// 出力を受け取り続けて、engine の Result に追加していく
+			go func() {
+				for {
+					select {
+					case b := <-e.GetChan():
+						s.log.Info("receive", zap.ByteString("msg", b))
+						if bytes.HasPrefix(b, []byte("info string")) {
+							continue // info string は無視
+						}
+						if bytes.HasPrefix(b, []byte("info ")) {
+							i, mpv, err := s.fu.Info(string(b))
+							if err != nil {
+								s.log.Error("ParseInfoError", zap.Error(err))
+								continue
+							}
+							if len(i.Moves) > 0 {
+								e.SetResult(i, mpv)
+							}
+						}
+					}
+				}
+			}()
+
 			e.SetState(state.Thinking)
 		}
 
@@ -122,6 +148,20 @@ func (s *server) stop(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *server) getValues(w http.ResponseWriter, r *http.Request) {
-	// TODO
+func (s *server) getResult(w http.ResponseWriter, r *http.Request) {
+	err := s.conn.WithEngine("", func(e engine.Engine) {
+		d, err := json.Marshal(e.GetResult())
+		if err != nil {
+			s.log.Error("Failed to marshal engine result.", zap.Error(err))
+			s.internalServerError(w, err)
+			return
+		}
+
+		s.log.Info("GetResult", zap.ByteString("Marshaled value", d))
+		w.Header().Set(contentType, mimeJson)
+		w.Write(d)
+	})
+	if err != nil {
+		s.internalServerError(w, err)
+	}
 }

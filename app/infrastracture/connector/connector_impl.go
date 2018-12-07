@@ -33,9 +33,6 @@ type connector struct {
 	pool conn.ConnectionPool
 	fu   *from_usi.FromUsi
 	log  logger.Log
-
-	// TODO: 2つのエンジンから受け取る方法を考える
-	egnOut chan []byte
 }
 
 func NewConnector(
@@ -44,7 +41,7 @@ func NewConnector(
 	fu *from_usi.FromUsi,
 	log logger.Log,
 ) conn.Connector {
-	return &connector{c, p, fu, log, make(chan []byte)}
+	return &connector{c, p, fu, log}
 }
 
 func (c *connector) Connect() error {
@@ -64,12 +61,12 @@ func (c *connector) Connect() error {
 
 	egn.Lock()
 	egn.SetState(state.Connected)
-	go c.catchOutput(c.egnOut)
+	go c.catchOutput(egn.GetChan())
 	if e := egn.Exec(usi.CmdUsi); e != nil {
 		c.log.Error("ExecUsiError", zap.Error(e))
 		return e
 	}
-	if e := c.waitFor(usi.ResOk, true); e != nil {
+	if e := c.waitFor(usi.ResOk, true, egn.GetChan()); e != nil {
 		c.log.Error("WaitUsiOkError", zap.Error(e))
 		return e
 	}
@@ -77,7 +74,7 @@ func (c *connector) Connect() error {
 		c.log.Error("ExecIsReadyError", zap.Error(e))
 		return e
 	}
-	if e := c.waitFor(usi.ResReady, false); e != nil {
+	if e := c.waitFor(usi.ResReady, false, egn.GetChan()); e != nil {
 		c.log.Error("WaitReadyOkError", zap.Error(e))
 		return e
 	}
@@ -122,16 +119,7 @@ func (c *connector) catchOutput(ch chan []byte) {
 	}
 }
 
-func (c *connector) waitInf() {
-	for {
-		select {
-		case b := <-c.egnOut:
-			c.log.Info("receive", zap.String("msg", string(b)))
-		}
-	}
-}
-
-func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
+func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) error {
 	timeout := make(chan struct{})
 	go func() {
 		time.Sleep(time.Second * 10)
@@ -140,7 +128,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool) error {
 	}()
 	for {
 		select {
-		case b := <-c.egnOut:
+		case b := <-egnOut:
 			if parseOpt && idRegex.Match(b) {
 				k, v, e := c.fu.EngineID(string(b))
 				if e != nil {

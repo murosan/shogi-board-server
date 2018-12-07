@@ -37,6 +37,8 @@ type engine struct {
 	// Singleton で持っておく
 	sc *bufio.Scanner
 
+	ch chan []byte
+
 	mux sync.Mutex
 
 	log logger.Log
@@ -49,6 +51,7 @@ func NewEngine(c command.OsCmd, log logger.Log) engineModel.Engine {
 		options: *option.NewOptMap(),
 		result:  result.NewResult(),
 		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
+		ch:      make(chan []byte),
 		log:     log,
 	}
 }
@@ -80,6 +83,8 @@ func (e *engine) GetState() state.State { return e.state }
 
 func (e *engine) SetResult(i *result.Info, key int) { e.result.Set(i, key) }
 
+func (e *engine) GetResult() *result.Result { return e.result }
+
 func (e *engine) FlushResult() { e.result.Flush() }
 
 func (e *engine) Lock() { e.mux.Lock() }
@@ -100,3 +105,5 @@ func (e *engine) Close() error {
 }
 
 func (e *engine) GetScanner() *bufio.Scanner { return e.sc }
+
+func (e *engine) GetChan() chan []byte { return e.ch }

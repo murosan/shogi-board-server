@@ -8,6 +8,9 @@ setup_develop:
 
 setup_all: install_dependencies setup_develop
 
+build:
+	go build -o ./main
+
 test_all:
 	rm -rf ./coverage
 	mkdir -p ./coverage

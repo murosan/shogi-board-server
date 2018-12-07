@@ -28,6 +28,7 @@ type Engine interface {
 	GetState() state.State
 
 	SetResult(i *result.Info, key int)
+	GetResult() *result.Result
 	FlushResult()
 
 	Lock()
@@ -40,4 +41,7 @@ type Engine interface {
 
 	// 将棋エンジンが出力した値を読み取る Scanner を作る
 	GetScanner() *bufio.Scanner
+
+	// 将棋エンジンが出力した値が送信されるチャネルを返す
+	GetChan() chan []byte
 }
