@@ -5,8 +5,9 @@
 package server
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
 	"net/http"
+
+	"github.com/murosan/shogi-board-server/app/domain/exception"
 )
 
 func (s *server) connect(w http.ResponseWriter, r *http.Request) {

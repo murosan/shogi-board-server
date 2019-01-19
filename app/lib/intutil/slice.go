@@ -4,6 +4,7 @@
 
 package intutil
 
+// SliceEquals a と b が同じ値を持っているか判定する
 func SliceEquals(a, b []int) bool {
 	if len(a) != len(b) {
 		return false

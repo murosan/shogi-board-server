@@ -7,7 +7,7 @@ package config
 import (
 	"encoding/json"
 
-	confModel "github.com/murosan/shogi-proxy-server/app/domain/config"
+	confModel "github.com/murosan/shogi-board-server/app/domain/config"
 	"go.uber.org/zap"
 )
 
@@ -16,6 +16,7 @@ type config struct {
 	Log        zap.Config        `json:"Log"`
 }
 
+// NewConfig return Config
 func NewConfig(b []byte) confModel.Config {
 	var c config
 	if err := json.Unmarshal(b, &c); err != nil {

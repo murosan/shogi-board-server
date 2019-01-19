@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package test_helper
+package testhelper
 
 import (
 	"reflect"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/result"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/result"
 )
 
-func InfoEquals(a, b *result.Info) bool {
-	if a == nil || b == nil {
-		return false
-	}
+// InfoEquals テスト用メソッド 2つの Info が同じかどうか判定する
+// 同じ: true
+// 違う: false
+func InfoEquals(a, b result.Info) bool {
 	return reflect.DeepEqual(a.Values, b.Values) &&
 		a.Score == b.Score &&
 		MoveSliceEquals(a.Moves, b.Moves)

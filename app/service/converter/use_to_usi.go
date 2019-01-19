@@ -5,11 +5,12 @@
 package converter
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/converter/to_usi"
+	"github.com/murosan/shogi-board-server/app/domain/entity/converter"
 )
 
-var tu = to_usi.NewToUsi()
+var tu = converter.NewToUSI()
 
-func UseToUsi() *to_usi.ToUsi {
+// UseToUSI ToUSI を返す
+func UseToUSI() converter.ToUSI {
 	return tu
 }

@@ -8,8 +8,8 @@ import (
 	"io"
 	"os/exec"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	"github.com/murosan/shogi-board-server/app/domain/infrastracture/os/command"
+	"github.com/murosan/shogi-board-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
@@ -24,6 +24,7 @@ type osCmd struct {
 	out io.ReadCloser
 }
 
+// NewCmd 新しい OsCmd を返す
 func NewCmd(cmd *exec.Cmd) command.OsCmd {
 	stdin, err := cmd.StdinPipe()
 	if err != nil {

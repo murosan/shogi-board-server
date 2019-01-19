@@ -4,18 +4,19 @@
 
 package state
 
+// State 将棋エンジンの状態を表す
 type State int
 
 const (
-	// 起動前
+	// NotConnected 起動前
 	NotConnected State = 1
 
-	// 接続済み. usinewgame 前
+	// Connected 接続済み. usinewgame 前
 	Connected State = 2
 
-	// usinewgame の後、思考中ではない
+	// StandBy USI の usinewgame を実行後、思考中ではないとき
 	StandBy State = 3
 
-	// 思考中
+	// Thinking 思考中
 	Thinking State = 4
 )

@@ -6,11 +6,14 @@ package option
 
 import (
 	"fmt"
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
+
+	"github.com/murosan/shogi-board-server/app/domain/exception"
+	"github.com/murosan/shogi-board-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
+// OptMap Option の一覧を入れておくもの
+// 管理しやすいように、オプションの種類別になっている
 type OptMap struct {
 	Buttons   map[string]*Button   `json:"buttons"`
 	Checks    map[string]*Check    `json:"checks"`
@@ -20,6 +23,7 @@ type OptMap struct {
 	Filenames map[string]*FileName `json:"filenames"`
 }
 
+// NewOptMap 新しい OptMap を返す
 func NewOptMap() *OptMap {
 	return &OptMap{
 		Buttons:   make(map[string]*Button),
@@ -31,7 +35,7 @@ func NewOptMap() *OptMap {
 	}
 }
 
-// 新しいオプションを追加する
+// Append OptMap に新しいオプションを追加する
 func (om *OptMap) Append(o Option) {
 	switch t := o.(type) {
 	case *Button:
@@ -51,6 +55,7 @@ func (om *OptMap) Append(o Option) {
 	}
 }
 
+// Update OptMap にある Option の値を更新する
 func (om *OptMap) Update(v UpdateOptionValue) (string, error) {
 	var (
 		opt Option

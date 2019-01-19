@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -xe
 
 # https://tip.golang.org/misc/git/pre-commit
 
@@ -12,3 +12,7 @@ for fn in $unformatted; do
   gofmt -w $PWD/$fn
   git add $PWD/$fn
 done
+
+go vet ./...
+staticcheck ./...
+golint -set_exit_status ./...

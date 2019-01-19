@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
+	"github.com/murosan/shogi-board-server/app/domain/exception"
 	"go.uber.org/zap"
 )
 
@@ -18,7 +18,7 @@ const (
 	get  = "GET"
 	post = "POST"
 
-	mimeJson = "application/json"
+	mimeJSON = "application/json"
 
 	contentType   = "Content-Type"
 	contentLength = "Content-Length"
@@ -45,9 +45,9 @@ func (s *server) Handling(w http.ResponseWriter, r *http.Request) {
 	case ListOptPath:
 		s.withMethod(get, w, r, s.getOptionList)
 	case SetOptPath:
-		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.updateOption))
+		s.withMethod(post, w, r, s.contentTypeCheck(mimeJSON, s.updateOption))
 	case SetPositionPath:
-		s.withMethod(post, w, r, s.contentTypeCheck(mimeJson, s.setPosition))
+		s.withMethod(post, w, r, s.contentTypeCheck(mimeJSON, s.setPosition))
 	case StartPath:
 		s.withMethod(post, w, r, s.start)
 	case StopPath:
@@ -107,7 +107,7 @@ func (s *server) withMethod(
 //         HttpHeaderにContent-Lengthがなかったり、int にできなかったエラー
 // error2: exception.FailedToReadBody
 //         body の読み取りに失敗したエラー
-func (s *server) readJsonBody(r *http.Request) ([]byte, error) {
+func (s *server) readJSONBody(r *http.Request) ([]byte, error) {
 	l, err := strconv.Atoi(r.Header.Get(contentLength))
 	if err != nil {
 		s.log.Error("Could not read "+contentLength, zap.Error(err))
@@ -115,7 +115,7 @@ func (s *server) readJsonBody(r *http.Request) ([]byte, error) {
 	}
 
 	body := make([]byte, l)
-	l, err = r.Body.Read(body)
+	_, err = r.Body.Read(body)
 	if err != nil && err != io.EOF {
 		m := fmt.Sprintf(
 			"%v\ncaused by:\n%v",

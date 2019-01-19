@@ -2,20 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package test_helper
+package testhelper
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
-	"github.com/murosan/shogi-proxy-server/app/lib/intutil"
+	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 )
 
+// MoveEquals テスト用メソッド 2つの Move が同じかどうか判定する
+// 同じ: true
+// 違う: false
 func MoveEquals(a, b shogi.Move) bool {
-	return intutil.SliceEquals(a.Source, b.Source) &&
-		intutil.SliceEquals(a.Dest, b.Dest) &&
-		a.PieceId == b.PieceId &&
+	return a.Source.Row == b.Source.Row &&
+		a.Source.Column == b.Source.Column &&
+		a.Dest.Row == b.Dest.Row &&
+		a.Dest.Column == b.Dest.Column &&
+		a.PieceID == b.PieceID &&
 		a.IsPromoted == b.IsPromoted
 }
 
+// MoveSliceEquals テスト用メソッド 2つの Move スライスが同じかどうか判定する
+// 同じ: true
+// 違う: false
 func MoveSliceEquals(a, b []shogi.Move) bool {
 	if len(a) != len(b) {
 		return false

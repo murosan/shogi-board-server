@@ -9,17 +9,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/murosan/shogi-proxy-server/app/server"
-	"github.com/murosan/shogi-proxy-server/app/service/config"
-	"github.com/murosan/shogi-proxy-server/app/service/connector"
-	"github.com/murosan/shogi-proxy-server/app/service/converter"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	"github.com/murosan/shogi-board-server/app/server"
+	"github.com/murosan/shogi-board-server/app/service/config"
+	"github.com/murosan/shogi-board-server/app/service/connector"
+	"github.com/murosan/shogi-board-server/app/service/converter"
+	"github.com/murosan/shogi-board-server/app/service/logger"
 	"go.uber.org/zap"
 )
 
 var (
 	addr       = flag.String("addr", "127.0.0.1:8080", "http service address")
-	configPath = flag.String("config", "./config.json", "config path")
+	configPath = flag.String("config", "./config/config.json", "config path")
 )
 
 func main() {
@@ -30,9 +30,9 @@ func main() {
 
 	s := server.NewServer(
 		conn,
-		converter.UseFromJson(),
-		converter.UseFromUsi(),
-		converter.UseToUsi(),
+		converter.UseFromJSON(),
+		converter.UseFromUSI(),
+		converter.UseToUSI(),
 		logger.Use(),
 	)
 

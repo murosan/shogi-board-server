@@ -5,12 +5,13 @@
 package logger
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/logger"
-	"github.com/murosan/shogi-proxy-server/app/service/config"
+	"github.com/murosan/shogi-board-server/app/domain/logger"
+	"github.com/murosan/shogi-board-server/app/service/config"
 )
 
-var l logger.Log = nil
+var l logger.Log
 
+// Use returns Logger
 func Use() logger.Log {
 	if l == nil {
 		l = logger.NewLogger(config.UseConfig())

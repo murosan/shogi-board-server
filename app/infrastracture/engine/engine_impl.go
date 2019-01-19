@@ -8,14 +8,14 @@ import (
 	"bufio"
 	"sync"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/result"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
-	engineModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/os/command"
-	"github.com/murosan/shogi-proxy-server/app/domain/logger"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/result"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/state"
+	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
+	"github.com/murosan/shogi-board-server/app/domain/exception"
+	engineModel "github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
+	"github.com/murosan/shogi-board-server/app/domain/infrastracture/os/command"
+	"github.com/murosan/shogi-board-server/app/domain/logger"
 	"go.uber.org/zap"
 )
 
@@ -44,6 +44,7 @@ type engine struct {
 	log logger.Log
 }
 
+// NewEngine 新しい Engine を返す
 func NewEngine(c command.OsCmd, log logger.Log) engineModel.Engine {
 	return &engine{
 		cmd:     c,
@@ -81,7 +82,7 @@ func (e *engine) SetState(s state.State) { e.state = s }
 
 func (e *engine) GetState() state.State { return e.state }
 
-func (e *engine) SetResult(i *result.Info, key int) { e.result.Set(i, key) }
+func (e *engine) SetResult(i result.Info, key int) { e.result.Set(i, key) }
 
 func (e *engine) GetResult() *result.Result { return e.result }
 
@@ -91,7 +92,6 @@ func (e *engine) Lock() { e.mux.Lock() }
 
 func (e *engine) Unlock() { e.mux.Unlock() }
 
-// USIコマンドの実行
 func (e *engine) Exec(b []byte) error {
 	e.log.Info("StdinPipe", zap.ByteString("Exec", b))
 	return e.cmd.Write(append(b, '\n'))

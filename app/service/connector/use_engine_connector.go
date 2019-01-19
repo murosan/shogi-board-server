@@ -5,22 +5,23 @@
 package connector
 
 import (
-	connModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
-	"github.com/murosan/shogi-proxy-server/app/infrastracture/connector"
-	"github.com/murosan/shogi-proxy-server/app/service/config"
-	"github.com/murosan/shogi-proxy-server/app/service/converter"
-	"github.com/murosan/shogi-proxy-server/app/service/logger"
+	connModel "github.com/murosan/shogi-board-server/app/domain/infrastracture/connector"
+	"github.com/murosan/shogi-board-server/app/infrastracture/connector"
+	"github.com/murosan/shogi-board-server/app/service/config"
+	"github.com/murosan/shogi-board-server/app/service/converter"
+	"github.com/murosan/shogi-board-server/app/service/logger"
 )
 
-var c connModel.Connector = nil
+var c connModel.Connector
 
+// UseConnector シングルトンで保持している Connector を返す
 func UseConnector() connModel.Connector {
 	if c == nil {
 		p := connector.NewConnectionPool(config.UseConfig(), logger.Use())
 		c = connector.NewConnector(
 			config.UseConfig(),
 			p,
-			converter.UseFromUsi(),
+			converter.UseFromUSI(),
 			logger.Use(),
 		)
 	}

@@ -4,6 +4,9 @@
 
 package option
 
+// UpdateOptionValue オプションを更新するときに API で受ける値
+// gRPC を検討したい
+// Engine 型の UpdateOption に渡す
 type UpdateOptionValue struct {
 	// オプション名
 	Name string `json:"name"`

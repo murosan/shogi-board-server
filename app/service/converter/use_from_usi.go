@@ -4,12 +4,13 @@
 
 package converter
 
-import "github.com/murosan/shogi-proxy-server/app/domain/entity/converter/from_usi"
+import "github.com/murosan/shogi-board-server/app/domain/entity/converter"
 
 // FromUsi を interface にして nil をぶっこむ
 // lazy 的な感じで initialize する
-var fu = from_usi.NewFromUsi()
+var fu = converter.NewFromUSI()
 
-func UseFromUsi() *from_usi.FromUsi {
+// UseFromUSI FromUSI を返す
+func UseFromUSI() converter.FromUSI {
 	return fu
 }

@@ -8,8 +8,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/murosan/shogi-proxy-server/app/lib/stringutil"
-	"github.com/murosan/shogi-proxy-server/app/lib/test_helper"
+	"github.com/murosan/shogi-board-server/app/lib/stringutil"
+	testhelper "github.com/murosan/shogi-board-server/app/lib/test_helper"
 	"go.uber.org/zap"
 )
 
@@ -90,7 +90,7 @@ func TestNewConfig2(t *testing.T) {
 	}
 
 	errMsg := "Expected panic, but there wasn't.\nInput: " + c.json
-	test_helper.MustPanic(t, func() { NewConfig([]byte(c.json)) }, errMsg)
+	testhelper.MustPanic(t, func() { NewConfig([]byte(c.json)) }, errMsg)
 }
 
 func failing(t *testing.T, key string, i int, expected, actual interface{}) {

@@ -4,8 +4,10 @@
 
 package connector
 
-import "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
+import "github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
 
+// ConnectionPool 将棋エンジンのコネクションを保持する
+// 将来的に複数の将棋エンジンを切り替えるために用意している
 type ConnectionPool interface {
 	// config にある全ての Engine のコマンドを初期化する
 	Initialize()

@@ -9,17 +9,17 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
-	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/state"
+	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
+	"github.com/murosan/shogi-board-server/app/domain/exception"
+	"github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
 	"go.uber.org/zap"
 )
 
 func (s *server) setPosition(w http.ResponseWriter, r *http.Request) {
-	body, err := s.readJsonBody(r)
+	body, err := s.readJSONBody(r)
 	if err != nil && err == exception.ContentLengthRequired {
-		http.Error(w, err.Error(), 411) // Length Required
+		http.Error(w, err.Error(), http.StatusLengthRequired)
 		return
 	}
 	if err != nil && err == exception.FailedToReadBody {
@@ -99,22 +99,19 @@ func (s *server) start(w http.ResponseWriter, r *http.Request) {
 
 			// 出力を受け取り続けて、engine の Result に追加していく
 			go func() {
-				for {
-					select {
-					case b := <-e.GetChan():
-						s.log.Info("receive", zap.ByteString("msg", b))
-						if bytes.HasPrefix(b, []byte("info string")) {
-							continue // info string は無視
+				for b := range e.GetChan() {
+					s.log.Info("receive", zap.ByteString("msg", b))
+					if bytes.HasPrefix(b, []byte("info string")) {
+						continue // info string は無視
+					}
+					if bytes.HasPrefix(b, []byte("info ")) {
+						i, mpv, err := s.fu.Info(string(b))
+						if err != nil {
+							s.log.Error("ParseInfoError", zap.Error(err))
+							continue
 						}
-						if bytes.HasPrefix(b, []byte("info ")) {
-							i, mpv, err := s.fu.Info(string(b))
-							if err != nil {
-								s.log.Error("ParseInfoError", zap.Error(err))
-								continue
-							}
-							if len(i.Moves) > 0 {
-								e.SetResult(i, mpv)
-							}
+						if len(i.Moves) > 0 {
+							e.SetResult(i, mpv)
 						}
 					}
 				}
@@ -141,7 +138,6 @@ func (s *server) stop(w http.ResponseWriter, r *http.Request) {
 		}
 		e.FlushResult()
 		w.WriteHeader(http.StatusOK)
-		return
 	})
 	if err != nil {
 		s.internalServerError(w, err)
@@ -158,7 +154,7 @@ func (s *server) getResult(w http.ResponseWriter, r *http.Request) {
 		}
 
 		s.log.Info("GetResult", zap.ByteString("Marshaled value", d))
-		w.Header().Set(contentType, mimeJson)
+		w.Header().Set(contentType, mimeJSON)
 		w.Write(d)
 	})
 	if err != nil {

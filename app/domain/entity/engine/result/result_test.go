@@ -19,7 +19,7 @@ func TestResult_Flush(t *testing.T) {
 
 	r.Flush()
 	if len(r.Values) != 0 {
-		t.Errorf(`Failed to flush values. 
+		t.Errorf(`Failed to flush values.
 Expected length is 0, but got %d`, len(r.Values))
 	}
 }
@@ -31,7 +31,7 @@ func TestResult_Set(t *testing.T) {
 		t.Errorf(`Failed to setup.`)
 	}
 
-	r.Set(&Info{}, 11)
+	r.Set(Info{}, 11)
 	if len(r.Values) != 1 {
 		t.Errorf("Failed to set info. Expected length is 1, but got 0")
 	}

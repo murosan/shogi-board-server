@@ -6,8 +6,7 @@ package byteutil
 
 import "bytes"
 
-// b の中に t があるか
-// ない時は -1 を返す
+// IndexOfBytes b の中に t があるか。ない時は -1 を返す
 func IndexOfBytes(b [][]byte, t []byte) int {
 	if b == nil || t == nil {
 		return -1
@@ -20,7 +19,7 @@ func IndexOfBytes(b [][]byte, t []byte) int {
 	return -1
 }
 
-// b1 と b2 が等しければ true
+// EqualBytes b1 と b2 が等しければ true
 func EqualBytes(b1, b2 [][]byte) bool {
 	if (b1 == nil) != (b2 == nil) {
 		return false

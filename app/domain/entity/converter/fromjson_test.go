@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package from_json
+package converter
 
 import (
+	"strings"
 	"testing"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/shogi"
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
+	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
+	"github.com/murosan/shogi-board-server/app/domain/exception"
 )
 
-func TestFromJson_Position(t *testing.T) {
-	fj := NewFromJson()
+func TestFromJSON_Position(t *testing.T) {
+	fj := NewFromJSON()
 	cases := []struct {
 		in   []byte
 		want shogi.Position
@@ -73,13 +74,14 @@ func TestFromJson_Position(t *testing.T) {
   "turn": 1,
 }`),
 			shogi.Position{},
-			exception.FailedToParseJson,
+			exception.FailedToParseJSON,
 		},
 	}
 
 	for i, c := range cases {
 		p, e := fj.Position(c.in)
-		if e != nil && c.err.Code == c.err.Code {
+		// 想定通りのエラーだった
+		if e != nil && strings.Contains(e.Error(), c.err.Error()) {
 			continue
 		}
 		if e != nil {

@@ -6,7 +6,7 @@ package command
 
 import "io"
 
-// exec.Command のラッパー
+// OsCmd exec.Command のラッパー
 type OsCmd interface {
 	Start() error
 	Wait() error

@@ -1,5 +1,6 @@
 /main
 /coverage
 /log
-/config.json
+/config/*
+!/config/example.json
 .envrc

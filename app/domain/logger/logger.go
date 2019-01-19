@@ -5,10 +5,11 @@
 package logger
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/config"
+	"github.com/murosan/shogi-board-server/app/domain/config"
 	"go.uber.org/zap"
 )
 
+// Log ロギングライブラリ、zap のラッパー
 type Log interface {
 	Debug(msg string, fields ...zap.Field)
 	Info(msg string, fields ...zap.Field)
@@ -21,6 +22,7 @@ type log struct {
 	z *zap.Logger
 }
 
+// NewLogger 新しい Log を返す
 func NewLogger(c config.Config) Log {
 	l, _ := c.GetLogConf().Build()
 	return &log{l}

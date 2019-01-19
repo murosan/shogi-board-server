@@ -9,15 +9,15 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/config"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/converter/from_usi"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/state"
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/usi"
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
-	conn "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
-	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/domain/logger"
+	"github.com/murosan/shogi-board-server/app/domain/config"
+	"github.com/murosan/shogi-board-server/app/domain/entity/converter"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/state"
+	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
+	"github.com/murosan/shogi-board-server/app/domain/exception"
+	conn "github.com/murosan/shogi-board-server/app/domain/infrastracture/connector"
+	"github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
+	"github.com/murosan/shogi-board-server/app/domain/logger"
 	"go.uber.org/zap"
 )
 
@@ -31,14 +31,15 @@ var (
 type connector struct {
 	conf config.Config
 	pool conn.ConnectionPool
-	fu   *from_usi.FromUsi
+	fu   converter.FromUSI
 	log  logger.Log
 }
 
+// NewConnector 新しい Connector を返す
 func NewConnector(
 	c config.Config,
 	p conn.ConnectionPool,
-	fu *from_usi.FromUsi,
+	fu converter.FromUSI,
 	log logger.Log,
 ) conn.Connector {
 	return &connector{c, p, fu, log}
@@ -134,7 +135,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) 
 				if e != nil {
 					return e
 				}
-				c.setId(k, v)
+				c.setID(k, v)
 			}
 
 			if parseOpt && optRegex.Match(b) {
@@ -155,7 +156,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) 
 	}
 }
 
-func (c *connector) setId(k, v string) {
+func (c *connector) setID(k, v string) {
 	egn := c.pool.NamedEngine()
 	switch k {
 	case name:

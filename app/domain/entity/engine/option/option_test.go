@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
+	"github.com/murosan/shogi-board-server/app/domain/exception"
 )
 
 func TestButton_GetName(t *testing.T) {

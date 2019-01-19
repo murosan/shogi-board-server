@@ -8,9 +8,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-proxy-server/app/domain/exception"
-	"github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
+	"github.com/murosan/shogi-board-server/app/domain/exception"
+	"github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +24,7 @@ func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
 		}
 
 		s.log.Info("GetOptions", zap.ByteString("Marshaled value", d))
-		w.Header().Set(contentType, mimeJson)
+		w.Header().Set(contentType, mimeJSON)
 		w.Write(d)
 	})
 	if err != nil {
@@ -33,9 +33,9 @@ func (s *server) getOptionList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) updateOption(w http.ResponseWriter, r *http.Request) {
-	body, err := s.readJsonBody(r)
+	body, err := s.readJSONBody(r)
 	if err != nil && err == exception.ContentLengthRequired {
-		http.Error(w, err.Error(), 411) // Length Required
+		http.Error(w, err.Error(), http.StatusLengthRequired)
 		return
 	}
 	if err != nil && err == exception.FailedToReadBody {

@@ -7,12 +7,14 @@ package config
 import (
 	"io/ioutil"
 
-	"github.com/murosan/shogi-proxy-server/app/config"
-	confModel "github.com/murosan/shogi-proxy-server/app/domain/config"
+	"github.com/murosan/shogi-board-server/app/config"
+	confModel "github.com/murosan/shogi-board-server/app/domain/config"
 )
 
-var c confModel.Config = nil
+var c confModel.Config
 
+// InitConfig Config の初期化
+// Config はシングルトンで持っておく
 func InitConfig(path string) {
 	if c == nil {
 		b, err := ioutil.ReadFile(path)
@@ -23,6 +25,7 @@ func InitConfig(path string) {
 	}
 }
 
+// UseConfig シングルトンで保持している Config を返す
 func UseConfig() confModel.Config {
 	if c == nil {
 		panic("Must run InitConfig(), first.")

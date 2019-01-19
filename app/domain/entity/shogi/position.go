@@ -4,7 +4,7 @@
 
 package shogi
 
-// TODO: docsに書く
+// Position は局面を表す
 //{
 //  "pos": [9][9]pieceId,
 //  "cap_0": [歩, 香, 桂, 銀, 金, 角, 飛], // 先手の持ち駒それぞれの枚数

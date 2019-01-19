@@ -7,13 +7,13 @@ package connector
 import (
 	"os/exec"
 
-	confModel "github.com/murosan/shogi-proxy-server/app/domain/config"
-	connModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/connector"
-	egnModel "github.com/murosan/shogi-proxy-server/app/domain/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/domain/logger"
-	"github.com/murosan/shogi-proxy-server/app/infrastracture/engine"
-	"github.com/murosan/shogi-proxy-server/app/infrastracture/os/command"
-	"github.com/murosan/shogi-proxy-server/app/service/config"
+	confModel "github.com/murosan/shogi-board-server/app/domain/config"
+	connModel "github.com/murosan/shogi-board-server/app/domain/infrastracture/connector"
+	egnModel "github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
+	"github.com/murosan/shogi-board-server/app/domain/logger"
+	"github.com/murosan/shogi-board-server/app/infrastracture/engine"
+	"github.com/murosan/shogi-board-server/app/infrastracture/os/command"
+	"github.com/murosan/shogi-board-server/app/service/config"
 )
 
 type connectionPool struct {
@@ -26,6 +26,7 @@ type connectionPool struct {
 	log logger.Log
 }
 
+// NewConnectionPool 新しい ConnectionPool を返す
 func NewConnectionPool(c confModel.Config, log logger.Log) connModel.ConnectionPool {
 	return &connectionPool{c, nil, log}
 }

@@ -5,11 +5,12 @@
 package converter
 
 import (
-	"github.com/murosan/shogi-proxy-server/app/domain/entity/converter/from_json"
+	"github.com/murosan/shogi-board-server/app/domain/entity/converter"
 )
 
-var fj = from_json.NewFromJson()
+var fj = converter.NewFromJSON()
 
-func UseFromJson() *from_json.FromJson {
+// UseFromJSON FromJSON を返す
+func UseFromJSON() converter.FromJSON {
 	return fj
 }

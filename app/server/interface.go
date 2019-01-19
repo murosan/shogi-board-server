@@ -7,79 +7,41 @@ package server
 import "net/http"
 
 var (
+	// API gRPC への移行を考えたい
+
+	// IndexPath HTML を返す API
 	IndexPath = "/"
 
+	// ConnectPath 将棋エンジンに接続する API
 	ConnectPath = "/connect"
-	ClosePath   = "/close"
+	// ClosePath 将棋エンジンとの接続を切る API
+	ClosePath = "/close"
 
+	// ListOptPath 将棋エンジンのオプション一覧を取得する API
 	ListOptPath = "/option/list"
-	SetOptPath  = "/option/update"
+	// SetOptPath 将棋エンジンのオプションを更新する API
+	SetOptPath = "/option/update"
 
+	// StartPath 思考開始 API
 	StartPath = "/start"
-	StopPath  = "/stop"
+	// StopPath 思考停止 API
+	StopPath = "/stop"
 
+	// SetPositionPath 現在局面更新 API
 	SetPositionPath = "/position/set"
 
+	// GetResultPath 将棋エンジンの思考結果を取得する API
 	GetResultPath = "/result/get"
 
-	InitAnalyze  = "/analyze/init"
+	// InitAnalyze 棋譜解析を初期化する API
+	InitAnalyze = "/analyze/init"
+	// StartAnalyze 棋譜解析を開始する API
 	StartAnalyze = "/analyze/start"
 )
 
-type ShogiProxyServer interface {
+// ShogiBoardServer サーバーのインターフェース
+type ShogiBoardServer interface {
 	// ルーターの役目
 	// メソッドチェックしたりもする方
 	Handling(w http.ResponseWriter, r *http.Request)
-
-	// HTML を返す
-	// method: GET
-	// returns: html
-	//ServeHome(http.ResponseWriter, *http.Request)
-
-	// Engine に接続する
-	// method: POST
-	// returns: ok | error
-	//Connect(http.ResponseWriter, *http.Request)
-
-	// Engine を終了する
-	// method: POST
-	// returns: ok | error
-	//Close(http.ResponseWriter, *http.Request)
-
-	// Option 一覧を返す
-	// method: GET
-	// returns: list | error
-	//ListOption(http.ResponseWriter, *http.Request)
-
-	// Option を設定する
-	// method: POST
-	// returns: ok | error
-	//SetOption(http.ResponseWriter, *http.Request)
-
-	// 局面のセット
-	// method: POST
-	// returns: ok | error
-	//SetPosition(http.ResponseWriter, *http.Request)
-
-	// newgame.
-	// method: POST
-	// returns: ok | error
-	//Start(http.ResponseWriter, *http.Request)
-
-	// 評価値一覧を返す
-	// method: GET
-	// returns: list | error
-	//GetValues(http.ResponseWriter, *http.Request)
-
-	// 棋譜解析の初期化。棋譜を渡す
-	// method: POST
-	// returns: ok | error
-	//InitAnalyze(http.ResponseWriter, *http.Request)
-
-	// 解析する。結果を返す
-	// method: POST
-	// returns: list | error
-	//StartAnalyze(http.ResponseWriter, *http.Request)
-
-	// TODO: 対局用のAPI
 }
