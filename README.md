@@ -1,1 +1,1 @@
-# shogi-proxy-server
+# shogi-board-server

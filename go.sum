@@ -1,0 +1,16 @@
+github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
+github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
+github.com/mattn/go-colorable v0.0.9 h1:UVL0vNpWh04HeJXV0KLcaT7r06gOH2l4OW6ddYRUIY4=
+github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
+github.com/mattn/go-isatty v0.0.4 h1:bnP0vzxcAdeI1zdubAl5PjU6zsERjGZb7raWodagDYs=
+github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
+github.com/murosan/shogi-proxy-server v0.0.0-20181207135126-44f11654e4ee h1:FItT1Wo9l2xpLmETs5BdjZtmd7EMXjuooA7V7JNJA8s=
+github.com/murosan/shogi-proxy-server v0.0.0-20181207135126-44f11654e4ee/go.mod h1:VCDFhJMYkc2GCFUbnp9MvrtNOGwbj95D/Gmok7OA1Lk=
+github.com/rakyll/gotest v0.0.0-20180125184505-86f0749cd8cc h1:hrzpgS8mnUi65ieVrD3TKJMxHP84bzmybMTQIdK/XhM=
+github.com/rakyll/gotest v0.0.0-20180125184505-86f0749cd8cc/go.mod h1:iln+RRtJaJ52lKwqrSmNgQYw32Fk16CgChX85eFqBgI=
+go.uber.org/atomic v1.3.2 h1:2Oa65PReHzfn29GpvgsYwloV9AVFHPDk8tYxt2c2tr4=
+go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
+go.uber.org/multierr v1.1.0 h1:HoEmRHQPVSqub6w2z2d2EOVs2fjyFRGyofhKuyDq0QI=
+go.uber.org/multierr v1.1.0/go.mod h1:wR5kodmAFQ0UK8QlbwjlSNy0Z68gJhDJUG5sjR94q/0=
+go.uber.org/zap v1.9.1 h1:XCJQEf3W6eZaVwhRBof6ImoYGJSITeKWsyeh3HFu/5o=
+go.uber.org/zap v1.9.1/go.mod h1:vwi/ZaCAaUcBkycHslxD9B2zi4UTXhF60s6SWpuDF0Q=

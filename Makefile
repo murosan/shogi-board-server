@@ -1,12 +1,6 @@
-install_dependencies:
-	go get -u go.uber.org/zap
-	go get -u github.com/natefinch/lumberjack
-	go get -u github.com/rakyll/gotest
-
-setup_develop:
+setup_development:
 	cp ./scripts/pre-commit.sh ./.git/hooks/pre-commit
-
-setup_all: install_dependencies setup_develop
+	go get -u github.com/rakyll/gotest
 
 build:
 	go build -o ./main
