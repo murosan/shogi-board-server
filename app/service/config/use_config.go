@@ -11,17 +11,27 @@ import (
 	confModel "github.com/murosan/shogi-board-server/app/domain/config"
 )
 
+var initialized = false
 var c confModel.Config
 
 // InitConfig Config の初期化
 // Config はシングルトンで持っておく
-func InitConfig(path string) {
-	if c == nil {
-		b, err := ioutil.ReadFile(path)
+// appPath はアプリケーション用 yaml 設定ファイルのパス
+// logPath はログ用 yaml 設定ファイルのパス
+func InitConfig(appPath, logPath string) {
+	if !initialized {
+		appBytes, err := ioutil.ReadFile(appPath)
 		if err != nil {
 			panic(err)
 		}
-		c = config.NewConfig(b)
+
+		logBytes, err := ioutil.ReadFile(logPath)
+		if err != nil {
+			panic(err)
+		}
+
+		c = config.NewConfig(appBytes, logBytes)
+		initialized = true
 	}
 }
 

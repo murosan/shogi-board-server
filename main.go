@@ -18,13 +18,14 @@ import (
 )
 
 var (
-	addr       = flag.String("addr", "127.0.0.1:8080", "http service address")
-	configPath = flag.String("config", "./config/config.json", "config path")
+	addr          = flag.String("addr", "127.0.0.1:8080", "http service address")
+	appConfigPath = flag.String("appConfig", "./config/app.yml", "application config path")
+	logConfigPath = flag.String("logConfig", "./config/log.yml", "log config path")
 )
 
 func main() {
 	flag.Parse()
-	config.InitConfig(*configPath)
+	config.InitConfig(*appConfigPath, *logConfigPath)
 	conn := connector.UseConnector()
 	defer conn.Close() // for safety
 

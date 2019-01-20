@@ -1,0 +1,8 @@
+# 各将棋エンジンの実行ファイルの場所
+
+engines:
+  com: /path/to/your/engine/bin
+  # 追加するときは ↓ のように並べていく
+  # com_name2: /path/exe
+  # com_name3: /path/exe2
+  # name4: /usr/local/bin/engine

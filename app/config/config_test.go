@@ -9,48 +9,46 @@ import (
 	"testing"
 
 	"github.com/murosan/shogi-board-server/app/lib/stringutil"
-	testhelper "github.com/murosan/shogi-board-server/app/lib/test_helper"
+	"github.com/murosan/shogi-board-server/app/lib/test_helper"
 	"go.uber.org/zap"
 )
 
 func TestNewConfig(t *testing.T) {
 	cases := []struct {
-		json        string
-		enginePaths []string
-		engineNames []string
+		appyml, logyml string
+		enginePaths    []string
+		engineNames    []string
 	}{
 		{`
-{
-  "enginePath": {
-    "com": "/home/user/path/to/engine"
-  },
-  "log": {
-    "level": "debug",
-    "encoding": "console",
-    "encoderConfig": {
-      "messageKey": "Msg",
-      "levelKey": "Level",
-      "timeKey": "Time",
-      "nameKey": "name",
-      "callerKey": "Caller",
-      "stacktraceKey": "St",
-      "levelEncoder": "color",
-      "timeEncoder": "iso8601",
-      "durationEncoder": "string",
-      "callerEncoder": "short"
-    },
-    "outputPaths": ["stdout"],
-    "errorOutputPaths": ["stderr"]
-  }
-}
+engines:
+  com: '/home/user/path/to/engine/bin'
 `,
-			[]string{"/home/user/path/to/engine"},
+			`
+level: 'debug'
+encoding: 'console'
+encoderConfig:
+  messageKey: 'Msg'
+  levelKey: 'Level'
+  timeKey: 'Time'
+  nameKey: 'name'
+  callerKey: 'Caller'
+  stacktraceKey: 'St'
+  levelEncoder: ''
+  timeEncoder: 'iso8601'
+  durationEncoder: 'string'
+  callerEncoder: 'short'
+outputPaths:
+  - 'stdout'
+errorOutputPaths:
+  - 'stderr'
+`,
+			[]string{"/home/user/path/to/engine/bin"},
 			[]string{"com"},
 		},
 	}
 
 	for i, c := range cases {
-		conf := NewConfig([]byte(c.json))
+		conf := NewConfig([]byte(c.appyml), []byte(c.logyml))
 		names := conf.GetEngineNames()
 		sort.Strings(names)
 
@@ -72,25 +70,29 @@ func TestNewConfig(t *testing.T) {
 // エラーのテスト
 func TestNewConfig2(t *testing.T) {
 	c := struct {
-		json        string
-		enginePaths []string
-		engineNames []string
-		log         zap.Config
+		appyml, logyml string
+		enginePaths    []string
+		engineNames    []string
+		log            zap.Config
 	}{
 		`
-{
-  "enginePath": {
-    "com": "/home/user/path/to/engine",
-  }
-}
+# invalid syntax
+engines
+  com: /home/user/path/to/engine/bin
 `,
+		``,
 		[]string{"/home/user/path/to/engine"},
 		[]string{"com"},
 		zap.Config{},
 	}
 
-	errMsg := "Expected panic, but there wasn't.\nInput: " + c.json
-	testhelper.MustPanic(t, func() { NewConfig([]byte(c.json)) }, errMsg)
+	errMsg := "Expected panic, but there wasn't.\nInput: " + c.appyml
+	testhelper.MustPanic(t, func() {
+		NewConfig(
+			[]byte(c.appyml),
+			[]byte(c.logyml),
+		)
+	}, errMsg)
 }
 
 func failing(t *testing.T, key string, i int, expected, actual interface{}) {

@@ -9,12 +9,14 @@ import (
 	"github.com/murosan/shogi-board-server/app/service/config"
 )
 
+var initialized = false
 var l logger.Log
 
 // Use returns Logger
 func Use() logger.Log {
-	if l == nil {
+	if !initialized {
 		l = logger.NewLogger(config.UseConfig())
+		initialized = true
 	}
 	return l
 }

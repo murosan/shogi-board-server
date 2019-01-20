@@ -12,11 +12,12 @@ import (
 	"github.com/murosan/shogi-board-server/app/service/logger"
 )
 
+var initialized = false
 var c connModel.Connector
 
 // UseConnector シングルトンで保持している Connector を返す
 func UseConnector() connModel.Connector {
-	if c == nil {
+	if !initialized {
 		p := connector.NewConnectionPool(config.UseConfig(), logger.Use())
 		c = connector.NewConnector(
 			config.UseConfig(),
@@ -24,6 +25,7 @@ func UseConnector() connModel.Connector {
 			converter.UseFromUSI(),
 			logger.Use(),
 		)
+		initialized = true
 	}
 	return c
 }

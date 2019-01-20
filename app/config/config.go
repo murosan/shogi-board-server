@@ -5,34 +5,43 @@
 package config
 
 import (
-	"encoding/json"
-
 	confModel "github.com/murosan/shogi-board-server/app/domain/config"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 type config struct {
-	EnginePath map[string]string `json:"enginePath"`
-	Log        zap.Config        `json:"Log"`
+	app appConfig
+	log zap.Config
+}
+
+type appConfig struct {
+	Engines map[string]string `json:"engines" yaml:"engines"`
 }
 
 // NewConfig return Config
-func NewConfig(b []byte) confModel.Config {
-	var c config
-	if err := json.Unmarshal(b, &c); err != nil {
+func NewConfig(appBytes, logBytes []byte) confModel.Config {
+	var app appConfig
+	var log zap.Config
+
+	if err := yaml.Unmarshal(appBytes, &app); err != nil {
 		panic(err)
 	}
-	return &c
+	if err := yaml.Unmarshal(logBytes, &log); err != nil {
+		panic(err)
+	}
+
+	return &config{app, log}
 }
 
 func (c *config) GetEnginePath(key string) string {
-	return c.EnginePath[key]
+	return c.app.Engines[key]
 }
 
 func (c *config) GetEngineNames() []string {
-	l := make([]string, len(c.EnginePath))
+	l := make([]string, len(c.app.Engines))
 	i := 0
-	for name := range c.EnginePath {
+	for name := range c.app.Engines {
 		l[i] = name
 		i++
 	}
@@ -40,5 +49,5 @@ func (c *config) GetEngineNames() []string {
 }
 
 func (c *config) GetLogConf() zap.Config {
-	return c.Log
+	return c.log
 }
