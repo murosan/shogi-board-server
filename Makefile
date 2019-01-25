@@ -1,5 +1,7 @@
+GIT_DIR=$(shell git rev-parse --git-dir)
+
 setup_development:
-	cp ./scripts/pre-commit.sh ./.git/hooks/pre-commit
+	cp ./scripts/pre-commit.sh $(GIT_DIR)/hooks/pre-commit
 
 build:
 	go build -o ./main
