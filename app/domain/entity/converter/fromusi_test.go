@@ -10,11 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/result"
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
-	testhelper "github.com/murosan/shogi-board-server/app/lib/test_helper"
+	"github.com/murosan/shogi-board-server/app/lib/test_helper"
+	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
 var emp = ""
@@ -22,7 +21,7 @@ var emp = ""
 func TestFromUSI_Piece(t *testing.T) {
 	cases := []struct {
 		in      string
-		want    int
+		want    int32
 		isError bool
 	}{
 		{shogi.UsiFu0, shogi.Fu0, false},
@@ -127,13 +126,13 @@ func TestFromUSI_Option(t *testing.T) {
 	fu := NewFromUSI()
 	cases := []struct {
 		in   string
-		want *option.Button
+		want *pb.Button
 		err  error
 	}{
-		{"option name ResetLearning type button", option.NewButton("ResetLearning"), nil},
-		{"option name <empty> type button", option.NewButton("<empty>"), nil}, // まぁいい
+		{"option name ResetLearning type button", &pb.Button{Name: "ResetLearning"}, nil},
+		{"option name <empty> type button", &pb.Button{Name: "<empty>"}, nil}, // まぁいい
 		{"option name ResetLearning type button sur", nil, exception.InvalidOptionSyntax},
-		{"option name 1 type button", option.NewButton("1"), nil},
+		{"option name 1 type button", &pb.Button{Name: "1"}, nil},
 	}
 	for _, c := range cases {
 		o, err := fu.Option(c.in)
@@ -145,11 +144,11 @@ func TestFromUSI_Option2(t *testing.T) {
 	fu := NewFromUSI()
 	cases := []struct {
 		in   string
-		want *option.Check
+		want *pb.Check
 		err  error
 	}{
-		{"option name UseBook type check default true", option.NewCheck("UseBook", true, true), nil},
-		{"   option name UseBook type check default true   ", option.NewCheck("UseBook", true, true), nil},
+		{"option name UseBook type check default true", &pb.Check{Name: "UseBook", Val: true, Default: true}, nil},
+		{"   option name UseBook type check default true   ", &pb.Check{Name: "UseBook", Val: true, Default: true}, nil},
 		{"option name UseBook type check default ", nil, exception.InvalidOptionSyntax},
 		{"option name UseBook type check default not_bool", nil, exception.InvalidOptionSyntax},
 		{"option name UseBook type check dlft true", nil, exception.InvalidOptionSyntax},
@@ -165,17 +164,17 @@ func TestFromUSI_Option3(t *testing.T) {
 	fu := NewFromUSI()
 	cases := []struct {
 		in   string
-		want *option.Spin
+		want *pb.Spin
 		err  error
 	}{
 		{
 			"option name Selectivity type spin default 2 min 0 max 4",
-			option.NewSpin("Selectivity", 2, 2, 0, 4),
+			&pb.Spin{Name: "Selectivity", Val: 2, Default: 2, Min: 0, Max: 4},
 			nil,
 		},
 		{
 			"option name Selectivity type spin default -100 min -123456 max 54321 ",
-			option.NewSpin("Selectivity", -100, -100, -123456, 54321),
+			&pb.Spin{Name: "Selectivity", Val: -100, Default: -100, Min: -123456, Max: 54321},
 			nil,
 		},
 		{
@@ -209,17 +208,17 @@ func TestFromUSI_Option4(t *testing.T) {
 	fu := NewFromUSI()
 	cases := []struct {
 		in   string
-		want *option.Select
+		want *pb.Select
 		err  error
 	}{
 		{
 			"option name Style type combo default Normal var Solid var Normal var Risky",
-			option.NewSelect("Style", "Normal", "Normal", []string{"Solid", "Normal", "Risky"}),
+			&pb.Select{Name: "Style", Val: "Normal", Default: "Normal", Vars: []string{"Solid", "Normal", "Risky"}},
 			nil,
 		},
 		{
 			"option name Style type combo default Nor mal var Sol id var Nor mal var R isky",
-			option.NewSelect("Style", "Nor mal", "Nor mal", []string{"Sol id", "Nor mal", "R isky"}),
+			&pb.Select{Name: "Style", Val: "Nor mal", Default: "Nor mal", Vars: []string{"Sol id", "Nor mal", "R isky"}},
 			nil,
 		},
 		{"option name Style type combo default None var Solid var Normal var Risky",
@@ -245,15 +244,15 @@ func TestFromUSI_Option5(t *testing.T) {
 	fu := NewFromUSI()
 	cases := []struct {
 		in   string
-		want *option.String
+		want *pb.String
 		err  error
 	}{
 		{"option name BookFile type string default public.bin",
-			option.NewString("BookFile", "public.bin", "public.bin"),
+			&pb.String{Name: "BookFile", Val: "public.bin", Default: "public.bin"},
 			nil,
 		},
 		{"option name BookFile type string default public.bin var a",
-			option.NewString("BookFile", "public.bin var a", "public.bin var a"),
+			&pb.String{Name: "BookFile", Val: "public.bin var a", Default: "public.bin var a"},
 			nil,
 		},
 		{"option name BookFile type string",
@@ -275,16 +274,16 @@ func TestFromUSI_Option6(t *testing.T) {
 	fu := NewFromUSI()
 	cases := []struct {
 		in   string
-		want *option.FileName
+		want *pb.Filename
 		err  error
 	}{
 		{
 			"option name LearningFile type filename default <empty>",
-			option.NewFileName("LearningFile", "<empty>", "<empty>"),
+			&pb.Filename{Name: "LearningFile", Val: "<empty>", Default: "<empty>"},
 			nil,
 		},
 		{"option name LearningFile type filename default <empty> var a",
-			option.NewFileName("LearningFile", "<empty> var a", "<empty> var a"),
+			&pb.Filename{Name: "LearningFile", Val: "<empty> var a", Default: "<empty> var a"},
 			nil,
 		},
 		{"option name LearningFile type filename",
@@ -307,7 +306,7 @@ func TestFromUSI_Option6(t *testing.T) {
 // o2: Expected Option
 // e1: Returned Error
 // e2: Expected Error
-func basicOptionMatching(t *testing.T, in string, o1, o2 option.Option, e1, e2 error) {
+func basicOptionMatching(t *testing.T, in string, o1, o2 interface{}, e1, e2 error) {
 	t.Helper()
 	if (e1 == nil && e2 != nil) || (e1 != nil && e2 == nil) {
 		t.Errorf(`
@@ -331,17 +330,6 @@ Expected: %v
 Actual:   %v`, in, e2, e1)
 	}
 
-	// USIコマンドが想定通りかどうか
-	usi1 := o1.Usi()
-	usi2 := o2.Usi()
-	if usi1 != usi2 {
-		t.Errorf(`
-Update value was not as expected.
-Input:    %v
-Expected: %v
-Actual:   %v`, in, usi2, usi1)
-	}
-
 	// json化した値が同等かどうか
 	json1, _ := json.MarshalIndent(o1, "", "  ")
 	json2, _ := json.MarshalIndent(o2, "", "  ")
@@ -358,50 +346,50 @@ Actual:   %s
 func TestFromUSI_Move(t *testing.T) {
 	cases := []struct {
 		in   string
-		want shogi.Move
+		want *pb.Move
 		err  error
 	}{
 		{"7g7f",
-			shogi.Move{
-				Source:     shogi.Point{Row: 6, Column: 6},
-				Dest:       shogi.Point{Row: 5, Column: 6},
+			&pb.Move{
+				Source:     &pb.Point{Row: 6, Column: 6},
+				Dest:       &pb.Point{Row: 5, Column: 6},
 				PieceID:    0,
 				IsPromoted: false,
 			},
 			nil,
 		},
 		{"8h2b+",
-			shogi.Move{
-				Source:     shogi.Point{Row: 7, Column: 7},
-				Dest:       shogi.Point{Row: 1, Column: 1},
+			&pb.Move{
+				Source:     &pb.Point{Row: 7, Column: 7},
+				Dest:       &pb.Point{Row: 1, Column: 1},
 				PieceID:    0,
 				IsPromoted: true},
 			nil},
 		{"G*5b",
-			shogi.Move{
-				Source:  shogi.Point{Row: -1, Column: -1},
-				Dest:    shogi.Point{Row: 1, Column: 4},
+			&pb.Move{
+				Source:  &pb.Point{Row: -1, Column: -1},
+				Dest:    &pb.Point{Row: 1, Column: 4},
 				PieceID: 5, IsPromoted: false,
 			},
 			nil,
 		},
 		{"s*5b",
-			shogi.Move{
-				Source:     shogi.Point{Row: -1, Column: -1},
-				Dest:       shogi.Point{Row: 1, Column: 4},
+			&pb.Move{
+				Source:     &pb.Point{Row: -1, Column: -1},
+				Dest:       &pb.Point{Row: 1, Column: 4},
 				PieceID:    -4,
 				IsPromoted: false,
 			},
 			nil,
 		},
-		{"", shogi.Move{}, exception.UnknownCharacter},
-		{"7g7z", shogi.Move{}, exception.UnknownCharacter},
-		{"7g7$", shogi.Move{}, exception.UnknownCharacter},
-		{"0g7a", shogi.Move{}, exception.UnknownCharacter},
-		{"1x7a", shogi.Move{}, exception.UnknownCharacter},
-		{"G*vb", shogi.Move{}, exception.UnknownCharacter},
-		{"G*4z", shogi.Move{}, exception.UnknownCharacter},
-		{"A*7a", shogi.Move{}, exception.UnknownCharacter},
+		{"", &pb.Move{}, exception.UnknownCharacter},
+		{"7g7z", &pb.Move{}, exception.UnknownCharacter},
+		{"7g7$", &pb.Move{}, exception.UnknownCharacter},
+		{"0g7a", &pb.Move{}, exception.UnknownCharacter},
+		{"1x7a", &pb.Move{}, exception.UnknownCharacter},
+		{"G*vb", &pb.Move{}, exception.UnknownCharacter},
+		{"G*4z", &pb.Move{}, exception.UnknownCharacter},
+		{"A*7a", &pb.Move{}, exception.UnknownCharacter},
 	}
 
 	for i, c := range cases {
@@ -409,7 +397,7 @@ func TestFromUSI_Move(t *testing.T) {
 	}
 }
 
-func moveHelper(t *testing.T, i int, in string, want shogi.Move, err error) {
+func moveHelper(t *testing.T, i int, in string, want *pb.Move, err error) {
 	t.Helper()
 	res, e := NewFromUSI().Move(in)
 	msg := ""
@@ -454,36 +442,36 @@ Actual:   %v
 func TestFromUSI_Info(t *testing.T) {
 	cases := []struct {
 		in   string
-		want result.Info
+		want *pb.Info
 		mpv  int
 		err  error
 	}{
 		{
 			"info time 1141 depth 3 seldepth 3 nodes 135125 score cp -1521 pv 3a3b L*4h 4c4d",
-			result.Info{
-				Values: map[string]int{
-					result.Time:     1141,
-					result.Depth:    3,
-					result.SelDepth: 3,
-					result.Nodes:    135125,
+			&pb.Info{
+				Values: map[string]int32{
+					time:     1141,
+					depth:    3,
+					selDepth: 3,
+					nodes:    135125,
 				},
 				Score: -1521,
-				Moves: []shogi.Move{
+				Moves: []*pb.Move{
 					{
-						Source:     shogi.Point{Column: 2, Row: 0},
-						Dest:       shogi.Point{Column: 2, Row: 1},
+						Source:     &pb.Point{Column: 2, Row: 0},
+						Dest:       &pb.Point{Column: 2, Row: 1},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: -1, Row: -1},
-						Dest:       shogi.Point{Column: 3, Row: 7},
+						Source:     &pb.Point{Column: -1, Row: -1},
+						Dest:       &pb.Point{Column: 3, Row: 7},
 						PieceID:    2,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 3, Row: 2},
-						Dest:       shogi.Point{Column: 3, Row: 3},
+						Source:     &pb.Point{Column: 3, Row: 2},
+						Dest:       &pb.Point{Column: 3, Row: 3},
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -491,42 +479,42 @@ func TestFromUSI_Info(t *testing.T) {
 			}, 0, nil},
 		{
 			"info nodes 120000 nps 116391 hashfull 104",
-			result.Info{
-				Values: map[string]int{
-					result.Nodes:    120000,
-					result.Nps:      116391,
-					result.HashFull: 104,
+			&pb.Info{
+				Values: map[string]int32{
+					nodes:    120000,
+					nps:      116391,
+					hashFull: 104,
 				},
 				Score: 0,
-				Moves: []shogi.Move{},
+				Moves: []*pb.Move{},
 			}, 0, nil},
 		{
 			"info score cp 156 multipv 1 pv P*5h 4g5g 5h5g 8b8f",
-			result.Info{
-				Values: map[string]int{},
+			&pb.Info{
+				Values: map[string]int32{},
 				Score:  156,
-				Moves: []shogi.Move{
+				Moves: []*pb.Move{
 					{
-						Source:     shogi.Point{Column: -1, Row: -1},
-						Dest:       shogi.Point{Column: 4, Row: 7},
+						Source:     &pb.Point{Column: -1, Row: -1},
+						Dest:       &pb.Point{Column: 4, Row: 7},
 						PieceID:    1,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 3, Row: 6},
-						Dest:       shogi.Point{Column: 4, Row: 6},
+						Source:     &pb.Point{Column: 3, Row: 6},
+						Dest:       &pb.Point{Column: 4, Row: 6},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 4, Row: 7},
-						Dest:       shogi.Point{Column: 4, Row: 6},
+						Source:     &pb.Point{Column: 4, Row: 7},
+						Dest:       &pb.Point{Column: 4, Row: 6},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 7, Row: 1},
-						Dest:       shogi.Point{Column: 7, Row: 5},
+						Source:     &pb.Point{Column: 7, Row: 1},
+						Dest:       &pb.Point{Column: 7, Row: 5},
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -534,60 +522,60 @@ func TestFromUSI_Info(t *testing.T) {
 			}, 1, nil},
 		{
 			"info score cp -99 multipv 2 pv 2d4d 3c4e 8h5e N*7f",
-			result.Info{
-				Values: map[string]int{},
+			&pb.Info{
+				Values: map[string]int32{},
 				Score:  -99,
-				Moves: []shogi.Move{
+				Moves: []*pb.Move{
 					{
-						Source: shogi.Point{Column: 1, Row: 3},
-						Dest:   shogi.Point{Column: 3, Row: 3}, PieceID: 0,
+						Source: &pb.Point{Column: 1, Row: 3},
+						Dest:   &pb.Point{Column: 3, Row: 3}, PieceID: 0,
 						IsPromoted: false,
 					},
 					{
-						Source: shogi.Point{Column: 2, Row: 2},
-						Dest:   shogi.Point{Column: 3, Row: 4}, PieceID: 0,
+						Source: &pb.Point{Column: 2, Row: 2},
+						Dest:   &pb.Point{Column: 3, Row: 4}, PieceID: 0,
 						IsPromoted: false,
 					},
 					{
-						Source: shogi.Point{Column: 7, Row: 7},
-						Dest:   shogi.Point{Column: 4, Row: 4}, PieceID: 0,
+						Source: &pb.Point{Column: 7, Row: 7},
+						Dest:   &pb.Point{Column: 4, Row: 4}, PieceID: 0,
 						IsPromoted: false,
 					},
 					{
-						Source: shogi.Point{Column: -1, Row: -1},
-						Dest:   shogi.Point{Column: 6, Row: 5}, PieceID: 3,
+						Source: &pb.Point{Column: -1, Row: -1},
+						Dest:   &pb.Point{Column: 6, Row: 5}, PieceID: 3,
 						IsPromoted: false,
 					},
 				},
 			}, 2, nil},
 		{
 			"info score cp -157 multipv 3 pv 5g5f 4g4f 4e3c+ 4c3c",
-			result.Info{
-				Values: map[string]int{},
+			&pb.Info{
+				Values: map[string]int32{},
 				Score:  -157,
-				Moves: []shogi.Move{
+				Moves: []*pb.Move{
 					{
-						Source:     shogi.Point{Column: 4, Row: 6},
-						Dest:       shogi.Point{Column: 4, Row: 5},
+						Source:     &pb.Point{Column: 4, Row: 6},
+						Dest:       &pb.Point{Column: 4, Row: 5},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 3, Row: 6},
-						Dest:       shogi.Point{Column: 3, Row: 5},
+						Source:     &pb.Point{Column: 3, Row: 6},
+						Dest:       &pb.Point{Column: 3, Row: 5},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 3, Row: 4},
-						Dest:       shogi.Point{Column: 2, Row: 2},
+						Source:     &pb.Point{Column: 3, Row: 4},
+						Dest:       &pb.Point{Column: 2, Row: 2},
 						PieceID:    0,
 						IsPromoted: true,
 					},
 
 					{
-						Source:     shogi.Point{Column: 3, Row: 2},
-						Dest:       shogi.Point{Column: 2, Row: 2},
+						Source:     &pb.Point{Column: 3, Row: 2},
+						Dest:       &pb.Point{Column: 2, Row: 2},
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -595,32 +583,32 @@ func TestFromUSI_Info(t *testing.T) {
 			}, 3, nil},
 		{
 			"info score cp -157 str multipv 3 lalala... pv 5g5f 4g4f 4e3c+ 4c3c",
-			result.Info{
-				Values: map[string]int{},
+			&pb.Info{
+				Values: map[string]int32{},
 				Score:  -157,
-				Moves: []shogi.Move{
+				Moves: []*pb.Move{
 					{
-						Source:     shogi.Point{Column: 4, Row: 6},
-						Dest:       shogi.Point{Column: 4, Row: 5},
+						Source:     &pb.Point{Column: 4, Row: 6},
+						Dest:       &pb.Point{Column: 4, Row: 5},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 3, Row: 6},
-						Dest:       shogi.Point{Column: 3, Row: 5},
+						Source:     &pb.Point{Column: 3, Row: 6},
+						Dest:       &pb.Point{Column: 3, Row: 5},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 3, Row: 4},
-						Dest:       shogi.Point{Column: 2, Row: 2},
+						Source:     &pb.Point{Column: 3, Row: 4},
+						Dest:       &pb.Point{Column: 2, Row: 2},
 						PieceID:    0,
 						IsPromoted: true,
 					},
 
 					{
-						Source:     shogi.Point{Column: 3, Row: 2},
-						Dest:       shogi.Point{Column: 2, Row: 2},
+						Source:     &pb.Point{Column: 3, Row: 2},
+						Dest:       &pb.Point{Column: 2, Row: 2},
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -629,31 +617,31 @@ func TestFromUSI_Info(t *testing.T) {
 			3, nil},
 		{
 			"info score cp -225 multipv 4 pv 5g6h 8b8f P*8g 8f5f",
-			result.Info{
-				Values: map[string]int{},
+			&pb.Info{
+				Values: map[string]int32{},
 				Score:  -225,
-				Moves: []shogi.Move{
+				Moves: []*pb.Move{
 					{
-						Source:     shogi.Point{Column: 4, Row: 6},
-						Dest:       shogi.Point{Column: 5, Row: 7},
+						Source:     &pb.Point{Column: 4, Row: 6},
+						Dest:       &pb.Point{Column: 5, Row: 7},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 7, Row: 1},
-						Dest:       shogi.Point{Column: 7, Row: 5},
+						Source:     &pb.Point{Column: 7, Row: 1},
+						Dest:       &pb.Point{Column: 7, Row: 5},
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: -1, Row: -1},
-						Dest:       shogi.Point{Column: 7, Row: 6},
+						Source:     &pb.Point{Column: -1, Row: -1},
+						Dest:       &pb.Point{Column: 7, Row: 6},
 						PieceID:    1,
 						IsPromoted: false,
 					},
 					{
-						Source:     shogi.Point{Column: 7, Row: 5},
-						Dest:       shogi.Point{Column: 4, Row: 5},
+						Source:     &pb.Point{Column: 7, Row: 5},
+						Dest:       &pb.Point{Column: 4, Row: 5},
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -661,13 +649,13 @@ func TestFromUSI_Info(t *testing.T) {
 			}, 4, nil},
 		{
 			"info score cp aaa multipv 4 pv 5g6h 8b8f P*8g 8f5f",
-			result.Info{},
+			&pb.Info{},
 			0,
 			exception.FailedToParseInfo,
 		},
 		{
 			"info score cp 4 multipv 4 pv 5g6h 8b8f P*8g 8f5z",
-			result.Info{},
+			&pb.Info{},
 			0,
 			exception.FailedToParseInfo,
 		},
@@ -682,7 +670,7 @@ func infoHelper(
 	t *testing.T,
 	i int,
 	in string,
-	want result.Info,
+	want *pb.Info,
 	mpv int,
 	err error,
 ) {
@@ -691,8 +679,9 @@ func infoHelper(
 	res, mpvKey, e := NewFromUSI().Info(in)
 
 	if (e == nil && err != nil) || (e != nil && err == nil) {
-		msg = "Expected error, but was not as expected."
+		msg = "Got error type was not as expected."
 		infoErrorPrintHelper(t, i, msg, in, err, e)
+		return
 	}
 
 	// 想定通りのエラー
@@ -704,6 +693,7 @@ func infoHelper(
 	if e != nil && err != nil && !strings.Contains(string(e.Error()), string(err.Error())) {
 		msg = "Expected error, but was not as expected."
 		infoErrorPrintHelper(t, i, msg, in, err, e)
+		return
 	}
 
 	if mpvKey != mpv {

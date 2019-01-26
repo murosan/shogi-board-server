@@ -11,12 +11,11 @@ import (
 
 	"github.com/murosan/shogi-board-server/app/domain/config"
 	"github.com/murosan/shogi-board-server/app/domain/entity/converter"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/state"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
 	conn "github.com/murosan/shogi-board-server/app/domain/infrastracture/connector"
-	"github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
+	eg "github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-board-server/app/domain/logger"
 	"go.uber.org/zap"
 )
@@ -45,6 +44,7 @@ func NewConnector(
 	return &connector{c, p, fu, log}
 }
 
+// Connect は将棋エンジンに接続します
 func (c *connector) Connect() error {
 	if c.pool.NamedEngine() != nil {
 		c.log.Debug(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
@@ -61,7 +61,7 @@ func (c *connector) Connect() error {
 	}
 
 	egn.Lock()
-	egn.SetState(state.Connected)
+	egn.SetState(engine.Connected)
 	go c.catchOutput(egn.GetChan())
 	if e := egn.Exec(usi.CmdUsi); e != nil {
 		c.log.Error("ExecUsiError", zap.Error(e))
@@ -83,12 +83,13 @@ func (c *connector) Connect() error {
 	return nil
 }
 
+// Close 将棋エンジンとの接続を切ります
 // TODO: エンジンに接続済か確認する処理はどうにか共通化して綺麗にしたい
 func (c *connector) Close() error {
 	defer c.pool.Remove()
 	egn := c.pool.NamedEngine()
-	if egn == nil || egn.GetState() == state.NotConnected {
-		c.log.Debug("Close", zap.Any("EngineState", state.NotConnected))
+	if egn == nil || egn.GetState() == engine.NotConnected {
+		c.log.Debug("Close", zap.Any("EngineState", engine.NotConnected))
 		return nil
 	}
 
@@ -96,13 +97,14 @@ func (c *connector) Close() error {
 	return egn.Close()
 }
 
-func (c *connector) WithEngine(name string, f func(engine.Engine)) error {
+// GetEngine 名前を受け取り Engine を返します
+func (c *connector) GetEngine(name string) (eg.Engine, error) {
 	e := c.pool.NamedEngine( /* name */ )
-	if e == nil || e.GetState() == state.NotConnected {
-		return exception.EngineIsNotRunning
+	if e == nil || e.GetState() == engine.NotConnected {
+		return nil, exception.EngineIsNotRunning
 	}
-	f(e)
-	return nil
+
+	return e, nil
 }
 
 func (c *connector) catchOutput(ch chan []byte) {
@@ -168,6 +170,7 @@ func (c *connector) setID(k, v string) {
 	}
 }
 
-func (c *connector) appendOption(o option.Option) {
-	c.pool.NamedEngine().SetOption(string(o.GetName()), o)
+// appendOption パース済みのオプションを受け取り、将棋エンジンが保持している一覧に追加
+func (c *connector) appendOption(i interface{}) {
+	c.pool.NamedEngine().AddOption(i)
 }

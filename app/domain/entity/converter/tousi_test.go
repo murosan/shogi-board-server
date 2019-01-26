@@ -9,11 +9,12 @@ import (
 	"testing"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
+	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
 func TestToUSI_Piece(t *testing.T) {
 	cases := []struct {
-		in      int
+		in      int32
 		want    string
 		isError bool
 	}{
@@ -77,24 +78,24 @@ Actual:   %s`, i, c.in, c.want, r)
 func TestToUSI_Position(t *testing.T) {
 	tu := NewToUSI()
 	cases := []struct {
-		in   shogi.Position
+		in   *pb.Position
 		want []byte
 	}{
 		{
-			shogi.Position{
-				Pos: [9][9]int{
-					{-2, -3, -4, -5, -8, 0, -4, -3, -2},
-					{0, 0, 0, 0, 0, 0, -5, -6, 0},
-					{-1, 0, -1, -1, -1, -1, 0, 0, -1},
-					{0, 0, 0, 0, 0, 0, 7, 0, 0},
-					{0, 0, 0, 0, 0, 0, 0, 0, 0},
-					{0, -7, 1, 0, 0, 0, 0, 0, 0},
-					{1, 0, 0, 1, 1, 1, 1, 0, 1},
-					{0, 6, 5, 0, 0, 0, 0, 0, 0},
-					{2, 3, 4, 0, 8, 5, 4, 3, 2},
+			&pb.Position{
+				Pos: []*pb.Row{
+					{Row: []int32{-2, -3, -4, -5, -8, 0, -4, -3, -2}},
+					{Row: []int32{0, 0, 0, 0, 0, 0, -5, -6, 0}},
+					{Row: []int32{-1, 0, -1, -1, -1, -1, 0, 0, -1}},
+					{Row: []int32{0, 0, 0, 0, 0, 0, 7, 0, 0}},
+					{Row: []int32{0, 0, 0, 0, 0, 0, 0, 0, 0}},
+					{Row: []int32{0, -7, 1, 0, 0, 0, 0, 0, 0}},
+					{Row: []int32{1, 0, 0, 1, 1, 1, 1, 0, 1}},
+					{Row: []int32{0, 6, 5, 0, 0, 0, 0, 0, 0}},
+					{Row: []int32{2, 3, 4, 0, 8, 5, 4, 3, 2}},
 				},
-				Cap0:      [7]int{3, 0, 0, 0, 0, 0, 0},
-				Cap1:      [7]int{2, 0, 0, 0, 0, 0, 0},
+				Cap0:      []int32{3, 0, 0, 0, 0, 0, 0},
+				Cap1:      []int32{2, 0, 0, 0, 0, 0, 0},
 				Turn:      1,
 				MoveCount: 100,
 			},

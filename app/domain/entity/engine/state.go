@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package state
+package engine
 
 // State 将棋エンジンの状態を表す
 type State int

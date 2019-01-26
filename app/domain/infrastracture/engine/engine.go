@@ -7,9 +7,8 @@ package engine
 import (
 	"bufio"
 
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/result"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/state"
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
+	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
 // Engine 将棋エンジンを表す
@@ -26,28 +25,26 @@ type Engine interface {
 	// SetAuthor 将棋エンジンの作者を変更する。GetAuthor の値が変更される
 	SetAuthor(string)
 
-	// SetOption オプションを Engine で保持している OptMap に追加する
+	// SetOption オプションを Engine で保持している Options に追加する
 	// 将棋エンジンから最初に出力されるものを追加するために使う
 	// USI の setoption を実行するわけではないので注意
-	SetOption(string, option.Option)
+	// パース済みのオプションを interface で受け取る
+	AddOption(interface{})
+
 	// GetOptions オプションの一覧を返す
-	// Engine で保持している OptMap から一覧を取得している
-	GetOptions() option.OptMap
-	// UpdateOption オプションの値を更新する
-	// USI の setoption が実行される
-	UpdateOption(option.UpdateOptionValue) error
+	GetOptions() *pb.Options
 
 	// SetState 将棋エンジンの状態を更新する
-	SetState(state.State)
+	SetState(engine.State)
 	// GetState 将棋エンジンの現在の状態を取得する
-	GetState() state.State
+	GetState() engine.State
 
 	// SetResult 将棋エンジンの思考結果をセットする
 	// USI の info をパースして、pv や multiPv だった場合に実行される
-	SetResult(i result.Info, key int)
+	SetResult(i *pb.Info, key int)
 	// GetResult 将棋エンジンの思考結果を取得する
 	// SetResult によって保持されている値を返す
-	GetResult() *result.Result
+	GetResult() *pb.Result
 	// FlushResult 将棋エンジンの思考結果一覧を削除する
 	// Position を更新したときに実行する
 	FlushResult()

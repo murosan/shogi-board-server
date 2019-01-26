@@ -9,29 +9,41 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/result"
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
+	pb "github.com/murosan/shogi-board-server/app/proto"
+)
+
+const (
+	depth    = "depth"
+	selDepth = "seldepth"
+	time     = "time"
+	nodes    = "nodes"
+	hashFull = "hashfull"
+	nps      = "nps"
+	score    = "score"
+	pv       = "pv"
+	multiPv  = "multipv"
 )
 
 // FromUSI USI から Go に変換するインターフェース
 type FromUSI interface {
 	// Piece USIの駒を int に変換する
 	// TODO: Piece 型を作る
-	Piece(string) (int, error)
+	Piece(string) (int32, error)
 
 	// EngineID USI の name と author を変換する
 	EngineID(string) (string, string, error)
 
 	// Option USI の option を変換する
-	Option(string) (option.Option, error)
+	// any で返しているのでよろしくない・・
+	Option(string) (interface{}, error)
 
 	// Move USI の pv を変換する
-	Move(string) (shogi.Move, error)
+	Move(string) (*pb.Move, error)
 
 	// Info USI の info を変換する
-	Info(string) (result.Info, int, error)
+	Info(string) (*pb.Info, int, error)
 }
 
 type fromUSI struct{}
@@ -41,7 +53,7 @@ func NewFromUSI() FromUSI {
 	return fromUSI{}
 }
 
-func (fu fromUSI) Piece(s string) (i int, e error) {
+func (fu fromUSI) Piece(s string) (i int32, e error) {
 	switch s {
 	case shogi.UsiFu0:
 		i = shogi.Fu0
@@ -100,11 +112,12 @@ func (fu fromUSI) Piece(s string) (i int, e error) {
 	case shogi.UsiRyu1:
 		i = shogi.Ryu1
 	default:
-		e = exception.InvalidPieceID.WithMsg("PieceIdが不正です id=" + s)
+		e = exception.InvalidPieceID.WithMsg("PieceIDが不正です id=" + s)
 	}
 	return
 }
 
+// EngineID
 // id name <EngineName>
 // id author <AuthorName> をパースする
 func (fu fromUSI) EngineID(s string) (string, string, error) {
@@ -119,11 +132,12 @@ func (fu fromUSI) EngineID(s string) (string, string, error) {
 	return "", "", exception.UnknownOption
 }
 
-// エンジンのオプションをパースする
-// @param s string 一行のオプションのUSI文字列
-// @returns Option オプション。Button|Check|Select|Spin|String|FileName
-//          error パースに失敗した場合はエラー。成功時は nil
-func (fu fromUSI) Option(s string) (option.Option, error) {
+// Option エンジンのオプションをパースする
+// s string 一行のオプションのUSI文字列を受け取り、
+// パースした結果の Option を返す。
+// interface だが、 Button|Check|Select|Spin|String|FileName
+// パースに失敗した場合はエラー。成功時 error は nil
+func (fu fromUSI) Option(s string) (interface{}, error) {
 	t := strings.TrimSpace(s)
 
 	if buttonRegex.MatchString(t) {
@@ -150,33 +164,33 @@ func (fu fromUSI) Option(s string) (option.Option, error) {
 
 // button type を Egn の Options にセットする
 // option name <string> type button
-func (fu fromUSI) parseButton(s string) (*option.Button, error) {
+func (fu fromUSI) parseButton(s string) (*pb.Button, error) {
 	res := buttonRegex.FindAllStringSubmatch(s, -1)
 	if len(res) == 0 || len(res[0]) < 2 {
 		return nil, invalidSyntax(s, parseErrorButton)
 	}
 
-	return option.NewButton(res[0][1]), nil
+	return &pb.Button{Name: res[0][1]}, nil
 }
 
 // check type を Egn の Options にセットする
 // option name <string> type check default <bool>
 // このフォーマット以外は許容しない。default が無くてもてもだめ
-func (fu fromUSI) parseCheck(s string) (*option.Check, error) {
+func (fu fromUSI) parseCheck(s string) (*pb.Check, error) {
 	res := checkRegex.FindAllStringSubmatch(s, -1)
 	if len(res) == 0 || len(res[0]) < 3 {
 		return nil, invalidSyntax(s, parseErrorCheck)
 	}
 
 	b := res[0][2] == "true"
-	return option.NewCheck(res[0][1], b, b), nil
+	return &pb.Check{Name: res[0][1], Val: b, Default: b}, nil
 }
 
 // spin type を Egn の Options にセットする
 // option name <string> type spin default <int> min <int> max <int>
 // このフォーマット以外は許容しない
 // 各値がなかったり、int ではない時、min > max の時はエラー
-func (fu fromUSI) parseSpin(s string) (*option.Spin, error) {
+func (fu fromUSI) parseSpin(s string) (*pb.Spin, error) {
 	res := spinRegex.FindAllStringSubmatch(s, -1)
 	if len(res) == 0 || len(res[0]) < 5 {
 		return nil, invalidSyntax(s, parseErrorSpin)
@@ -201,14 +215,15 @@ func (fu fromUSI) parseSpin(s string) (*option.Spin, error) {
 		return nil, invalidSyntax(s, fmt.Sprintf("%s Min value is not lesser than or equal to Max. Min: %d, Max: %d", s, min, max))
 	}
 
-	return option.NewSpin(res[0][1], init, init, min, max), nil
+	init32, min32, max32 := int32(init), int32(min), int32(max)
+	return &pb.Spin{Name: res[0][1], Val: init32, Default: init32, Min: min32, Max: max32}, nil
 }
 
 // select type を Egn の Options にセットする
 // option name <string> type combo default <string> rep(var <string>)
 // このフォーマット以外は許容しない
 // initial がない、var がない、default が var にない時はエラー
-func (fu fromUSI) parseSelect(s string) (*option.Select, error) {
+func (fu fromUSI) parseSelect(s string) (*pb.Select, error) {
 	res := selectRegex.FindAllStringSubmatch(s, -1)
 	if len(res) == 0 || len(res[0]) < 4 {
 		return nil, invalidSyntax(s, parseErrorSelect)
@@ -234,35 +249,35 @@ func (fu fromUSI) parseSelect(s string) (*option.Select, error) {
 		return nil, invalidSyntax(s, fmt.Sprintf("%s Default value of Select was not in vars. Default: %s, Vars: %v", parseErrorSelect, init, vars))
 	}
 
-	return option.NewSelect(res[0][1], init, init, vars), nil
+	return &pb.Select{Name: res[0][1], Val: init, Default: init, Vars: vars}, nil
 }
 
 // string type を Egn の Options にセットする
 // option name <string> type string default <string>
-func (fu fromUSI) parseString(s string) (*option.String, error) {
+func (fu fromUSI) parseString(s string) (*pb.String, error) {
 	res := stringRegex.FindAllStringSubmatch(s, -1)
 	if len(res) == 0 || len(res[0]) < 3 {
 		return nil, invalidSyntax(s, parseErrorString)
 	}
 
-	return option.NewString(res[0][1], res[0][2], res[0][2]), nil
+	return &pb.String{Name: res[0][1], Val: res[0][2], Default: res[0][2]}, nil
 }
 
 // option name <string> type filename default <string>
-func (fu fromUSI) parseFileName(s string) (*option.FileName, error) {
+func (fu fromUSI) parseFileName(s string) (*pb.Filename, error) {
 	res := fileNameRegex.FindAllStringSubmatch(s, -1)
 	if len(res) == 0 || len(res[0]) < 3 {
 		return nil, invalidSyntax(s, parseErrorFileName)
 	}
 
-	return option.NewFileName(res[0][1], res[0][2], res[0][2]), nil
+	return &pb.Filename{Name: res[0][1], Val: res[0][2], Default: res[0][2]}, nil
 }
 
 func invalidSyntax(input, msg string) error {
 	return exception.InvalidOptionSyntax.WithMsg(msg + "\nInput: " + input + "\n")
 }
 
-func (fu fromUSI) Move(s string) (m shogi.Move, err error) {
+func (fu fromUSI) Move(s string) (m *pb.Move, err error) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			err = exception.UnknownCharacter.WithMsg(fmt.Sprintf("%v", rec))
@@ -279,21 +294,21 @@ func (fu fromUSI) Move(s string) (m shogi.Move, err error) {
 			return
 		}
 
-		return shogi.Move{
-			Source:  shogi.Point{Row: -1, Column: -1},
-			Dest:    shogi.Point{Row: fu.row(a[3]), Column: fu.column(a[2])},
+		return &pb.Move{
+			Source:  &pb.Point{Row: -1, Column: -1},
+			Dest:    &pb.Point{Row: fu.row(a[3]), Column: fu.column(a[2])},
 			PieceID: piece,
 		}, nil
 	}
 
-	return shogi.Move{
-		Source:     shogi.Point{Row: fu.row(a[1]), Column: fu.column(a[0])},
-		Dest:       shogi.Point{Row: fu.row(a[3]), Column: fu.column(a[2])},
+	return &pb.Move{
+		Source:     &pb.Point{Row: fu.row(a[1]), Column: fu.column(a[0])},
+		Dest:       &pb.Point{Row: fu.row(a[3]), Column: fu.column(a[2])},
 		IsPromoted: len(a) == 5 && a[4] == "+",
 	}, nil
 }
 
-func (fu fromUSI) column(s string) int {
+func (fu fromUSI) column(s string) int32 {
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		panic(err)
@@ -301,15 +316,15 @@ func (fu fromUSI) column(s string) int {
 	if i < 1 || i > 9 {
 		panic(exception.InvalidColumnNumber)
 	}
-	return i - 1 // 0-8 にする
+	return int32(i - 1) // 0-8 にする
 }
 
-func (fu fromUSI) row(s string) int {
+func (fu fromUSI) row(s string) int32 {
 	r := []rune(s)[0]
 	if r < 97 || r > 105 {
 		panic(exception.InvalidRowNumber)
 	}
-	return int(r - 97)
+	return int32(r - 97)
 }
 
 // Info をパース(info string は渡さない)
@@ -317,9 +332,9 @@ func (fu fromUSI) row(s string) int {
 //   r *result.Info パースした結果。失敗したら nil
 //   mpv int multipvならその値。multipvじゃなければ 0
 //   err error エラー
-func (fu fromUSI) Info(s string) (r result.Info, mpv int, err error) {
+func (fu fromUSI) Info(s string) (r *pb.Info, mpv int, err error) {
 	a := strings.Split(s, " ")
-	r = result.NewInfo()
+	r = &pb.Info{Values: make(map[string]int32)}
 
 	// panic をリカバーしてエラーをセット
 	defer func() {
@@ -331,34 +346,34 @@ func (fu fromUSI) Info(s string) (r result.Info, mpv int, err error) {
 	i := 0
 	for i < len(a) {
 		switch strings.TrimSpace(a[i]) {
-		case result.Depth:
+		case depth:
 			i++
-			r.Values[result.Depth] = toInt(a[i])
-		case result.SelDepth:
+			r.Values[depth] = toInt32(a[i])
+		case selDepth:
 			i++
-			r.Values[result.SelDepth] = toInt(a[i])
-		case result.Time:
+			r.Values[selDepth] = toInt32(a[i])
+		case time:
 			i++
-			r.Values[result.Time] = toInt(a[i])
-		case result.Nodes:
+			r.Values[time] = toInt32(a[i])
+		case nodes:
 			i++
-			r.Values[result.Nodes] = toInt(a[i])
-		case result.HashFull:
+			r.Values[nodes] = toInt32(a[i])
+		case hashFull:
 			i++
-			r.Values[result.HashFull] = toInt(a[i])
-		case result.Nps:
+			r.Values[hashFull] = toInt32(a[i])
+		case nps:
 			i++
-			r.Values[result.Nps] = toInt(a[i])
-		case result.Score:
+			r.Values[nps] = toInt32(a[i])
+		case score:
 			if a[i+1] == "cp" || a[i+1] == "mate" {
-				r.Score = toInt(a[i+2])
+				r.Score = toInt32(a[i+2])
 			}
 			i += 2
-		case result.MultiPv:
+		case multiPv:
 			i++
-			mpv = toInt(a[i])
-		case result.Pv:
-			fu.setMoves(&r, a[i+1:])
+			mpv = int(toInt32(a[i]))
+		case pv:
+			fu.setMoves(r, a[i+1:])
 			i += len(a) // pv は 末尾
 		}
 		i++
@@ -367,8 +382,8 @@ func (fu fromUSI) Info(s string) (r result.Info, mpv int, err error) {
 	return
 }
 
-func (fu fromUSI) setMoves(r *result.Info, a []string) {
-	m := make([]shogi.Move, len(a))
+func (fu fromUSI) setMoves(r *pb.Info, a []string) {
+	m := make([]*pb.Move, len(a))
 	for i, v := range a {
 		mv, err := fu.Move(v)
 		if err != nil {
@@ -380,10 +395,10 @@ func (fu fromUSI) setMoves(r *result.Info, a []string) {
 	r.Moves = m
 }
 
-func toInt(s string) int {
-	i, err := strconv.Atoi(s)
+func toInt32(s string) int32 {
+	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return int32(i)
 }

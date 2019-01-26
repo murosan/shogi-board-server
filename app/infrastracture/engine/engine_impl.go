@@ -8,14 +8,14 @@ import (
 	"bufio"
 	"sync"
 
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/option"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/result"
-	"github.com/murosan/shogi-board-server/app/domain/entity/engine/state"
+	eg "github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
 	engineModel "github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-board-server/app/domain/infrastracture/os/command"
 	"github.com/murosan/shogi-board-server/app/domain/logger"
+	pb "github.com/murosan/shogi-board-server/app/proto"
+
 	"go.uber.org/zap"
 )
 
@@ -23,15 +23,15 @@ type engine struct {
 	cmd command.OsCmd
 
 	// 将棋エンジンの状態を管理
-	state state.State
+	state eg.State
 
 	// その他の情報
 	name    string
 	author  string
-	options option.OptMap
+	options *pb.Options
 
 	// エンジンの思考結果を貯めておくところ
-	result *result.Result
+	result *pb.Result
 
 	// エンジンの出力を流し込む scanner
 	// Singleton で持っておく
@@ -48,9 +48,9 @@ type engine struct {
 func NewEngine(c command.OsCmd, log logger.Log) engineModel.Engine {
 	return &engine{
 		cmd:     c,
-		state:   state.NotConnected,
-		options: *option.NewOptMap(),
-		result:  result.NewResult(),
+		state:   eg.NotConnected,
+		options: eg.NewOptions(),
+		result:  &pb.Result{},
 		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
 		ch:      make(chan []byte),
 		log:     log,
@@ -65,28 +65,19 @@ func (e *engine) GetAuthor() string { return e.author }
 
 func (e *engine) SetAuthor(a string) { e.author = a }
 
-func (e *engine) SetOption(n string, opt option.Option) { e.options.Append(opt) }
+func (e *engine) AddOption(i interface{}) { eg.AppendOption(e.options, i) }
 
-func (e *engine) GetOptions() option.OptMap { return e.options }
+func (e *engine) GetOptions() *pb.Options { return e.options }
 
-func (e *engine) UpdateOption(v option.UpdateOptionValue) error {
-	u, err := e.options.Update(v)
-	if err != nil {
-		e.log.Warn("EngineUpdateOption", zap.Error(exception.FailedToUpdateOption))
-		return err
-	}
-	return e.Exec([]byte(u))
-}
+func (e *engine) SetState(s eg.State) { e.state = s }
 
-func (e *engine) SetState(s state.State) { e.state = s }
+func (e *engine) GetState() eg.State { return e.state }
 
-func (e *engine) GetState() state.State { return e.state }
+func (e *engine) SetResult(i *pb.Info, key int) { e.result.Result[int32(key)] = i }
 
-func (e *engine) SetResult(i result.Info, key int) { e.result.Set(i, key) }
+func (e *engine) GetResult() *pb.Result { return e.result }
 
-func (e *engine) GetResult() *result.Result { return e.result }
-
-func (e *engine) FlushResult() { e.result.Flush() }
+func (e *engine) FlushResult() { e.result = &pb.Result{} }
 
 func (e *engine) Lock() { e.mux.Lock() }
 
@@ -100,7 +91,10 @@ func (e *engine) Exec(b []byte) error {
 func (e *engine) Start() error { return e.cmd.Start() }
 
 func (e *engine) Close() error {
-	e.Exec(usi.CmdQuit)
+	if err := e.Exec(usi.CmdQuit); err != nil {
+		e.log.Error("ExecError", zap.Error(err))
+		return exception.FailedToExecUSI.WithMsg(err.Error())
+	}
 	return e.cmd.Wait()
 }
 

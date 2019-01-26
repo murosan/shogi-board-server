@@ -26,21 +26,6 @@ func (e *Error) WithMsg(m string) *Error {
 }
 
 var (
-	// http
-
-	// NotFound 404 APIのパスが違うなど
-	NotFound = &Error{Code: "NotFound"}
-	// MethodNotAllowed 405 POST/GET を間違えている
-	MethodNotAllowed = &Error{Code: "MethodNotAllowed"}
-	// InternalServerError 503 サーバー側でエラーが発生
-	InternalServerError = &Error{Code: "InternalServerError"}
-	// ContentLengthRequired 411 ヘッダに Content-Length が見つからなかった
-	ContentLengthRequired = &Error{Code: "ContentLengthRequired"}
-	// FailedToReadBody body を必要としていたが読み取れなかった
-	FailedToReadBody = &Error{Code: "FailedToReadBody"}
-	// FailedToParseJSON JSON をパースしようとしたが、値が不正だった
-	FailedToParseJSON = &Error{Code: "FailedToParseJSON"}
-
 	// engine
 
 	// ConnectionTimeout 将棋エンジンからの応答がなかったり、必要以上に時間がかかってタイムアウト
@@ -49,6 +34,14 @@ var (
 	FailedToConnect = &Error{Code: "FailedToConnect"}
 	// FailedToClose 将棋エンジンとの接続解除に失敗した
 	FailedToClose = &Error{Code: "FailedToClose"}
+	// FailedToStart 将棋エンジンの思考を開始するのに失敗した
+	FailedToStart = &Error{Code: "FailedToStart"}
+	// FailedToStop 将棋エンジンの思考を止めるのに失敗した
+	FailedToStop = &Error{Code: "FailedToStop"}
+	// FailedToConvert USI への変換に失敗した
+	FailedToConvert = &Error{Code: "FailedToConvert"}
+	// FailedToExecUSI 将棋エンジンに対する USI コマンド実行に失敗した
+	FailedToExecUSI = &Error{Code: "FailedToExecUSI"}
 	// EngineIsNotRunning 将棋エンジンに接続している前提の処理を実行しようとしたが、
 	// 接続前だった
 	EngineIsNotRunning = &Error{Code: "EngineIsNotRunning"}
@@ -62,8 +55,10 @@ var (
 	// InvalidOptionParameter オプションに渡そうとしたパラメータが不正
 	// 型が違うときや、範囲外が指定された
 	InvalidOptionParameter = &Error{Code: "InvalidOptionParameter"}
-	// UnknownOption 不明なオプションの型
+	// UnknownOption 不明なオプション
 	UnknownOption = &Error{Code: "UnknownOption"}
+	// UnknownOptionType 不明なオプションの型
+	UnknownOptionType = &Error{Code: "UnknownOptionType"}
 
 	// usi
 

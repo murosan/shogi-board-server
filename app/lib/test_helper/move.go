@@ -5,13 +5,13 @@
 package testhelper
 
 import (
-	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
+	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
 // MoveEquals テスト用メソッド 2つの Move が同じかどうか判定する
 // 同じ: true
 // 違う: false
-func MoveEquals(a, b shogi.Move) bool {
+func MoveEquals(a, b *pb.Move) bool {
 	return a.Source.Row == b.Source.Row &&
 		a.Source.Column == b.Source.Column &&
 		a.Dest.Row == b.Dest.Row &&
@@ -23,7 +23,7 @@ func MoveEquals(a, b shogi.Move) bool {
 // MoveSliceEquals テスト用メソッド 2つの Move スライスが同じかどうか判定する
 // 同じ: true
 // 違う: false
-func MoveSliceEquals(a, b []shogi.Move) bool {
+func MoveSliceEquals(a, b []*pb.Move) bool {
 	if len(a) != len(b) {
 		return false
 	}

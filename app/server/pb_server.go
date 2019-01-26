@@ -8,29 +8,32 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/entity/converter"
 	"github.com/murosan/shogi-board-server/app/domain/infrastracture/connector"
 	"github.com/murosan/shogi-board-server/app/domain/logger"
+	"go.uber.org/zap"
 )
 
-type server struct {
+// Server は protocol buffers で定義された要件を満たすサーバー
+type Server struct {
 	conn connector.Connector
-	fj   converter.FromJSON
 	fu   converter.FromUSI
 	tu   converter.ToUSI
 	log  logger.Log
 }
 
-// NewServer 新しいサーバーを返す
+// NewServer returns new protocol buffer server
 func NewServer(
 	conn connector.Connector,
-	fj converter.FromJSON,
 	fu converter.FromUSI,
 	tu converter.ToUSI,
 	log logger.Log,
-) ShogiBoardServer {
-	return &server{
+) *Server {
+	return &Server{
 		conn,
-		fj,
 		fu,
 		tu,
 		log,
 	}
+}
+
+func (s *Server) accessLog(rpcName string) {
+	s.log.Info("access log", zap.String("rpc", rpcName))
 }

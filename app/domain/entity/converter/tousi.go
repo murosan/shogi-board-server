@@ -5,17 +5,19 @@
 package converter
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
+	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
 // ToUSI Go から USI に変換するインターフェース
 type ToUSI interface {
-	Piece(int) (string, error)
-	Position(shogi.Position) ([]byte, error)
+	Piece(int32) (string, error)
+	Position(*pb.Position) ([]byte, error)
 }
 
 type toUSI struct{}
@@ -25,7 +27,7 @@ func NewToUSI() ToUSI {
 	return toUSI{}
 }
 
-func (tu toUSI) Piece(i int) (s string, e error) {
+func (tu toUSI) Piece(i int32) (s string, e error) {
 	switch i {
 	case shogi.Fu0:
 		s = shogi.UsiFu0
@@ -84,13 +86,13 @@ func (tu toUSI) Piece(i int) (s string, e error) {
 	case shogi.Ryu1:
 		s = shogi.UsiRyu1
 	default:
-		e = exception.InvalidPieceID.WithMsg("PieceIDが不正です id=" + strconv.Itoa(i))
+		e = exception.InvalidPieceID.WithMsg("PieceIDが不正です id=" + fmt.Sprint(i))
 	}
 	return
 }
 
 // TODO: クソコードすぎる
-func (tu toUSI) Position(p shogi.Position) ([]byte, error) {
+func (tu toUSI) Position(p *pb.Position) ([]byte, error) {
 	arr := make([]string, 9)
 	for i, r := range p.Pos {
 		usir, err := tu.row(r)
@@ -115,28 +117,28 @@ func (tu toUSI) Position(p shogi.Position) ([]byte, error) {
 	// TODO
 	for i, c := range c0 {
 		if c != 0 {
-			p, err := tu.Piece(i + 1)
+			p, err := tu.Piece(int32(i + 1))
 			if err != nil {
 				return nil, err
 			}
-			s = append(s, []byte(strconv.Itoa(c)+p)...)
+			s = append(s, []byte(fmt.Sprint(c)+p)...)
 		}
 	}
 	for i, c := range c1 {
 		if c != 0 {
-			p, err := tu.Piece(-i - 1)
+			p, err := tu.Piece(int32(-i - 1))
 			if err != nil {
 				return nil, err
 			}
-			s = append(s, []byte(strconv.Itoa(c)+p)...)
+			s = append(s, []byte(fmt.Sprint(c)+p)...)
 		}
 	}
-	return append(s, []byte(" "+strconv.Itoa(p.MoveCount))...), nil
+	return append(s, []byte(" "+fmt.Sprint(p.MoveCount))...), nil
 }
 
-func (tu toUSI) row(r [9]int) (s string, e error) {
+func (tu toUSI) row(r *pb.Row) (s string, e error) {
 	emp := 0
-	for _, id := range r {
+	for _, id := range r.Row {
 		// クソ
 		if id == 0 {
 			emp++

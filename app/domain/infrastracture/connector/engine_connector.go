@@ -16,8 +16,6 @@ type Connector interface {
 	// 接続を切る
 	Close() error
 
-	// WithEngine 将棋エンジンの JSON キー と、callback を受け取って
-	// ConnectionPool から Engine を取得し、
-	// Engine を callback に渡して実行する
-	WithEngine(string, func(engine.Engine)) error
+	// GetEngine は指定された名前の Engine を返します
+	GetEngine(string) (engine.Engine, error)
 }

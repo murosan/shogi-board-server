@@ -6,38 +6,48 @@ package main
 
 import (
 	"flag"
-	"log"
-	"net/http"
+	"net"
 
+	pb "github.com/murosan/shogi-board-server/app/proto"
 	"github.com/murosan/shogi-board-server/app/server"
 	"github.com/murosan/shogi-board-server/app/service/config"
 	"github.com/murosan/shogi-board-server/app/service/connector"
 	"github.com/murosan/shogi-board-server/app/service/converter"
 	"github.com/murosan/shogi-board-server/app/service/logger"
+
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 var (
-	addr          = flag.String("addr", "127.0.0.1:8080", "http service address")
+	port          = flag.String("port", ":8080", "http server port")
 	appConfigPath = flag.String("appConfig", "./config/app.yml", "application config path")
 	logConfigPath = flag.String("logConfig", "./config/log.yml", "log config path")
 )
 
 func main() {
 	flag.Parse()
+
+	lis, err := net.Listen("tcp", *port)
+	if err != nil {
+		panic(err)
+	}
+
 	config.InitConfig(*appConfigPath, *logConfigPath)
 	conn := connector.UseConnector()
-	defer conn.Close() // for safety
 
-	s := server.NewServer(
+	svr := server.NewServer(
 		conn,
-		converter.UseFromJSON(),
 		converter.UseFromUSI(),
 		converter.UseToUSI(),
 		logger.Use(),
 	)
+	s := grpc.NewServer()
+	pb.RegisterShogiBoardServer(s, svr)
 
-	logger.Use().Info("Listening...", zap.String("address", *addr))
-	http.HandleFunc("/", s.Handling)
-	log.Fatalln(http.ListenAndServe(*addr, nil))
+	logger.Use().Info("Listening...", zap.String("port", *port))
+
+	if err := s.Serve(lis); err != nil {
+		panic(err)
+	}
 }

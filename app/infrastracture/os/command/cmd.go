@@ -10,6 +10,7 @@ import (
 
 	"github.com/murosan/shogi-board-server/app/domain/infrastracture/os/command"
 	"github.com/murosan/shogi-board-server/app/service/logger"
+
 	"go.uber.org/zap"
 )
 
