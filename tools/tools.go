@@ -9,7 +9,6 @@ package tools
 import (
 	_ "github.com/golang/protobuf/protoc-gen-go"
 	_ "github.com/rakyll/gotest"
-	_ "golang.org/x/lint/golint"
 	_ "google.golang.org/grpc"
 	_ "honnef.co/go/tools/cmd/staticcheck"
 )
