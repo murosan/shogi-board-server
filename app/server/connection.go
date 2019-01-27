@@ -21,6 +21,7 @@ func (s *Server) Connect(ctx context.Context, in *pb.EngineName) (*pb.Response, 
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
+	s.log.Info("Successfully connected")
 	return pb.NewResponse(), nil
 }
 
@@ -32,5 +33,6 @@ func (s *Server) Close(ctx context.Context, in *pb.EngineName) (*pb.Response, er
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
+	s.log.Info("Successfully closed")
 	return pb.NewResponse(), nil
 }

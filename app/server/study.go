@@ -96,6 +96,7 @@ func (s *Server) Stop(ctx context.Context, in *pb.EngineName) (*pb.Response, err
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
+	egn.SetState(engine.StandBy)
 	egn.FlushResult()
 	return pb.NewResponse(), nil
 }

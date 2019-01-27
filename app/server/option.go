@@ -72,6 +72,7 @@ func (s *Server) UpdateCheck(ctx context.Context, in *pb.UpdateCheckRequest) (*p
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
+	s.log.Info("Successfully updated")
 	return pb.NewResponse(), nil
 }
 
