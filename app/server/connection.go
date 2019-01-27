@@ -6,6 +6,7 @@ package server
 
 import (
 	"context"
+
 	"github.com/murosan/shogi-board-server/app/domain/exception"
 	pb "github.com/murosan/shogi-board-server/app/proto"
 	"google.golang.org/grpc/codes"
@@ -20,7 +21,7 @@ func (s *Server) Connect(ctx context.Context, in *pb.EngineName) (*pb.Response, 
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // Close 指定の将棋エンジンとの接続を切る
@@ -31,5 +32,5 @@ func (s *Server) Close(ctx context.Context, in *pb.EngineName) (*pb.Response, er
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }

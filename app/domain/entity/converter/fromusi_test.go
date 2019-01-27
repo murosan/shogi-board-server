@@ -129,10 +129,10 @@ func TestFromUSI_Option(t *testing.T) {
 		want *pb.Button
 		err  error
 	}{
-		{"option name ResetLearning type button", &pb.Button{Name: "ResetLearning"}, nil},
-		{"option name <empty> type button", &pb.Button{Name: "<empty>"}, nil}, // まぁいい
+		{"option name ResetLearning type button", pb.NewButton("ResetLearning"), nil},
+		{"option name <empty> type button", pb.NewButton("<empty>"), nil}, // まぁいい
 		{"option name ResetLearning type button sur", nil, exception.InvalidOptionSyntax},
-		{"option name 1 type button", &pb.Button{Name: "1"}, nil},
+		{"option name 1 type button", pb.NewButton("1"), nil},
 	}
 	for _, c := range cases {
 		o, err := fu.Option(c.in)
@@ -147,8 +147,8 @@ func TestFromUSI_Option2(t *testing.T) {
 		want *pb.Check
 		err  error
 	}{
-		{"option name UseBook type check default true", &pb.Check{Name: "UseBook", Val: true, Default: true}, nil},
-		{"   option name UseBook type check default true   ", &pb.Check{Name: "UseBook", Val: true, Default: true}, nil},
+		{"option name UseBook type check default true", pb.NewCheck("UseBook", true, true), nil},
+		{"   option name UseBook type check default true   ", pb.NewCheck("UseBook", true, true), nil},
 		{"option name UseBook type check default ", nil, exception.InvalidOptionSyntax},
 		{"option name UseBook type check default not_bool", nil, exception.InvalidOptionSyntax},
 		{"option name UseBook type check dlft true", nil, exception.InvalidOptionSyntax},
@@ -169,12 +169,12 @@ func TestFromUSI_Option3(t *testing.T) {
 	}{
 		{
 			"option name Selectivity type spin default 2 min 0 max 4",
-			&pb.Spin{Name: "Selectivity", Val: 2, Default: 2, Min: 0, Max: 4},
+			pb.NewSpin("Selectivity", 2, 2, 0, 4),
 			nil,
 		},
 		{
 			"option name Selectivity type spin default -100 min -123456 max 54321 ",
-			&pb.Spin{Name: "Selectivity", Val: -100, Default: -100, Min: -123456, Max: 54321},
+			pb.NewSpin("Selectivity", -100, -100, -123456, 54321),
 			nil,
 		},
 		{
@@ -213,12 +213,12 @@ func TestFromUSI_Option4(t *testing.T) {
 	}{
 		{
 			"option name Style type combo default Normal var Solid var Normal var Risky",
-			&pb.Select{Name: "Style", Val: "Normal", Default: "Normal", Vars: []string{"Solid", "Normal", "Risky"}},
+			pb.NewSelect("Style", "Normal", "Normal", []string{"Solid", "Normal", "Risky"}),
 			nil,
 		},
 		{
 			"option name Style type combo default Nor mal var Sol id var Nor mal var R isky",
-			&pb.Select{Name: "Style", Val: "Nor mal", Default: "Nor mal", Vars: []string{"Sol id", "Nor mal", "R isky"}},
+			pb.NewSelect("Style", "Nor mal", "Nor mal", []string{"Sol id", "Nor mal", "R isky"}),
 			nil,
 		},
 		{"option name Style type combo default None var Solid var Normal var Risky",
@@ -248,11 +248,11 @@ func TestFromUSI_Option5(t *testing.T) {
 		err  error
 	}{
 		{"option name BookFile type string default public.bin",
-			&pb.String{Name: "BookFile", Val: "public.bin", Default: "public.bin"},
+			pb.NewString("BookFile", "public.bin", "public.bin"),
 			nil,
 		},
 		{"option name BookFile type string default public.bin var a",
-			&pb.String{Name: "BookFile", Val: "public.bin var a", Default: "public.bin var a"},
+			pb.NewString("BookFile", "public.bin var a", "public.bin var a"),
 			nil,
 		},
 		{"option name BookFile type string",
@@ -279,11 +279,11 @@ func TestFromUSI_Option6(t *testing.T) {
 	}{
 		{
 			"option name LearningFile type filename default <empty>",
-			&pb.Filename{Name: "LearningFile", Val: "<empty>", Default: "<empty>"},
+			pb.NewFilename("LearningFile", "<empty>", "<empty>"),
 			nil,
 		},
 		{"option name LearningFile type filename default <empty> var a",
-			&pb.Filename{Name: "LearningFile", Val: "<empty> var a", Default: "<empty> var a"},
+			pb.NewFilename("LearningFile", "<empty> var a", "<empty> var a"),
 			nil,
 		},
 		{"option name LearningFile type filename",
@@ -350,36 +350,31 @@ func TestFromUSI_Move(t *testing.T) {
 		err  error
 	}{
 		{"7g7f",
-			&pb.Move{
-				Source:     &pb.Point{Row: 6, Column: 6},
-				Dest:       &pb.Point{Row: 5, Column: 6},
-				PieceID:    0,
-				IsPromoted: false,
-			},
+			pb.NewMove(
+				pb.NewPoint(6, 6),
+				pb.NewPoint(5, 6),
+				0, false),
 			nil,
 		},
 		{"8h2b+",
-			&pb.Move{
-				Source:     &pb.Point{Row: 7, Column: 7},
-				Dest:       &pb.Point{Row: 1, Column: 1},
-				PieceID:    0,
-				IsPromoted: true},
+			pb.NewMove(
+				pb.NewPoint(7, 7),
+				pb.NewPoint(1, 1),
+				0, true),
 			nil},
 		{"G*5b",
-			&pb.Move{
-				Source:  &pb.Point{Row: -1, Column: -1},
-				Dest:    &pb.Point{Row: 1, Column: 4},
-				PieceID: 5, IsPromoted: false,
-			},
+			pb.NewMove(
+				pb.NewPoint(-1, -1),
+				pb.NewPoint(1, 4),
+				5, false),
 			nil,
 		},
-		{"s*5b",
-			&pb.Move{
-				Source:     &pb.Point{Row: -1, Column: -1},
-				Dest:       &pb.Point{Row: 1, Column: 4},
-				PieceID:    -4,
-				IsPromoted: false,
-			},
+		{
+			"s*5b",
+			pb.NewMove(
+				pb.NewPoint(-1, -1),
+				pb.NewPoint(1, 4),
+				-4, false),
 			nil,
 		},
 		{"", &pb.Move{}, exception.UnknownCharacter},
@@ -458,20 +453,20 @@ func TestFromUSI_Info(t *testing.T) {
 				Score: -1521,
 				Moves: []*pb.Move{
 					{
-						Source:     &pb.Point{Column: 2, Row: 0},
-						Dest:       &pb.Point{Column: 2, Row: 1},
+						Source:     pb.NewPoint(0, 2),
+						Dest:       pb.NewPoint(1, 2),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: -1, Row: -1},
-						Dest:       &pb.Point{Column: 3, Row: 7},
+						Source:     pb.NewPoint(-1, -1),
+						Dest:       pb.NewPoint(7, 3),
 						PieceID:    2,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 3, Row: 2},
-						Dest:       &pb.Point{Column: 3, Row: 3},
+						Source:     pb.NewPoint(2, 3),
+						Dest:       pb.NewPoint(3, 3),
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -495,26 +490,26 @@ func TestFromUSI_Info(t *testing.T) {
 				Score:  156,
 				Moves: []*pb.Move{
 					{
-						Source:     &pb.Point{Column: -1, Row: -1},
-						Dest:       &pb.Point{Column: 4, Row: 7},
+						Source:     pb.NewPoint(-1, -1),
+						Dest:       pb.NewPoint(7, 4),
 						PieceID:    1,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 3, Row: 6},
-						Dest:       &pb.Point{Column: 4, Row: 6},
+						Source:     pb.NewPoint(6, 3),
+						Dest:       pb.NewPoint(6, 4),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 4, Row: 7},
-						Dest:       &pb.Point{Column: 4, Row: 6},
+						Source:     pb.NewPoint(7, 4),
+						Dest:       pb.NewPoint(6, 4),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 7, Row: 1},
-						Dest:       &pb.Point{Column: 7, Row: 5},
+						Source:     pb.NewPoint(1, 7),
+						Dest:       pb.NewPoint(5, 7),
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -527,23 +522,27 @@ func TestFromUSI_Info(t *testing.T) {
 				Score:  -99,
 				Moves: []*pb.Move{
 					{
-						Source: &pb.Point{Column: 1, Row: 3},
-						Dest:   &pb.Point{Column: 3, Row: 3}, PieceID: 0,
+						Source:     pb.NewPoint(3, 1),
+						Dest:       pb.NewPoint(3, 3),
+						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source: &pb.Point{Column: 2, Row: 2},
-						Dest:   &pb.Point{Column: 3, Row: 4}, PieceID: 0,
+						Source:     pb.NewPoint(2, 2),
+						Dest:       pb.NewPoint(4, 3),
+						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source: &pb.Point{Column: 7, Row: 7},
-						Dest:   &pb.Point{Column: 4, Row: 4}, PieceID: 0,
+						Source:     pb.NewPoint(7, 7),
+						Dest:       pb.NewPoint(4, 4),
+						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source: &pb.Point{Column: -1, Row: -1},
-						Dest:   &pb.Point{Column: 6, Row: 5}, PieceID: 3,
+						Source:     pb.NewPoint(-1, -1),
+						Dest:       pb.NewPoint(5, 6),
+						PieceID:    3,
 						IsPromoted: false,
 					},
 				},
@@ -555,27 +554,27 @@ func TestFromUSI_Info(t *testing.T) {
 				Score:  -157,
 				Moves: []*pb.Move{
 					{
-						Source:     &pb.Point{Column: 4, Row: 6},
-						Dest:       &pb.Point{Column: 4, Row: 5},
+						Source:     pb.NewPoint(6, 4),
+						Dest:       pb.NewPoint(5, 4),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 3, Row: 6},
-						Dest:       &pb.Point{Column: 3, Row: 5},
+						Source:     pb.NewPoint(6, 3),
+						Dest:       pb.NewPoint(5, 3),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 3, Row: 4},
-						Dest:       &pb.Point{Column: 2, Row: 2},
+						Source:     pb.NewPoint(4, 3),
+						Dest:       pb.NewPoint(2, 2),
 						PieceID:    0,
 						IsPromoted: true,
 					},
 
 					{
-						Source:     &pb.Point{Column: 3, Row: 2},
-						Dest:       &pb.Point{Column: 2, Row: 2},
+						Source:     pb.NewPoint(2, 3),
+						Dest:       pb.NewPoint(2, 2),
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -588,27 +587,27 @@ func TestFromUSI_Info(t *testing.T) {
 				Score:  -157,
 				Moves: []*pb.Move{
 					{
-						Source:     &pb.Point{Column: 4, Row: 6},
-						Dest:       &pb.Point{Column: 4, Row: 5},
+						Source:     pb.NewPoint(6, 4),
+						Dest:       pb.NewPoint(5, 4),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 3, Row: 6},
-						Dest:       &pb.Point{Column: 3, Row: 5},
+						Source:     pb.NewPoint(6, 3),
+						Dest:       pb.NewPoint(5, 3),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 3, Row: 4},
-						Dest:       &pb.Point{Column: 2, Row: 2},
+						Source:     pb.NewPoint(4, 3),
+						Dest:       pb.NewPoint(2, 2),
 						PieceID:    0,
 						IsPromoted: true,
 					},
 
 					{
-						Source:     &pb.Point{Column: 3, Row: 2},
-						Dest:       &pb.Point{Column: 2, Row: 2},
+						Source:     pb.NewPoint(2, 3),
+						Dest:       pb.NewPoint(2, 2),
 						PieceID:    0,
 						IsPromoted: false,
 					},
@@ -622,26 +621,26 @@ func TestFromUSI_Info(t *testing.T) {
 				Score:  -225,
 				Moves: []*pb.Move{
 					{
-						Source:     &pb.Point{Column: 4, Row: 6},
-						Dest:       &pb.Point{Column: 5, Row: 7},
+						Source:     pb.NewPoint(6, 4),
+						Dest:       pb.NewPoint(7, 5),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 7, Row: 1},
-						Dest:       &pb.Point{Column: 7, Row: 5},
+						Source:     pb.NewPoint(1, 7),
+						Dest:       pb.NewPoint(5, 7),
 						PieceID:    0,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: -1, Row: -1},
-						Dest:       &pb.Point{Column: 7, Row: 6},
+						Source:     pb.NewPoint(-1, -1),
+						Dest:       pb.NewPoint(6, 7),
 						PieceID:    1,
 						IsPromoted: false,
 					},
 					{
-						Source:     &pb.Point{Column: 7, Row: 5},
-						Dest:       &pb.Point{Column: 4, Row: 5},
+						Source:     pb.NewPoint(5, 7),
+						Dest:       pb.NewPoint(5, 4),
 						PieceID:    0,
 						IsPromoted: false,
 					},

@@ -60,7 +60,7 @@ func (s *Server) SetPosition(ctx context.Context, in *pb.SetPositionRequest) (*p
 		}
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // Start 将棋エンジンに思考を開始させる
@@ -77,7 +77,7 @@ func (s *Server) Start(ctx context.Context, in *pb.EngineName) (*pb.Response, er
 	if err := s.start(egn); err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // Stop 将棋エンジンの思考を停止する
@@ -97,7 +97,7 @@ func (s *Server) Stop(ctx context.Context, in *pb.EngineName) (*pb.Response, err
 	}
 
 	egn.FlushResult()
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // GetResult 将棋エンジンの思考結果を取得する

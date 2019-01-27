@@ -6,6 +6,7 @@ package server
 
 import (
 	"context"
+
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
 	pb "github.com/murosan/shogi-board-server/app/proto"
@@ -48,7 +49,7 @@ func (s *Server) UpdateButton(ctx context.Context, in *pb.UpdateButtonRequest) (
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // UpdateCheck は Options の Check の値を更新し、
@@ -71,7 +72,7 @@ func (s *Server) UpdateCheck(ctx context.Context, in *pb.UpdateCheckRequest) (*p
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // UpdateSpin は Options の Spin の値を更新し、
@@ -94,7 +95,7 @@ func (s *Server) UpdateSpin(ctx context.Context, in *pb.UpdateSpinRequest) (*pb.
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // UpdateSelect は Options の Select の値を更新し、
@@ -117,7 +118,7 @@ func (s *Server) UpdateSelect(ctx context.Context, in *pb.UpdateSelectRequest) (
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // UpdateString は Options の String の値を更新し、
@@ -140,7 +141,7 @@ func (s *Server) UpdateString(ctx context.Context, in *pb.UpdateStringRequest) (
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }
 
 // UpdateFilename は Options の Filename の値を更新し、
@@ -163,5 +164,5 @@ func (s *Server) UpdateFilename(ctx context.Context, in *pb.UpdateFilenameReques
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
-	return &pb.Response{}, nil
+	return pb.NewResponse(), nil
 }

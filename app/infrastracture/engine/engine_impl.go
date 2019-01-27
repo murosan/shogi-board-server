@@ -49,8 +49,8 @@ func NewEngine(c command.OsCmd, log logger.Log) engineModel.Engine {
 	return &engine{
 		cmd:     c,
 		state:   eg.NotConnected,
-		options: eg.NewOptions(),
-		result:  &pb.Result{},
+		options: pb.NewOptions(),
+		result:  pb.NewResult(),
 		sc:      bufio.NewScanner(*c.GetStdoutPipe()),
 		ch:      make(chan []byte),
 		log:     log,
@@ -77,7 +77,7 @@ func (e *engine) SetResult(i *pb.Info, key int) { e.result.Result[int32(key)] = 
 
 func (e *engine) GetResult() *pb.Result { return e.result }
 
-func (e *engine) FlushResult() { e.result = &pb.Result{} }
+func (e *engine) FlushResult() { e.result = pb.NewResult() }
 
 func (e *engine) Lock() { e.mux.Lock() }
 

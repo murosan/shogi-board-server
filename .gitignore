@@ -1,5 +1,5 @@
 /main
-/app/proto
+/app/proto/*.pb.go
 /coverage
 /logs
 /config/*

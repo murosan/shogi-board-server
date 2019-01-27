@@ -170,7 +170,7 @@ func (fu fromUSI) parseButton(s string) (*pb.Button, error) {
 		return nil, invalidSyntax(s, parseErrorButton)
 	}
 
-	return &pb.Button{Name: res[0][1]}, nil
+	return pb.NewButton(res[0][1]), nil
 }
 
 // check type を Egn の Options にセットする
@@ -183,7 +183,7 @@ func (fu fromUSI) parseCheck(s string) (*pb.Check, error) {
 	}
 
 	b := res[0][2] == "true"
-	return &pb.Check{Name: res[0][1], Val: b, Default: b}, nil
+	return pb.NewCheck(res[0][1], b, b), nil
 }
 
 // spin type を Egn の Options にセットする
@@ -216,7 +216,7 @@ func (fu fromUSI) parseSpin(s string) (*pb.Spin, error) {
 	}
 
 	init32, min32, max32 := int32(init), int32(min), int32(max)
-	return &pb.Spin{Name: res[0][1], Val: init32, Default: init32, Min: min32, Max: max32}, nil
+	return pb.NewSpin(res[0][1], init32, init32, min32, max32), nil
 }
 
 // select type を Egn の Options にセットする
@@ -249,7 +249,7 @@ func (fu fromUSI) parseSelect(s string) (*pb.Select, error) {
 		return nil, invalidSyntax(s, fmt.Sprintf("%s Default value of Select was not in vars. Default: %s, Vars: %v", parseErrorSelect, init, vars))
 	}
 
-	return &pb.Select{Name: res[0][1], Val: init, Default: init, Vars: vars}, nil
+	return pb.NewSelect(res[0][1], init, init, vars), nil
 }
 
 // string type を Egn の Options にセットする
@@ -260,7 +260,7 @@ func (fu fromUSI) parseString(s string) (*pb.String, error) {
 		return nil, invalidSyntax(s, parseErrorString)
 	}
 
-	return &pb.String{Name: res[0][1], Val: res[0][2], Default: res[0][2]}, nil
+	return pb.NewString(res[0][1], res[0][2], res[0][2]), nil
 }
 
 // option name <string> type filename default <string>
@@ -270,7 +270,7 @@ func (fu fromUSI) parseFileName(s string) (*pb.Filename, error) {
 		return nil, invalidSyntax(s, parseErrorFileName)
 	}
 
-	return &pb.Filename{Name: res[0][1], Val: res[0][2], Default: res[0][2]}, nil
+	return pb.NewFilename(res[0][1], res[0][2], res[0][2]), nil
 }
 
 func invalidSyntax(input, msg string) error {
@@ -294,18 +294,15 @@ func (fu fromUSI) Move(s string) (m *pb.Move, err error) {
 			return
 		}
 
-		return &pb.Move{
-			Source:  &pb.Point{Row: -1, Column: -1},
-			Dest:    &pb.Point{Row: fu.row(a[3]), Column: fu.column(a[2])},
-			PieceID: piece,
-		}, nil
+		src := pb.NewPoint(-1, -1)
+		dst := pb.NewPoint(fu.row(a[3]), fu.column(a[2]))
+		return pb.NewMove(src, dst, piece, false), nil
 	}
 
-	return &pb.Move{
-		Source:     &pb.Point{Row: fu.row(a[1]), Column: fu.column(a[0])},
-		Dest:       &pb.Point{Row: fu.row(a[3]), Column: fu.column(a[2])},
-		IsPromoted: len(a) == 5 && a[4] == "+",
-	}, nil
+	src := pb.NewPoint(fu.row(a[1]), fu.column(a[0]))
+	dst := pb.NewPoint(fu.row(a[3]), fu.column(a[2]))
+	prm := len(a) == 5 && a[4] == "+"
+	return pb.NewMove(src, dst, 0, prm), nil
 }
 
 func (fu fromUSI) column(s string) int32 {
@@ -334,7 +331,7 @@ func (fu fromUSI) row(s string) int32 {
 //   err error エラー
 func (fu fromUSI) Info(s string) (r *pb.Info, mpv int, err error) {
 	a := strings.Split(s, " ")
-	r = &pb.Info{Values: make(map[string]int32)}
+	r = pb.NewInfo()
 
 	// panic をリカバーしてエラーをセット
 	defer func() {

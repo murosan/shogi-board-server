@@ -19,18 +19,6 @@ var (
 	val  = " value "
 )
 
-// NewOptions は新しい Options を返します
-func NewOptions() *pb.Options {
-	return &pb.Options{
-		Buttons:   make(map[string]*pb.Button),
-		Checks:    make(map[string]*pb.Check),
-		Spins:     make(map[string]*pb.Spin),
-		Selects:   make(map[string]*pb.Select),
-		Strings:   make(map[string]*pb.String),
-		Filenames: make(map[string]*pb.Filename),
-	}
-}
-
 // AppendOption は Options に指定のオプションを追加します
 func AppendOption(opts *pb.Options, opt interface{}) {
 	switch o := opt.(type) {
