@@ -18,10 +18,16 @@ test_all:
 	gotest -v -cover -coverprofile ./coverage/cover.out ./...
 	go tool cover -html=./coverage/cover.out -o ./coverage/cover.html
 
-syntax_check:
+style_check:
 	go vet ./...
 	staticcheck ./...
 	golint ./...
+
+gen_proto:
+	protoc \
+		--go_out=plugins=grpc:./app/proto \
+		--proto_path=shogi-board-protobufs/protos \
+		v1.proto
 
 # clean up go modules
 clean_modules:
