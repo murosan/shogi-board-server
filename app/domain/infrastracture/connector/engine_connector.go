@@ -18,4 +18,7 @@ type Connector interface {
 
 	// GetEngine は指定された名前の Engine を返します
 	GetEngine(string) (engine.Engine, error)
+
+	// GetEngineNames は app.yml で設定された接続可能な将棋エンジンの名前一覧を返す
+	GetEngineNames() []string
 }

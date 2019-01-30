@@ -101,6 +101,11 @@ func NewOptions() *Options {
 	}
 }
 
+// NewEngineNames returns new EngineNames
+func NewEngineNames(engines []string) *EngineNames {
+	return &EngineNames{Engines: engines}
+}
+
 // NewResponse returns new Response
 func NewResponse() *Response {
 	return &Response{}

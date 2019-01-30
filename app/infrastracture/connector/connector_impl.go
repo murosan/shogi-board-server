@@ -107,6 +107,11 @@ func (c *connector) GetEngine(name string) (eg.Engine, error) {
 	return e, nil
 }
 
+// GetEngineNames は app.yml で設定された接続可能な将棋エンジンの名前一覧を返します
+func (c *connector) GetEngineNames() []string {
+	return c.conf.GetEngineNames()
+}
+
 func (c *connector) catchOutput(ch chan []byte) {
 	egn := c.pool.NamedEngine()
 	s := egn.GetScanner()
