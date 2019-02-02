@@ -23,12 +23,6 @@ check_code_style:
 	staticcheck ./...
 	golint ./...
 
-gen_proto:
-	protoc \
-		--go_out=plugins=grpc:./app/proto \
-		--proto_path=shogi-board-protobufs/protos \
-		v1.proto
-
 # clean up go modules
 clean_modules:
 	go mod tidy
