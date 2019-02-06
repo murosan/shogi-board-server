@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	port          = flag.String("port", ":8080", "http server port")
+	port          = flag.String("port", "8080", "http server port")
 	appConfigPath = flag.String("appConfig", "./config/app.yml", "application config path")
 	logConfigPath = flag.String("logConfig", "./config/log.yml", "log config path")
 )
@@ -28,7 +28,7 @@ var (
 func main() {
 	flag.Parse()
 
-	lis, err := net.Listen("tcp", *port)
+	lis, err := net.Listen("tcp", ":"+*port)
 	if err != nil {
 		panic(err)
 	}

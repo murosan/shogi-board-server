@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    volumes:
+      - ./:/go/src/shogi-board-server/
+    ports:
+      - '8081:8081'
+    container_name: 'shogi-board-server'
+
+  proxy:
+    build: ./proxy
+    ports:
+      - '8080:8080'
+    links:
+      - 'server'
+    container_name: 'shogi-board-proxy'
