@@ -1,18 +1,11 @@
 # ログローテーションの設定
 # /etc/logrotate.d/ にコピーする
 
-/go/src/shogi-board-server/app.log {
+/go/src/shogi-board-server/log/*.log {
   ifempty
   missingok
   compress
   daily
-  rotate 30
-}
-
-/go/src/shogi-board-server/app_error.log {
-  ifempty
-  missingok
-  compress
-  daily
+  size 100M
   rotate 30
 }
