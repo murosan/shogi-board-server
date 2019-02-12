@@ -7,6 +7,11 @@ services:
       - ./:/go/src/shogi-board-server/
     ports:
       - '8081:8081'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '50m'
+        max-file: '10'
     container_name: 'shogi-board-server'
 
   proxy:
@@ -15,4 +20,9 @@ services:
       - '8080:8080'
     links:
       - 'server'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '50m'
+        max-file: '10'
     container_name: 'shogi-board-proxy'
