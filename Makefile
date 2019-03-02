@@ -7,8 +7,6 @@ setup_development:
 	go get -u github.com/golang/protobuf/protoc-gen-go
 	go get -u honnef.co/go/tools/cmd/staticcheck
 	go get -u github.com/rakyll/gotest
-	go get -u github.com/fullstorydev/grpcurl
-	go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 
 build:
 	go build -o ./main

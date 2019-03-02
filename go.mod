@@ -32,7 +32,7 @@ require (
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
 	github.com/prometheus/common v0.2.0 // indirect
 	github.com/prometheus/procfs v0.0.0-20190227231451-bbced9601137 // indirect
-	github.com/rakyll/gotest v0.0.0-20180125184505-86f0749cd8cc // indirect
+	github.com/rakyll/gotest v0.0.0-20180125184505-86f0749cd8cc
 	github.com/rogpeppe/fastuuid v1.0.0 // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/shurcooL/go v0.0.0-20190121191506-3fef8c783dec // indirect
@@ -68,6 +68,6 @@ require (
 	google.golang.org/genproto v0.0.0-20190227213309-4f5b463f9597 // indirect
 	google.golang.org/grpc v1.19.0
 	gopkg.in/yaml.v2 v2.2.2
-	honnef.co/go/tools v0.0.0-20190215041234-466a0476246c // indirect
+	honnef.co/go/tools v0.0.0-20190215041234-466a0476246c
 	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect
 )
