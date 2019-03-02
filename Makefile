@@ -2,6 +2,7 @@ GIT_DIR=$(shell git rev-parse --git-dir)
 
 setup_development:
 	cp ./scripts/pre-commit.sh $(GIT_DIR)/hooks/pre-commit
+	git config commit.template .commit-template
 
 	go get -u github.com/golang/protobuf/protoc-gen-go
 	go get -u honnef.co/go/tools/cmd/staticcheck
