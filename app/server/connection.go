@@ -15,8 +15,8 @@ import (
 	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
-// GetEngineNames は app.yml で設定された接続可能な将棋エンジンの名前一覧を返す
-func (s *Server) GetEngineNames(ctx context.Context, in *pb.Request) (*pb.EngineNames, error) {
+// Initialize は app.yml で設定された接続可能な将棋エンジンの名前一覧を返す
+func (s *Server) Initialize(ctx context.Context, in *pb.Request) (*pb.EngineNames, error) {
 	s.accessLog("GetEngineNames")
 	n := s.conn.GetEngineNames()
 	s.log.Info("GetEngineNames", zap.Strings("result", n))

@@ -17,5 +17,7 @@ type ConnectionPool interface {
 	// name を渡してない。あとで修正する
 	NamedEngine() engine.Engine
 
+	// Remove Engine を Pool から消す
+	// TODO: これ自体なくす
 	Remove() error
 }
