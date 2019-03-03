@@ -10,6 +10,7 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
 	pb "github.com/murosan/shogi-board-server/app/proto"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

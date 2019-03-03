@@ -6,6 +6,7 @@ package connector
 
 import (
 	"bytes"
+	"os/exec"
 	"regexp"
 	"time"
 
@@ -15,21 +16,23 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
 	conn "github.com/murosan/shogi-board-server/app/domain/infrastracture/connector"
-	eg "github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
+	mengine "github.com/murosan/shogi-board-server/app/domain/infrastracture/engine"
 	"github.com/murosan/shogi-board-server/app/domain/logger"
+	iengine "github.com/murosan/shogi-board-server/app/infrastracture/engine"
+	"github.com/murosan/shogi-board-server/app/infrastracture/os/command"
+	"github.com/murosan/shogi-board-server/app/lib/stringutil"
+
 	"go.uber.org/zap"
 )
 
 var (
 	idRegex  = regexp.MustCompile(`id.*`)
 	optRegex = regexp.MustCompile(`option.*`)
-	name     = "name"
-	author   = "author"
 )
 
 type connector struct {
 	conf config.Config
-	pool conn.ConnectionPool
+	em   map[string]mengine.Engine
 	fu   converter.FromUSI
 	log  logger.Log
 }
@@ -37,22 +40,33 @@ type connector struct {
 // NewConnector 新しい Connector を返す
 func NewConnector(
 	c config.Config,
-	p conn.ConnectionPool,
 	fu converter.FromUSI,
 	log logger.Log,
 ) conn.Connector {
-	return &connector{c, p, fu, log}
+	em := make(map[string]mengine.Engine)
+	return &connector{c, em, fu, log}
 }
 
 // Connect は将棋エンジンに接続します
-func (c *connector) Connect() error {
-	if c.pool.NamedEngine() != nil {
+func (c *connector) Connect(name string) error {
+	if _, ok := c.em[name]; ok {
 		c.log.Debug(exception.EngineIsAlreadyRunning.Error() + " Ignore request...")
 		return nil
 	}
 
-	c.pool.Initialize() // TODO: Nameを渡して2つのエンジンを使えるように
-	egn := c.pool.NamedEngine()
+	// 将棋エンジンの名前一覧を Conf から取得
+	names := c.conf.GetEngineNames()
+
+	// Conf にエンジンの名前があるかチェックする
+	if !stringutil.Contains(names, name) {
+		return exception.UnknownEngineName
+	}
+
+	// バイナリ実行
+	cmd := exec.Command(c.conf.GetEnginePath(name))
+	egn := iengine.NewEngine(command.NewCmd(cmd), c.log)
+	c.em[name] = egn
+
 	stt := egn.GetState()
 	c.log.Debug("Connect", zap.Any("EngineState", stt))
 
@@ -62,12 +76,12 @@ func (c *connector) Connect() error {
 
 	egn.Lock()
 	egn.SetState(engine.Connected)
-	go c.catchOutput(egn.GetChan())
+	go c.catchOutput(egn.GetChan(), name)
 	if e := egn.Exec(usi.CmdUsi); e != nil {
 		c.log.Error("ExecUsiError", zap.Error(e))
 		return e
 	}
-	if e := c.waitFor(usi.ResOk, true, egn.GetChan()); e != nil {
+	if e := c.waitFor(usi.ResOk, true, egn.GetChan(), name); e != nil {
 		c.log.Error("WaitUsiOkError", zap.Error(e))
 		return e
 	}
@@ -75,7 +89,7 @@ func (c *connector) Connect() error {
 		c.log.Error("ExecIsReadyError", zap.Error(e))
 		return e
 	}
-	if e := c.waitFor(usi.ResReady, false, egn.GetChan()); e != nil {
+	if e := c.waitFor(usi.ResReady, false, egn.GetChan(), name); e != nil {
 		c.log.Error("WaitReadyOkError", zap.Error(e))
 		return e
 	}
@@ -84,27 +98,31 @@ func (c *connector) Connect() error {
 }
 
 // Close 将棋エンジンとの接続を切ります
-// TODO: エンジンに接続済か確認する処理はどうにか共通化して綺麗にしたい
-func (c *connector) Close() error {
-	defer c.pool.Remove()
-	egn := c.pool.NamedEngine()
-	if egn == nil || egn.GetState() == engine.NotConnected {
+func (c *connector) Close(name string) error {
+	// config にエンジンの名前があるかチェックする
+	if !stringutil.Contains(c.conf.GetEngineNames(), name) {
+		return exception.UnknownEngineName
+	}
+
+	egn, ok := c.em[name]
+
+	if !ok {
 		c.log.Debug("Close", zap.Any("EngineState", engine.NotConnected))
 		return nil
 	}
 
-	// TODO: timeout
+	defer delete(c.em, name)
 	return egn.Close()
 }
 
 // GetEngine 名前を受け取り Engine を返します
-func (c *connector) GetEngine(name string) (eg.Engine, error) {
-	e := c.pool.NamedEngine( /* name */ )
-	if e == nil || e.GetState() == engine.NotConnected {
+func (c *connector) GetEngine(name string) (mengine.Engine, error) {
+	egn, ok := c.em[name]
+	if !ok || egn.GetState() == engine.NotConnected {
 		return nil, exception.EngineIsNotRunning
 	}
 
-	return e, nil
+	return egn, nil
 }
 
 // GetEngineNames は app.yml で設定された接続可能な将棋エンジンの名前一覧を返します
@@ -112,8 +130,8 @@ func (c *connector) GetEngineNames() []string {
 	return c.conf.GetEngineNames()
 }
 
-func (c *connector) catchOutput(ch chan []byte) {
-	egn := c.pool.NamedEngine()
+func (c *connector) catchOutput(ch chan []byte, name string) {
+	egn := c.em[name]
 	s := egn.GetScanner()
 
 	for s.Scan() {
@@ -127,7 +145,12 @@ func (c *connector) catchOutput(ch chan []byte) {
 	}
 }
 
-func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) error {
+func (c *connector) waitFor(
+	exitWord []byte,
+	parseOpt bool,
+	egnOut chan []byte,
+	name string,
+) error {
 	timeout := make(chan struct{})
 	go func() {
 		time.Sleep(time.Second * 10)
@@ -142,7 +165,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) 
 				if e != nil {
 					return e
 				}
-				c.setID(k, v)
+				c.setID(k, v, name)
 			}
 
 			if parseOpt && optRegex.Match(b) {
@@ -150,7 +173,7 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) 
 				if e != nil {
 					return e
 				}
-				c.appendOption(o)
+				c.appendOption(o, name)
 			}
 
 			if bytes.Equal(b, exitWord) {
@@ -163,12 +186,12 @@ func (c *connector) waitFor(exitWord []byte, parseOpt bool, egnOut chan []byte) 
 	}
 }
 
-func (c *connector) setID(k, v string) {
-	egn := c.pool.NamedEngine()
+func (c *connector) setID(k, v, name string) {
+	egn := c.em[name]
 	switch k {
-	case name:
+	case "name":
 		egn.SetName(v)
-	case author:
+	case "author":
 		egn.SetAuthor(v)
 	default:
 		panic("unknown id name")
@@ -176,6 +199,7 @@ func (c *connector) setID(k, v string) {
 }
 
 // appendOption パース済みのオプションを受け取り、将棋エンジンが保持している一覧に追加
-func (c *connector) appendOption(i interface{}) {
-	c.pool.NamedEngine().AddOption(i)
+func (c *connector) appendOption(i interface{}, name string) {
+	egn := c.em[name]
+	egn.AddOption(i)
 }

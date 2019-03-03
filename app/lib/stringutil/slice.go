@@ -36,3 +36,13 @@ func SliceEquals(a, b []string) bool {
 
 	return true
 }
+
+// Contains checks list contains s
+func Contains(list []string, s string) bool {
+	for _, v := range list {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}

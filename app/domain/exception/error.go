@@ -42,6 +42,8 @@ var (
 	FailedToConvert = &Error{Code: "FailedToConvert"}
 	// FailedToExecUSI 将棋エンジンに対する USI コマンド実行に失敗した
 	FailedToExecUSI = &Error{Code: "FailedToExecUSI"}
+	// UnknownEngineName 指定された将棋エンジンの名前が不明だった
+	UnknownEngineName = &Error{Code: "UnknownEngineName"}
 	// EngineIsNotRunning 将棋エンジンに接続している前提の処理を実行しようとしたが、
 	// 接続前だった
 	EngineIsNotRunning = &Error{Code: "EngineIsNotRunning"}

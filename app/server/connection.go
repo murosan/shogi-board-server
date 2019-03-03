@@ -19,6 +19,12 @@ import (
 func (s *Server) Initialize(ctx context.Context, in *pb.Request) (*pb.EngineNames, error) {
 	s.accessLog("GetEngineNames")
 	n := s.conn.GetEngineNames()
+	for _, name := range n {
+		if err := s.closeEngine(name); err != nil {
+			msg := exception.FailedToClose.WithMsg(err.Error()).Error()
+			return nil, status.Error(codes.Unknown, msg)
+		}
+	}
 	s.log.Info("GetEngineNames", zap.Strings("result", n))
 	return pb.NewEngineNames(n), nil
 }
@@ -26,7 +32,7 @@ func (s *Server) Initialize(ctx context.Context, in *pb.Request) (*pb.EngineName
 // Connect 指定の将棋エンジンに接続する
 func (s *Server) Connect(ctx context.Context, in *pb.EngineName) (*pb.Response, error) {
 	s.accessLog("Connect")
-	if err := s.conn.Connect(); err != nil {
+	if err := s.conn.Connect(in.Name); err != nil {
 		msg := exception.FailedToConnect.WithMsg(err.Error()).Error()
 		return nil, status.Error(codes.Unknown, msg)
 	}
@@ -38,11 +44,15 @@ func (s *Server) Connect(ctx context.Context, in *pb.EngineName) (*pb.Response, 
 // Close 指定の将棋エンジンとの接続を切る
 func (s *Server) Close(ctx context.Context, in *pb.EngineName) (*pb.Response, error) {
 	s.accessLog("Close")
-	if err := s.conn.Close(); err != nil {
+	if err := s.closeEngine(in.Name); err != nil {
 		msg := exception.FailedToClose.WithMsg(err.Error()).Error()
 		return nil, status.Error(codes.Unknown, msg)
 	}
 
 	s.log.Info("Successfully closed")
 	return pb.NewResponse(), nil
+}
+
+func (s *Server) closeEngine(name string) error {
+	return s.conn.Close(name)
 }
