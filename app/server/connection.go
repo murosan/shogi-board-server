@@ -17,10 +17,11 @@ import (
 
 // Initialize は app.yml で設定された接続可能な将棋エンジンの名前一覧を返す
 func (s *Server) Initialize(ctx context.Context, in *pb.Request) (*pb.EngineNames, error) {
-	s.accessLog("GetEngineNames")
+	s.accessLog("Initialize")
 	n := s.conn.GetEngineNames()
 	for _, name := range n {
 		if err := s.closeEngine(name); err != nil {
+			s.log.Info("Close", zap.String("engine name", name))
 			msg := exception.FailedToClose.WithMsg(err.Error()).Error()
 			return nil, status.Error(codes.Unknown, msg)
 		}
