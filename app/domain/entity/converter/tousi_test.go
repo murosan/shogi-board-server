@@ -96,7 +96,7 @@ func TestToUSI_Position(t *testing.T) {
 				},
 				Cap0:      []int32{3, 0, 0, 0, 0, 0, 0},
 				Cap1:      []int32{2, 0, 0, 0, 0, 0, 0},
-				Turn:      1,
+				Turn:      -1,
 				MoveCount: 100,
 			},
 			[]byte("position sfen lnsgk1snl/6gb1/p1pppp2p/6R2/9/1rP6/P2PPPP1P/1BG6/LNS1KGSNL w 3P2p 100"),

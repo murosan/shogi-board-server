@@ -103,25 +103,23 @@ func (tu toUSI) Position(p *pb.Position) ([]byte, error) {
 	}
 
 	s := []byte("position sfen " + strings.Join(arr, "/"))
-	if p.Turn == 0 {
+	if p.Turn == 1 {
 		s = append(s, []byte(" b ")...)
 	} else {
 		s = append(s, []byte(" w ")...)
 	}
 
 	c0, c1 := p.Cap0, p.Cap1
-	if len(c0) == 0 && len(c1) == 0 {
-		return append(s, []byte("- 1")...), nil
-	}
 
 	// TODO
+	caps := []byte("")
 	for i, c := range c0 {
 		if c != 0 {
 			p, err := tu.Piece(int32(i + 1))
 			if err != nil {
 				return nil, err
 			}
-			s = append(s, []byte(fmt.Sprint(c)+p)...)
+			caps = append(caps, []byte(fmt.Sprint(c)+p)...)
 		}
 	}
 	for i, c := range c1 {
@@ -130,8 +128,13 @@ func (tu toUSI) Position(p *pb.Position) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			s = append(s, []byte(fmt.Sprint(c)+p)...)
+			caps = append(caps, []byte(fmt.Sprint(c)+p)...)
 		}
+	}
+	if len(caps) == 0 {
+		s = append(s, []byte("-")...)
+	} else {
+		s = append(s, caps...)
 	}
 	return append(s, []byte(" "+fmt.Sprint(p.MoveCount))...), nil
 }
