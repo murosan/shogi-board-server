@@ -73,7 +73,15 @@ func (e *engine) SetState(s eg.State) { e.state = s }
 
 func (e *engine) GetState() eg.State { return e.state }
 
-func (e *engine) SetResult(i *pb.Info, key int) { e.result.Result[int32(key)] = i }
+func (e *engine) SetResult(i *pb.Info, key int) {
+	if key == 1 {
+		// 最善手をセットする場合他の結果も消す
+		// 候補が5手あった状態から、2手に減ったときなど、余計なものが残らないようにするため
+		// TODO: 安定しなかったら、5秒以上とかで判定するようにする
+		e.FlushResult()
+	}
+	e.result.Result[int32(key)] = i
+}
 
 func (e *engine) GetResult() *pb.Result { return e.result }
 
