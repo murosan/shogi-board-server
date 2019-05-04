@@ -101,6 +101,26 @@ func TestToUSI_Position(t *testing.T) {
 			},
 			[]byte("position sfen lnsgk1snl/6gb1/p1pppp2p/6R2/9/1rP6/P2PPPP1P/1BG6/LNS1KGSNL w 3P2p 100"),
 		},
+		{
+			&pb.Position{
+				Pos: []*pb.Row{
+					{Row: []int32{-2, -3, -4, -5, -8, -5, -4, -3, -2}},
+					{Row: []int32{0, -7, 0, 0, 0, 0, 0, -6, 0}},
+					{Row: []int32{-1, -1, -1, -1, -1, -1, -1, -1, -1}},
+					{Row: []int32{0, 0, 0, 0, 0, 0, 0, 0, 0}},
+					{Row: []int32{0, 0, 0, 0, 0, 0, 0, 0, 0}},
+					{Row: []int32{0, 0, 0, 0, 0, 0, 0, 0, 0}},
+					{Row: []int32{1, 1, 1, 1, 1, 1, 1, 1, 1}},
+					{Row: []int32{0, 6, 0, 0, 0, 0, 0, 7, 0}},
+					{Row: []int32{2, 3, 4, 5, 8, 5, 4, 3, 2}},
+				},
+				Cap0:      []int32{0, 0, 0, 0, 0, 0, 0},
+				Cap1:      []int32{0, 0, 0, 0, 0, 0, 0},
+				Turn:      1,
+				MoveCount: 1,
+			},
+			[]byte("position sfen lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1"),
+		},
 	}
 
 	for i, c := range cases {
@@ -109,7 +129,11 @@ func TestToUSI_Position(t *testing.T) {
 			t.Errorf("Error: %v\nindex: %d", e.Error(), i)
 		}
 		if !bytes.Equal(b, c.want) {
-			t.Errorf("index: %d\nExpected: %v\nActual: %v", i, string(c.want), string(b))
+			t.Errorf(`
+Failed at index: %d
+Expected: %v
+Actual:   %v
+`, i, string(c.want), string(b))
 		}
 	}
 }
