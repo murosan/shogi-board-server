@@ -7,6 +7,7 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.6 // indirect
+	github.com/murosan/goutils v0.0.0-20190506160604-a2da7259cdd8
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/rakyll/gotest v0.0.0-20180125184505-86f0749cd8cc
 	github.com/stretchr/testify v1.3.0 // indirect

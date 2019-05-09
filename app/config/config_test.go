@@ -5,100 +5,95 @@
 package config
 
 import (
-	"sort"
+	"os"
+	"path"
 	"testing"
 
-	"github.com/murosan/shogi-board-server/app/lib/stringutil"
-	"github.com/murosan/shogi-board-server/app/lib/test_helper"
-	"go.uber.org/zap"
+	smap "github.com/murosan/goutils/map/strings"
+	sslice "github.com/murosan/goutils/slice/strings"
+	"github.com/murosan/goutils/testutils"
 )
 
-func TestNewConfig(t *testing.T) {
+var (
+	pwd, _  = os.Getwd()
+	dataDir = "./testdata"
+)
+
+func TestNew(t *testing.T) {
 	cases := []struct {
-		appyml, logyml string
-		enginePaths    []string
-		engineNames    []string
+		appPath string
+		logPath string
+		app     *App
 	}{
-		{`
-engines:
-  com: '/home/user/path/to/engine/bin'
-`,
-			`
-level: 'debug'
-encoding: 'console'
-encoderConfig:
-  messageKey: 'Msg'
-  levelKey: 'Level'
-  timeKey: 'Time'
-  nameKey: 'name'
-  callerKey: 'Caller'
-  stacktraceKey: 'St'
-  levelEncoder: ''
-  timeEncoder: 'iso8601'
-  durationEncoder: 'string'
-  callerEncoder: 'short'
-outputPaths:
-  - 'stdout'
-errorOutputPaths:
-  - 'stderr'
-`,
-			[]string{"/home/user/path/to/engine/bin"},
-			[]string{"com"},
+		{path.Join(pwd, dataDir, "app.config.yml"),
+			path.Join(pwd, dataDir, "log.config.yml"),
+			&App{
+				Engines:     map[string]string{"com": "/home/user/path/to/engine/bin"},
+				EngineNames: []string{"com"},
+			},
 		},
 	}
 
 	for i, c := range cases {
-		conf := NewConfig([]byte(c.appyml), []byte(c.logyml))
-		names := conf.GetEngineNames()
-		sort.Strings(names)
+		conf := New(c.appPath, c.logPath)
 
-		// GetEngineNames() と GetEnginePath() のテスト
-		if stringutil.SliceEquals(conf.GetEngineNames(), c.engineNames) {
-			for j := range names {
-				p1 := conf.GetEnginePath(names[j])
-				p2 := c.enginePaths[j]
-				if p1 != p2 {
-					failing(t, "EnginePath", j, p2, p1)
-				}
-			}
-		} else {
-			failing(t, "EngineNames", i, c.engineNames, names)
+		failed := func(key string, expected, actual interface{}) {
+			t.Helper()
+			t.Errorf(`
+[app > config > TestNew] %s was not equal to as expected.
+Index:    %d
+Expected: %v
+Actual:   %v
+`, key, i, expected, actual)
+		}
+
+		if sslice.NotEqual(conf.App.EngineNames, c.app.EngineNames) {
+			failed("EngineNames", c.app.EngineNames, conf.App.EngineNames)
+		}
+		if smap.NotEqual(conf.App.Engines, c.app.Engines) {
+			failed("Engines", c.app.Engines, conf.App.Engines)
 		}
 	}
 }
 
-// エラーのテスト
-func TestNewConfig2(t *testing.T) {
-	c := struct {
-		appyml, logyml string
-		enginePaths    []string
-		engineNames    []string
-		log            zap.Config
+func TestNew2(t *testing.T) {
+	cases := []struct {
+		appPath string
+		logPath string
 	}{
-		`
-# invalid syntax
-engines
-  com: /home/user/path/to/engine/bin
-`,
-		``,
-		[]string{"/home/user/path/to/engine"},
-		[]string{"com"},
-		zap.Config{},
+		{
+			path.Join(pwd, dataDir, "app_invalid.config.yml"),
+			path.Join(pwd, dataDir, "log.config.yml"),
+		},
+		{
+			path.Join(pwd, dataDir, "app.config.yml"),
+			path.Join(pwd, dataDir, "log_invalid.config.yml"),
+		},
+		{
+			path.Join(pwd, dataDir, "app_empty.config.yml"),
+			path.Join(pwd, dataDir, "log.config.yml"),
+		},
+		{
+			path.Join(pwd, dataDir),
+			path.Join(pwd, dataDir, "log.config.yml"),
+		},
+		{
+			path.Join(pwd, dataDir, "app.config.yml"),
+			path.Join(pwd, dataDir),
+		},
 	}
 
-	errMsg := "Expected panic, but there wasn't.\nInput: " + c.appyml
-	testhelper.MustPanic(t, func() {
-		NewConfig(
-			[]byte(c.appyml),
-			[]byte(c.logyml),
-		)
-	}, errMsg)
-}
-
-func failing(t *testing.T, key string, i int, expected, actual interface{}) {
-	t.Helper()
-	t.Errorf(`%s was not equal to as expected.
-i: %d
-Expected: %v
-Actual:   %v`, key, i, expected, actual)
+	for i, c := range cases {
+		causePanic := func() { New(c.appPath, c.logPath) }
+		onFail := func(t *testing.T) {
+			t.Helper()
+			t.Errorf(`
+[app > config > TestNew2] Expected panic but none was found.
+Index:        %d
+InputAppPath: %s
+InputLogPath: %s
+`, i, c.appPath, c.logPath)
+		}
+		testutils.MustPanic(t, causePanic, onFail)
+	}
 }

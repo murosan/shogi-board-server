@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"time"
 
+	sslice "github.com/murosan/goutils/slice/strings"
 	"github.com/murosan/shogi-board-server/app/domain/config"
 	"github.com/murosan/shogi-board-server/app/domain/entity/converter"
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
@@ -20,8 +21,6 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/logger"
 	iengine "github.com/murosan/shogi-board-server/app/infrastracture/engine"
 	"github.com/murosan/shogi-board-server/app/infrastracture/os/command"
-	"github.com/murosan/shogi-board-server/app/lib/stringutil"
-
 	"go.uber.org/zap"
 )
 
@@ -58,7 +57,7 @@ func (c *connector) Connect(name string) error {
 	names := c.conf.GetEngineNames()
 
 	// Conf にエンジンの名前があるかチェックする
-	if !stringutil.Contains(names, name) {
+	if sslice.NotContain(names, name) {
 		return exception.UnknownEngineName
 	}
 
@@ -100,7 +99,7 @@ func (c *connector) Connect(name string) error {
 // Close 将棋エンジンとの接続を切ります
 func (c *connector) Close(name string) error {
 	// config にエンジンの名前があるかチェックする
-	if !stringutil.Contains(c.conf.GetEngineNames(), name) {
+	if sslice.NotContain(c.conf.GetEngineNames(), name) {
 		return exception.UnknownEngineName
 	}
 

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strconv"
 
+	sslice "github.com/murosan/goutils/slice/strings"
 	"github.com/murosan/shogi-board-server/app/domain/exception"
-	"github.com/murosan/shogi-board-server/app/lib/stringutil"
 	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
@@ -76,10 +76,10 @@ func UpdateSelect(opts *pb.Options, s *pb.Select) {
 	if !ok {
 		panic(exception.UnknownOption)
 	}
-	if !stringutil.SliceEquals(se.Vars, s.Vars) || se.Default != s.Default {
+	if sslice.NotEqual(se.Vars, s.Vars) || se.Default != s.Default {
 		panic(exception.InvalidOptionParameter)
 	}
-	if !stringutil.SliceContains(s.Vars, s.Val) {
+	if sslice.NotContain(s.Vars, s.Val) {
 		panic(exception.InvalidOptionParameter)
 	}
 

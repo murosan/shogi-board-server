@@ -1,0 +1,4 @@
+# invalid config for testing
+engines:
+  # type mismatch
+  - '/home/user/path/to/engine/bin'
