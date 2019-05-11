@@ -4,13 +4,15 @@
 
 package shogi
 
-// Turn は手番を表す
+// Turn represents turn of the game.
 type Turn int
 
 const (
-	// Sente は先手のこと
+	// Sente is the first player in shogi.
+	// It is said `black` in chess.
 	Sente Turn = 1
 
-	// Gote は後手のこと
+	// Gote is the second player in shogi.
+	// It is said `white` in chess.
 	Gote Turn = -Sente
 )

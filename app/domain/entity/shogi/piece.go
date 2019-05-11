@@ -4,183 +4,108 @@
 
 package shogi
 
-// Piece は駒
+// Piece is a piece of the game.
 type Piece int
 
-// USIPiece は USI 形式の駒
-type USIPiece string
-
 const (
-	// Empty 空白マス
+	// Empty is not piece, is just a empty cell.
 	Empty Piece = 0
 
-	// Fu0 先手の歩
+	// Fu0 is a Fu owned by the first player.
+	// Fu moves like a Pawn in chess.
 	Fu0 Piece = 1
 
-	// Kyou0 先手の香車
+	// Kyou0 is a Kyousha owned by the first player.
+	// Kyousha moves like a Rook in chess, but can only go straight forward.
 	Kyou0 Piece = 2
 
-	// Kei0 先手の桂馬
+	// Kei0 is a Keima owned by the first player.
+	// Keima moves like a Knight in chess, but can only go forward.
 	Kei0 Piece = 3
 
-	// Gin0 先手の銀
+	// Gin0 is a Gin owned by the first player.
+	// Gin moves like King in chess, but can not move behind and to the side.
 	Gin0 Piece = 4
 
-	// Kin0 先手の金
+	// Kin0 is a Kin owned by the first player.
+	// Kin moves like King in chess, but can not move diagonally backwards.
 	Kin0 Piece = 5
 
-	// Kaku0 先手の角
+	// Kaku0 is a Kaku owned by the first player.
+	// Kaku moves as same as Bishop in chess.
 	Kaku0 Piece = 6
 
-	// Hisha0 先手の飛車
+	// Hisha0 is a Hisha owned by the first player.
+	// Hisha moves as same as Rook in chess.
 	Hisha0 Piece = 7
 
-	// Gyoku0 先手の玉
+	// Gyoku0 is a Gyoku owned by the first player.
+	// Gyoku moves like King in chess.
 	Gyoku0 Piece = 8
 
-	// To0 Piece 先手のと金
+	// To0 is a To owned by the first player.
+	// To moves as same as Kin.
 	To0 Piece = 11
 
-	// NariKyou0 先手の成香
+	// NariKyou0 is a NariKyou owned by the first player.
+	// NariKyou moves as same as Kin.
 	NariKyou0 Piece = 12
 
-	// NariKei0 先手の成桂
+	// NariKei0 is a NariKei owned by the first player.
+	// NariKei moves as same as Kin.
 	NariKei0 Piece = 13
 
-	// NariGin0 先手の成銀
+	// NariGin0 is a NariGin owned by the first player.
+	// NariGin moves as same as Kin.
 	NariGin0 Piece = 14
 
-	// Uma0 先手の馬
+	// Uma0 is a Uma owned by the first player.
+	// Uma can move to the place where Gyoku and Kaku can move.
 	Uma0 Piece = 16
 
-	// Ryu0 先手の龍
+	// Ryu0 is a Ryu owned by the first player.
+	// Ryu can moves to the place where Gyoku and Hisha can move.
 	Ryu0 Piece = 17
 
-	// Fu1 後手の歩
+	// Fu1 is a Fu owned by the second player.
 	Fu1 = -Fu0
 
-	// Kyou1 後手の香車
+	// Kyou1 is a Kyou owned by the second player.
 	Kyou1 = -Kyou0
 
-	// Kei1 後手の桂馬
+	// Kei1 is a Kei owned by the second player.
 	Kei1 = -Kei0
 
-	// Gin1 後手の銀
+	// Gin1 is a Gin owned by the second player.
 	Gin1 = -Gin0
 
-	// Kin1 後手の金
+	// Kin1 is a Kin owned by the second player.
 	Kin1 = -Kin0
 
-	// Kaku1 後手の角
+	// Kaku1 is a Kaku owned by the second player.
 	Kaku1 = -Kaku0
 
-	// Hisha1 後手の飛車
+	// Hisha1 is a Hisha owned by the second player.
 	Hisha1 = -Hisha0
 
-	// Gyoku1 後手の玉
+	// Gyoku1 is a Gyoku owned by the second player.
 	Gyoku1 = -Gyoku0
 
-	// To1 後手のと金
+	// To1 is a To owned by the second player.
 	To1 = -To0
 
-	// NariKyou1 後手の成香
+	// NariKyou1 is a NariKyou owned by the second player.
 	NariKyou1 = -NariKyou0
 
-	// NariKei1 後手の成桂
+	// NariKei1 is a NariKei owned by the second player.
 	NariKei1 = -NariKei0
 
-	// NariGin1 後手の成銀
+	// NariGin1 is a NariGin owned by the second player.
 	NariGin1 = -NariGin0
 
-	// Uma1 後手の馬
+	// Uma1 is a Uma owned by the second player.
 	Uma1 = -Uma0
 
-	// Ryu1 後手の龍
+	// Ryu1 is a Ryu owned by the second player.
 	Ryu1 = -Ryu0
-)
-
-const (
-	// UsiFu0 USIの先手の歩
-	UsiFu0 USIPiece = "P"
-
-	// UsiKyou0 USIの先手の香車
-	UsiKyou0 USIPiece = "L"
-
-	// UsiKei0 USIの先手の桂馬
-	UsiKei0 USIPiece = "N"
-
-	// UsiGin0 USIの先手の銀
-	UsiGin0 USIPiece = "S"
-
-	// UsiKin0 USIの先手の金
-	UsiKin0 USIPiece = "G"
-
-	// UsiKaku0 USIの先手の角
-	UsiKaku0 USIPiece = "B"
-
-	// UsiHisha0 USIの先手の飛車
-	UsiHisha0 USIPiece = "R"
-
-	// UsiGyoku0 USIの先手の玉
-	UsiGyoku0 USIPiece = "K"
-
-	// UsiTo0 USIの先手のと金
-	UsiTo0 USIPiece = "+P"
-
-	// UsiNariKyou0 USIの先手の成香
-	UsiNariKyou0 USIPiece = "+L"
-
-	// UsiNariKei0 USIの先手の成桂
-	UsiNariKei0 USIPiece = "+N"
-
-	// UsiNariGin0 USIの先手の成銀
-	UsiNariGin0 USIPiece = "+S"
-
-	// UsiUma0 USIの先手の馬
-	UsiUma0 USIPiece = "+B"
-
-	// UsiRyu0 USIの先手の龍
-	UsiRyu0 USIPiece = "+R"
-
-	// UsiFu1 USIの後手の歩
-	UsiFu1 USIPiece = "p"
-
-	// UsiKyou1 USIの後手の香車
-	UsiKyou1 USIPiece = "l"
-
-	// UsiKei1 USIの後手の桂馬
-	UsiKei1 USIPiece = "n"
-
-	// UsiGin1 USIの後手の銀
-	UsiGin1 USIPiece = "s"
-
-	// UsiKin1 USIの後手の金
-	UsiKin1 USIPiece = "g"
-
-	// UsiKaku1 USIの後手の角
-	UsiKaku1 USIPiece = "b"
-
-	// UsiHisha1 USIの後手の飛車
-	UsiHisha1 USIPiece = "r"
-
-	// UsiGyoku1 USIの後手の玉
-	UsiGyoku1 USIPiece = "k"
-
-	// UsiTo1 USIの後手のと金
-	UsiTo1 USIPiece = "+p"
-
-	// UsiNariKyou1 USIの後手の成香
-	UsiNariKyou1 USIPiece = "+l"
-
-	// UsiNariKei1 USIの後手の成桂
-	UsiNariKei1 USIPiece = "+n"
-
-	// UsiNariGin1 USIの後手の成銀
-	UsiNariGin1 USIPiece = "+s"
-
-	// UsiUma1 USIの後手の馬
-	UsiUma1 USIPiece = "+b"
-
-	// UsiRyu1 USIの後手の龍
-	UsiRyu1 USIPiece = "+r"
 )
