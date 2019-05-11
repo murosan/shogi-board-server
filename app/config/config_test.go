@@ -23,11 +23,11 @@ func TestNew(t *testing.T) {
 	cases := []struct {
 		appPath string
 		logPath string
-		app     *App
+		app     App
 	}{
 		{path.Join(pwd, dataDir, "app.config.yml"),
 			path.Join(pwd, dataDir, "log.config.yml"),
-			&App{
+			App{
 				Engines:     map[string]string{"com": "/home/user/path/to/engine/bin"},
 				EngineNames: []string{"com"},
 			},

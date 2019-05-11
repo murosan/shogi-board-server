@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package config defines Config interface and generate method.
 package config
 
 import (
@@ -16,10 +17,10 @@ import (
 // Config is container of configurations.
 type Config struct {
 	// application config
-	App *App
+	App App
 
 	// zap(logger) config
-	Log *zap.Config
+	Log zap.Config
 }
 
 // App is configuration of application
@@ -38,6 +39,15 @@ type App struct {
 	EngineNames []string
 }
 
+// New returns new Config.
+//
+// The appPath is a path to application config file.
+// See /config/app_example.yml.
+// The logPath is a path to logger(zap) config file.
+// See /config/log_example.yml
+//
+// Only YAML syntax is supported for now.
+// TODO: support JSON and TOML
 func New(appPath, logPath string) *Config {
 	var app App
 	var log zap.Config
@@ -70,5 +80,5 @@ func New(appPath, logPath string) *Config {
 
 	app.EngineNames = smap.Keys(app.Engines)
 
-	return &Config{App: &app, Log: &log}
+	return &Config{App: app, Log: log}
 }

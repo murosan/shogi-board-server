@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package logger provides Logger interface and generate method.
 package logger
 
 import (
-	"github.com/murosan/shogi-board-server/app/config"
 	"go.uber.org/zap"
+
+	"github.com/murosan/shogi-board-server/app/config"
 )
 
 // Logger is a interface of logger.
@@ -18,7 +20,8 @@ type Logger interface {
 	Fatal(msg string, fields ...zap.Field)
 }
 
-// New
+// New generates zap.Config from given config,
+// and returns it as a Logger instance.
 func New(c config.Config) Logger {
 	l, err := c.Log.Build()
 
