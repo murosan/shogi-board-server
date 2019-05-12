@@ -9,131 +9,111 @@ import (
 	"strconv"
 
 	sslice "github.com/murosan/goutils/slice/strings"
-	"github.com/murosan/shogi-board-server/app/domain/exception"
-	pb "github.com/murosan/shogi-board-server/app/proto"
 )
 
-var (
-	// USI コマンドのパーツ
-	pref = "setoption name "
-	val  = " value "
+const (
+	// These are the parts of USI command.
+	set = "setoption name "
+	val = " value "
 )
 
-// AppendOption は Options に指定のオプションを追加します
-func AppendOption(opts *pb.Options, opt interface{}) {
-	switch o := opt.(type) {
-	case *pb.Button:
-		opts.Buttons[o.Name] = o
-	case *pb.Check:
-		opts.Checks[o.Name] = o
-	case *pb.Spin:
-		opts.Spins[o.Name] = o
-	case *pb.Select:
-		opts.Selects[o.Name] = o
-	case *pb.String:
-		opts.Strings[o.Name] = o
-	case *pb.Filename:
-		opts.Filenames[o.Name] = o
-	default:
-		panic(exception.UnknownOptionType)
-	}
+// Option is a shogi enigne option.
+// Option is given when initializing.
+type Option interface {
+	// ToUSI returns
+	ToUSI() string
 }
 
-// UpdateCheck は Options の Check を更新します
-// panics
-//   - Name が Options に存在しない
-func UpdateCheck(opts *pb.Options, c *pb.Check) {
-	if _, ok := opts.Checks[c.Name]; !ok {
-		panic(exception.UnknownOption)
-	}
-	opts.Checks[c.Name] = c
+// Button is a Button type in USI expression.
+type Button struct {
+	Name string `json:"name"`
 }
 
-// UpdateSpin は Options の Spin を更新します
-// panics
-//   - Name が Options に存在しない
-//   - Min, Max が元の値と違う
-//   - Val が範囲外 (Val < Min || Val > Max)
-func UpdateSpin(opts *pb.Options, s *pb.Spin) {
-	sp, ok := opts.Spins[s.Name]
-	if !ok {
-		panic(exception.UnknownOption)
-	}
-	if sp.Min != s.Min || sp.Max != s.Max || s.Val < s.Min || s.Val > s.Max {
-		panic(exception.InvalidOptionParameter)
-	}
-
-	opts.Spins[s.Name] = s
+// ToUSI returns USI setoption command string.
+func (b *Button) ToUSI() string {
+	return set + b.Name
 }
 
-// UpdateSelect は Options の Select を更新します
-// panics
-//   - Name が Options に存在しない
-//   - Vars と Default が元の値と異なる
-//   - Val が Vars に存在しない
-func UpdateSelect(opts *pb.Options, s *pb.Select) {
-	se, ok := opts.Selects[s.Name]
-	if !ok {
-		panic(exception.UnknownOption)
-	}
-	if sslice.NotEqual(se.Vars, s.Vars) || se.Default != s.Default {
-		panic(exception.InvalidOptionParameter)
-	}
-	if sslice.NotContain(s.Vars, s.Val) {
-		panic(exception.InvalidOptionParameter)
+// Check is a Check type in USI expression.
+type Check struct {
+	Name    string `json:"name"`
+	Value   bool   `json:"value"`
+	Default bool   `json:"default"`
+}
+
+// ToUSI returns USI setoption command string.
+func (c *Check) ToUSI() string {
+	return set + c.Name + val + strconv.FormatBool(c.Value)
+}
+
+// Set sets the given value to Check.Value
+func (c *Check) Set(b bool) { c.Value = b }
+
+// Range is a Spin type in USI expression.
+type Range struct {
+	Name    string `json:"name"`
+	Value   int    `json:"value"`
+	Default int    `json:"default"`
+	Min     int    `json:"min"`
+	Max     int    `json:"max"`
+}
+
+// ToUSI returns USI setoption command string.
+func (r *Range) ToUSI() string {
+	return set + r.Name + val + fmt.Sprint(r.Value)
+}
+
+// Set sets given value to Range.Value.
+// Returns an error if given value was out of range, otherwise returns nil.
+func (r *Range) Set(i int) error {
+	if i < r.Min || i > r.Max {
+		f := "[Check.Set] Given value is out of range. Given=%d, Min=%d, Max=%d"
+		return fmt.Errorf(f, i, r.Min, r.Max)
 	}
 
-	opts.Selects[s.Name] = s
+	r.Value = i
+	return nil
 }
 
-// UpdateString は Options の String を更新します
-// panics
-//   - Name が Options に存在しない
-func UpdateString(opts *pb.Options, s *pb.String) {
-	if _, ok := opts.Strings[s.Name]; !ok {
-		panic(exception.UnknownOption)
+// Select is a Combo type in USI expression.
+type Select struct {
+	Name    string   `json:"name"`
+	Value   string   `json:"value"`
+	Default string   `json:"default"`
+	Vars    []string `json:"vars"`
+}
+
+// ToUSI returns USI setoption command string.
+func (s *Select) ToUSI() string {
+	return set + s.Name + val + s.Value
+}
+
+// Set sets given value to Select.Value.
+// Returns an error if given value was not in Set.Vars, otherwise returns nil.
+func (s *Select) Set(v string) error {
+	if sslice.NotContain(s.Vars, v) {
+		f := "[Select.Set] Given string is not in vars. Given=%s, Vars=%v"
+		return fmt.Errorf(f, v, s.Vars)
 	}
 
-	opts.Strings[s.Name] = s
+	s.Value = v
+	return nil
 }
 
-// UpdateFilename は Options の Filename を更新します
-// panics
-//   - Name が Options に存在しない
-func UpdateFilename(opts *pb.Options, s *pb.Filename) {
-	if _, ok := opts.Filenames[s.Name]; !ok {
-		panic(exception.UnknownOption)
-	}
-
-	opts.Filenames[s.Name] = s
+// Text is a String or Filename type in USI expression.
+// We treat the String and Filename type as a single type named Text.
+type Text struct {
+	Name    string `json:"name"`
+	Value   string `json:"value"`
+	Default string `json:"default"`
 }
 
-// ButtonUSI Button の setoption USI コマンドを返す
-func ButtonUSI(b *pb.Button) string {
-	return pref + b.Name
+// ToUSI returns USI setoption command string.
+func (t *Text) ToUSI() string {
+	return set + t.Name + val + t.Value
 }
 
-// CheckUSI Check の setoption USI コマンドを返す
-func CheckUSI(c *pb.Check) string {
-	return pref + c.Name + val + strconv.FormatBool(c.Val)
-}
-
-// SpinUSI Spin の setoption USI コマンドを返す
-func SpinUSI(s *pb.Spin) string {
-	return pref + s.Name + val + fmt.Sprint(s.Val)
-}
-
-// SelectUSI Select の setoption USI コマンドを返す
-func SelectUSI(s *pb.Select) string {
-	return pref + s.Name + val + s.Val
-}
-
-// StringUSI String の setoption USI コマンドを返す
-func StringUSI(s *pb.String) string {
-	return pref + s.Name + val + s.Val
-}
-
-// FilenameUSI Filename の setoption USI コマンドを返す
-func FilenameUSI(s *pb.Filename) string {
-	return pref + s.Name + val + s.Val
+// Set sets given value to Text.Value
+func (t *Text) Set(s string) {
+	t.Value = s
 }

@@ -4,19 +4,21 @@
 
 package engine
 
-// State 将棋エンジンの状態を表す
+// State represents the state of shogi engine or connection.
 type State int
 
 const (
-	// NotConnected 起動前
+	// NotConnected is the state before connecting to a shogi engine.
 	NotConnected State = 1
 
-	// Connected 接続済み. usinewgame 前
+	// Connected is the state after connected to a shogi engine,
+	// and before execute usinewgame(USI command).
 	Connected State = 2
 
-	// StandBy USI の usinewgame を実行後、思考中ではないとき
+	// StandBy is the state after execute usinewgame(USI command),
+	// and the shogi engine is not thinking.
 	StandBy State = 3
 
-	// Thinking 思考中
+	// Thinking is the state the connected shogi engine is thinking.
 	Thinking State = 4
 )
