@@ -20,7 +20,7 @@ const (
 // Option is a shogi enigne option.
 // Option is given when initializing.
 type Option interface {
-	// ToUSI returns
+	// ToUSI returns USI setoption command string.
 	ToUSI() string
 }
 

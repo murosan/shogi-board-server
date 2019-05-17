@@ -7,8 +7,6 @@ package engine
 import "fmt"
 
 // Options is a option holder.
-// Although each maps are exported to convert to JSON,
-// do not touch directly from other packages.
 type Options struct {
 	Buttons map[string]*Button `json:"buttons"`
 	Checks  map[string]*Check  `json:"checks"`
@@ -37,39 +35,4 @@ func (o *Options) Push(v Option) error {
 	}
 
 	return nil
-}
-
-// GetButton return a Button from Options as a first value.
-// The second value is true if the Button exists, false otherwise.
-func (o *Options) GetButton(name string) (*Button, bool) {
-	b, ok := o.Buttons[name]
-	return b, ok
-}
-
-// GetCheck return a Check from Options as a first value.
-// The second value is true if the Check exists, false otherwise.
-func (o *Options) GetCheck(name string) (*Check, bool) {
-	c, ok := o.Checks[name]
-	return c, ok
-}
-
-// GetRange return a Range from Options as a first value.
-// The second value is true if the Range exists, false otherwise.
-func (o *Options) GetRange(name string) (*Range, bool) {
-	r, ok := o.Ranges[name]
-	return r, ok
-}
-
-// GetSelect return a Select from Options as a first value.
-// The second value is true if the Select exists, false otherwise.
-func (o *Options) GetSelect(name string) (*Select, bool) {
-	s, ok := o.Selects[name]
-	return s, ok
-}
-
-// GetText return a Text from Options as a first value.
-// The second value is true if the Text exists, false otherwise.
-func (o *Options) GetText(name string) (*Text, bool) {
-	t, ok := o.Texts[name]
-	return t, ok
 }
