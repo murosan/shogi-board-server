@@ -7,17 +7,17 @@ package usi
 //type Cmd = []byte
 
 var (
-	//// Usi is a usi command.
-	//Usi = []byte("usi")
-	//
-	//// IsReady is a isready command.
-	//IsReady = []byte("isready")
-	//
-	//// NewGame is a usinewgame command.
-	//NewGame = []byte("usinewgame")
-	//
-	//// GoInf is a go infinite command.
-	//GoInf = []byte("go infinite")
+	// Usi is a usi command.
+	Usi = []byte("usi")
+
+	// IsReady is a isready command.
+	IsReady = []byte("isready")
+
+	// NewGame is a usinewgame command.
+	NewGame = []byte("usinewgame")
+
+	// GoInf is a go infinite command.
+	GoInf = []byte("go infinite")
 
 	// Stop is a stop command.
 	Stop = []byte("stop")
@@ -25,9 +25,9 @@ var (
 	// Quit is a quit command.
 	Quit = []byte("quit")
 
-	//// UsiOK is a usiok command.
-	//UsiOK = []byte("usiok")
-	//
-	//// ReadyOK is a readyok response value.
-	//ReadyOK = []byte("readyok")
+	// UsiOK is a usiok command.
+	UsiOK = []byte("usiok")
+
+	// ReadyOK is a readyok response value.
+	ReadyOK = []byte("readyok")
 )

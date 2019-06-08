@@ -5,48 +5,51 @@
 package controllers
 
 import (
+	"github.com/labstack/echo"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
-	"github.com/murosan/shogi-board-server/app/domain/model/exception"
-	"github.com/murosan/shogi-board-server/app/domain/model/usi"
 	"github.com/murosan/shogi-board-server/app/server/context"
-
-	"github.com/labstack/echo"
-	"go.uber.org/zap"
 )
 
 // Close closes the connection of shogi engine.
 func Close(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
-		name := c.Param(ParamEngineName)
+		name := c.QueryParam(ParamEngineName)
 		egn, ok := sbc.Engines[name]
 
 		if !ok {
-			return c.JSON(http.StatusNotFound, "")
+			return c.NoContent(http.StatusNotFound)
 		}
+
+		sbc.Logger.Info(
+			"[Connect]",
+			zap.String("name", name),
+			zap.String("target key", egn.Key),
+		)
 
 		if err := closeEngine(sbc, egn); err != nil {
-			return c.JSON(http.StatusInternalServerError, "")
+			return c.NoContent(http.StatusInternalServerError)
 		}
 
-		return c.JSON(http.StatusOK, "")
+		return c.NoContent(http.StatusOK)
 	}
 }
 
-func closeEngine(c *context.Context, e engine.Engine) error {
-	// nothing to do
+func closeEngine(c *context.Context, e *engine.Engine) error {
 	if e.State == engine.NotConnected {
 		return nil
 	}
 
 	// exec quit command
-	if err := e.Cmd.Write(usi.Quit); err != nil {
-		err = exception.FailedToClose(err)
-		c.Logger.Error("failed to exec", zap.Error(err))
-		return err
+	if err := e.Close(); err != nil {
+		werr := errors.Wrap(err, "failed to close")
+		c.Logger.Error("failed to close", zap.Error(werr))
+		return werr
 	}
 
 	defer delete(c.Engines, e.Key)
-	return e.Cmd.Wait()
+	return nil
 }

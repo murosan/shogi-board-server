@@ -15,20 +15,20 @@ import (
 type Context struct {
 	Logger  logger.Logger
 	Config  *config.Config
-	Engines map[string]engine.Engine
+	Engines map[string]*engine.Engine
 }
 
 // New returns new Context.
 func New(logger logger.Logger, config *config.Config) *Context {
 	return &Context{
-		Engines: make(map[string]engine.Engine),
+		Engines: make(map[string]*engine.Engine),
 		Config:  config,
 		Logger:  logger,
 	}
 }
 
-// ActiveEngines returns list of the shogi engine connected.
-func (c *Context) ActiveEngines() (e []engine.Engine) {
+// EngineList returns list of the shogi engine connected.
+func (c *Context) EngineList() (e []*engine.Engine) {
 	for _, v := range c.Engines {
 		e = append(e, v)
 	}

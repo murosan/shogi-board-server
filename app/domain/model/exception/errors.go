@@ -19,13 +19,13 @@ var (
 	ErrTimeout = errors.New("Execution timed out")
 )
 
-//var (
-//	// engine
-//
-//	// ConnectionTimeout means got no response from shogi engine,
-//	// or took too long time.
-//	ConnectionTimeout = errors.New("ConnectionTimeout")
-//
+var (
+// engine
+
+// ErrEngineIsAlreadyRunning is returned when tried to initialize engine,
+// but the engine was already running.
+//ErrEngineIsAlreadyRunning = errors.New("EngineIsAlreadyRunning")
+
 //	// FailedToConnect means failed to connect to shogi engine.
 //	FailedToConnect = errors.New("FailedToConnect")
 //
@@ -51,4 +51,4 @@ var (
 //
 //	// FailedToParseInfo means failed to parse usi info.
 //	FailedToParseInfo = errors.New("FailedToParseInfo")
-//)
+)

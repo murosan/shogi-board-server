@@ -19,6 +19,8 @@ import (
 func Init(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
 		for _, ngn := range sbc.Engines {
+			sbc.Logger.Info("[Init]", zap.String("close target", ngn.Key))
+
 			if err := closeEngine(sbc, ngn); err != nil {
 				msg := "failed to close engine. name = " + ngn.Name
 				e := exception.FailedToClose(err)

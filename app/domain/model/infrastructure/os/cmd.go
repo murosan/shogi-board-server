@@ -5,6 +5,8 @@
 package os
 
 import (
+	"bufio"
+	"github.com/pkg/errors"
 	"io"
 	"os/exec"
 	"time"
@@ -23,6 +25,28 @@ type Cmd struct {
 
 	// Pipe to receive responses from the shogi engine through stdout.
 	out io.ReadCloser
+
+	scanner *bufio.Scanner
+}
+
+// New returns new Cmd
+func New(cmd *exec.Cmd) (*Cmd, error) {
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get stdin")
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get stdout")
+	}
+
+	return &Cmd{
+		cmd:     cmd,
+		in:      stdin,
+		out:     stdout,
+		scanner: bufio.NewScanner(stdout),
+	}, nil
 }
 
 // Start executes the command.
@@ -44,9 +68,12 @@ func (c *Cmd) Wait() error {
 
 // Write passes the received bytes to the command.
 func (c *Cmd) Write(b []byte) error {
-	_, err := c.in.Write(b)
+	_, err := c.in.Write(append(b, '\n'))
 	return err
 }
 
 // Stdout returns stdout pipe.
 func (c *Cmd) Stdout() *io.ReadCloser { return &c.out }
+
+// Scanner returns *bufio.Scanner
+func (c *Cmd) Scanner() *bufio.Scanner { return c.scanner }
