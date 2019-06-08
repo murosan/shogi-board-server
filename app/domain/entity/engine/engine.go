@@ -93,7 +93,7 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 	}
 
 	logger.Info("[engine.New]", zap.ByteString("wait", usi.UsiOK))
-	if err := engine.waitFor(ch, usi.UsiOK, false); err != nil {
+	if err := engine.waitFor(ch, usi.UsiOK, true); err != nil {
 		return nil, errors.Wrap(err, "could not get 'usiok' from the engine")
 	}
 

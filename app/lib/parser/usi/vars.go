@@ -4,7 +4,7 @@ import "regexp"
 
 const (
 	// TypeButton is used for check the engine output is option type button
-	TypeButton = " type button "
+	TypeButton = " type button"
 
 	// TypeCheck is used for check the engine output is option type check
 	TypeCheck = " type check "

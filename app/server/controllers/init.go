@@ -30,6 +30,7 @@ func Init(sbc *context.Context) func(echo.Context) error {
 		}
 
 		names := sbc.Config.App.EngineNames
+		sbc.Logger.Info("[Init]", zap.Strings("names", names))
 		return c.JSON(http.StatusOK, names)
 	}
 }
