@@ -6,5 +6,5 @@ package controllers
 
 const (
 	// ParamEngineName is a uri parameter key name.
-	ParamEngineName = "engineName"
+	ParamEngineName = "key"
 )
