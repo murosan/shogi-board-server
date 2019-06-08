@@ -4,6 +4,9 @@ setup:
 	cp ./scripts/pre-commit.sh $(GIT_DIR)/hooks/pre-commit
 	git config commit.template .commit-template
 
+start:
+	realize start
+
 build:
 	go build -o ./main
 

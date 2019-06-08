@@ -7,6 +7,7 @@ package tools
 // 開発用ライブラリを go modules に認識させるためのファイル
 
 import (
+	_ "github.com/oxequa/realize"
 	_ "github.com/rakyll/gotest"
 	_ "honnef.co/go/tools/cmd/staticcheck"
 )

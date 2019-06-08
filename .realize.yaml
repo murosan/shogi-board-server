@@ -1,0 +1,19 @@
+settings:
+  legacy:
+    force: false
+    interval: 3s
+schema:
+  - name: shogi-board-server
+    path: .
+    commands:
+      run:
+        status: true
+    watcher:
+      extensions:
+        - go
+      paths:
+        - /
+      ignore:
+        paths:
+          - .git
+          - .realize
