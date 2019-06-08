@@ -36,7 +36,7 @@ type App struct {
 	Engines map[string]string `yaml:"engines"`
 
 	// Keys of Engines
-	EngineNames []string
+	EngineNames []string `yaml:"engineNames"`
 }
 
 // New returns new Config.

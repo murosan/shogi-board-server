@@ -12,10 +12,10 @@ const (
 	NotConnected State = 1
 
 	// Connected is the state after connected to a shogi engine,
-	// and before execute usinewgame(USI command).
+	// and before executing usinewgame(USI command).
 	Connected State = 2
 
-	// StandBy is the state after execute usinewgame(USI command),
+	// StandBy is the state after executing usinewgame(USI command),
 	// and the shogi engine is not thinking.
 	StandBy State = 3
 

@@ -1,19 +1,22 @@
-# ログの設定
+# Logger Config
 # https://github.com/uber-go/zap
 
 level: 'debug'
-encoding: 'console'
+sampling:
+  initial: 100
+  thereafter: 100
+encoding: 'console' # or json
 encoderConfig:
-  messageKey: 'Msg'
-  levelKey: 'Level'
-  timeKey: 'Time'
-  nameKey: 'name'
-  callerKey: 'Caller'
-  stacktraceKey: 'St'
+  timeKey: 'time'
+  levelKey: 'level'
+  nameKey: 'logger'
+  callerKey: 'caller'
+  messageKey: 'msg'
+  stacktraceKey: 'stacktrace'
   levelEncoder: ''
-  timeEncoder: 'iso8601'
-  durationEncoder: 'string'
-  callerEncoder: 'short'
+  timeEncoder: 'iso8601' # be empty for timestamp
+  durationEncoder: ''
+  callerEncoder: ''
 outputPaths:
   - 'stdout'
 errorOutputPaths:

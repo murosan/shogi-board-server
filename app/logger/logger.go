@@ -22,7 +22,7 @@ type Logger interface {
 
 // New generates zap.Config from given config,
 // and returns it as a Logger instance.
-func New(c config.Config) Logger {
+func New(c *config.Config) Logger {
 	l, err := c.Log.Build()
 
 	if err != nil {

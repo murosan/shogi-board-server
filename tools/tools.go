@@ -7,8 +7,6 @@ package tools
 // 開発用ライブラリを go modules に認識させるためのファイル
 
 import (
-	_ "google.golang.org/grpc"
-	_ "github.com/golang/protobuf/protoc-gen-go"
-	_ "honnef.co/go/tools/cmd/staticcheck"
 	_ "github.com/rakyll/gotest"
+	_ "honnef.co/go/tools/cmd/staticcheck"
 )

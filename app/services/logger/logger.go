@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package logger is a Logger provider
 package logger
 
 import (
@@ -11,11 +10,11 @@ import (
 )
 
 // Hold as a singleton instance.
-var l logger.Logger = nil
+var l logger.Logger
 
 // Init initializes Logger instance.
 // This must be called before using logger and called only once.
-func Init(c config.Config) {
+func Init(c *config.Config) {
 	if l != nil {
 		panic("Logger is already initialized")
 	}
@@ -24,7 +23,7 @@ func Init(c config.Config) {
 }
 
 // Use returns a Logger instance.
-// Call Init only once before execution.
+// Call Init once before.
 func Use() logger.Logger {
 	return l
 }

@@ -14,14 +14,14 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	c1 := config.Config{}
+	c1 := &config.Config{}
 
 	testutils.MustPanic(t, func() { New(c1) }, func(t *testing.T) {
 		t.Helper()
 		t.Error("[app > logger > New] Expected panic but there wasn't")
 	})
 
-	c2 := config.Config{
+	c2 := &config.Config{
 		Log: zap.NewDevelopmentConfig(),
 	}
 

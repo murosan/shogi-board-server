@@ -6,48 +6,65 @@ package main
 
 import (
 	"flag"
-	"net"
+	"github.com/murosan/shogi-board-server/app/server/controllers"
+	"github.com/murosan/shogi-board-server/app/services/context"
+	"net/http"
 
-	pb "github.com/murosan/shogi-board-server/app/proto"
-	"github.com/murosan/shogi-board-server/app/server"
-	"github.com/murosan/shogi-board-server/app/service/config"
-	"github.com/murosan/shogi-board-server/app/service/connector"
-	"github.com/murosan/shogi-board-server/app/service/converter"
-	"github.com/murosan/shogi-board-server/app/service/logger"
+	"github.com/murosan/shogi-board-server/app/services/config"
+	"github.com/murosan/shogi-board-server/app/services/logger"
 
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 var (
 	port          = flag.String("port", "8080", "http server port")
-	appConfigPath = flag.String("appConfig", "./config/app.yml", "application config path")
-	logConfigPath = flag.String("logConfig", "./config/log.yml", "log config path")
+	appConfigPath = flag.String(
+		"appConfig",
+		"./config/app.yml",
+		"application config path",
+	)
+	logConfigPath = flag.String(
+		"logConfig",
+		"./config/log.yml",
+		"log config path",
+	)
 )
 
 func main() {
 	flag.Parse()
 
-	lis, err := net.Listen("tcp", ":"+*port)
+	config.Init(*appConfigPath, *logConfigPath)
+	logger.Init(config.Use())
+	context.Init(logger.Use(), config.Use())
+
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.GET("/ok", ok)
+	e.HEAD("/ok", ok)
+
+	e.POST("/init", controllers.Init(context.Use()))
+	e.POST("/connect", controllers.Connect(context.Use()))
+	e.POST("/close", controllers.Close(context.Use()))
+	e.POST("/start", controllers.Start(context.Use()))
+	e.POST("/stop", controllers.Stop(context.Use()))
+	e.GET("/options/get", controllers.GetOptions(context.Use()))
+	e.POST("/options/update/button", controllers.UpdateButton(context.Use()))
+	e.POST("/options/update/check", controllers.UpdateCheck(context.Use()))
+	e.POST("/options/update/range", controllers.UpdateRange(context.Use()))
+	e.POST("/options/update/select", controllers.UpdateSelect(context.Use()))
+	e.POST("/options/update/string", controllers.UpdateString(context.Use()))
+	e.GET("/result/get", controllers.GetResult(context.Use()))
+	e.POST("/position/set", controllers.SetPosition(context.Use()))
+
+	err := e.Start(":" + *port)
 	if err != nil {
 		panic(err)
 	}
+}
 
-	config.InitConfig(*appConfigPath, *logConfigPath)
-	conn := connector.UseConnector()
-
-	svr := server.NewServer(
-		conn,
-		converter.UseFromUSI(),
-		converter.UseToUSI(),
-		logger.Use(),
-	)
-	s := grpc.NewServer()
-	pb.RegisterShogiBoardServer(s, svr)
-
-	logger.Use().Info("Listening...", zap.String("port", *port))
-
-	if err := s.Serve(lis); err != nil {
-		panic(err)
-	}
+func ok(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
 }

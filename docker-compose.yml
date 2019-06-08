@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 services:
   server:
@@ -13,16 +13,3 @@ services:
         max-size: '50m'
         max-file: '10'
     container_name: 'shogi-board-server'
-
-  proxy:
-    build: ./proxy
-    ports:
-      - '8080:8080'
-    links:
-      - 'server'
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '50m'
-        max-file: '10'
-    container_name: 'shogi-board-proxy'
