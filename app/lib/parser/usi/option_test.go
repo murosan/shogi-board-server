@@ -151,6 +151,81 @@ func TestParseSelect(t *testing.T) {
 	}
 }
 
+func TestParseTextFromStringType(t *testing.T) {
+	cases := []struct {
+		in   string
+		want *option.Text
+		err  error
+	}{
+		{"option name BookFile type string default public.bin",
+			&option.Text{
+				Name:    "BookFile",
+				Value:   "public.bin",
+				Default: "public.bin",
+			},
+			nil,
+		},
+		{"option name BookFile type string default public.bin var a",
+			&option.Text{
+				Name:    "BookFile",
+				Value:   "public.bin var a",
+				Default: "public.bin var a",
+			},
+			nil,
+		},
+		{"option name BookFile type string",
+			nil,
+			emptyErr,
+		},
+		{"option name BookFile type string public.bin",
+			nil,
+			emptyErr,
+		},
+	}
+	for _, c := range cases {
+		o, err := ParseTextFromStringType(c.in)
+		basicOptionMatching(t, c.in, o, c.want, err, c.err)
+	}
+}
+
+func TestParseTextFromFilenameType(t *testing.T) {
+	cases := []struct {
+		in   string
+		want *option.Text
+		err  error
+	}{
+		{
+			"option name LearningFile type filename default <empty>",
+			&option.Text{
+				Name:    "LearningFile",
+				Value:   "<empty>",
+				Default: "<empty>",
+			},
+			nil,
+		},
+		{"option name LearningFile type filename default <empty> var a",
+			&option.Text{
+				Name:    "LearningFile",
+				Value:   "<empty> var a",
+				Default: "<empty> var a",
+			},
+			nil,
+		},
+		{"option name LearningFile type filename",
+			nil,
+			emptyErr,
+		},
+		{"option name LearningFile type filename <empty>",
+			nil,
+			emptyErr,
+		},
+	}
+	for _, c := range cases {
+		o, err := ParseTextFromFilenameType(c.in)
+		basicOptionMatching(t, c.in, o, c.want, err, c.err)
+	}
+}
+
 // in: input
 // o1: Returned Option
 // o2: Expected Option
