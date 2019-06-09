@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package engine
+package usi
 
 // Result is a thought result of the shogi engine.
-type Result struct {
-}
+type Result = map[int]*Info
 
-// Flush flushes all the thought results.
-func (r *Result) Flush() {
-
+// NewResult returns new Result
+func NewResult() Result {
+	return make(map[int]*Info)
 }

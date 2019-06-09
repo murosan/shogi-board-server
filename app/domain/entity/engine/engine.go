@@ -44,7 +44,7 @@ type Engine struct {
 	State State
 
 	// Thought result of the engine.
-	Result *Result
+	Result usi.Result
 
 	// Shogi engine external command. The path written in
 	// app config is used. It must be executable.
@@ -72,7 +72,7 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 			Texts:   make(map[string]*option.Text),
 		},
 		State:  NotConnected,
-		Result: &Result{}, // TODO
+		Result: usi.NewResult(),
 		Cmd:    cmd,
 		Ch:     make(chan []byte),
 		logger: logger,
@@ -116,7 +116,7 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 
 // FlushResult resets result
 func (e *Engine) FlushResult() {
-	e.Result = &Result{}
+	e.Result = usi.NewResult()
 }
 
 // Close closes the connection with the shogi engine.

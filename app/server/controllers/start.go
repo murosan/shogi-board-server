@@ -8,6 +8,7 @@ import (
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/model/usi"
+	usiParser "github.com/murosan/shogi-board-server/app/lib/parser/usi"
 	"github.com/murosan/shogi-board-server/app/server/context"
 )
 
@@ -68,9 +69,24 @@ func start(sbc *context.Context, egn *engine.Engine) error {
 				continue
 			}
 
-			// TODO: parse info
 			if bytes.HasPrefix(b, []byte("info ")) {
+				i, mpv, err := usiParser.ParseInfo(string(b))
+				if err != nil {
+					sbc.Logger.Error("[start]", zap.Error(err))
+					continue
+				}
 
+				sbc.Logger.Info("[start]", zap.Any("parsed", i))
+
+				if mpv == 1 {
+					// If mpv is 1, it means 'best move' usually.
+					// If the number of candidates is reduced from 5 to 2,
+					// there will be extra information left, so delete
+					egn.FlushResult()
+				}
+				if len(i.Moves) != 0 {
+					egn.Result[mpv] = i
+				}
 			}
 		}
 	}()
