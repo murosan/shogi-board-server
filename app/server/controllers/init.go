@@ -6,10 +6,10 @@ package controllers
 
 import (
 	"github.com/labstack/echo"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
 
-	"github.com/murosan/shogi-board-server/app/domain/model/exception"
 	"github.com/murosan/shogi-board-server/app/server/context"
 )
 
@@ -23,7 +23,7 @@ func Init(sbc *context.Context) func(echo.Context) error {
 
 			if err := closeEngine(sbc, ngn); err != nil {
 				msg := "failed to close engine. name = " + ngn.Name
-				e := exception.FailedToClose(err)
+				e := errors.Wrap(err, msg)
 				sbc.Logger.Error(msg, zap.Error(e))
 				return echo.NewHTTPError(http.StatusInternalServerError, msg)
 			}

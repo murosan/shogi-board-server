@@ -28,13 +28,13 @@ func Stop(sbc *context.Context) func(echo.Context) error {
 		)
 
 		// engine is not thinking. nothing to do
-		if egn.State == engine.NotConnected {
+		if egn.State != engine.Thinking {
 			sbc.Logger.Info("[Stop]", zap.Any("nothing to do", egn.State))
 			return c.NoContent(http.StatusOK)
 		}
 
-		// execute 'quit'
-		if err := egn.Cmd.Write(usi.Quit); err != nil {
+		// execute 'stop'
+		if err := egn.Cmd.Write(usi.Stop); err != nil {
 			sbc.Logger.Error("[Stop] error", zap.Error(err))
 			return c.NoContent(http.StatusInternalServerError)
 		}

@@ -104,7 +104,7 @@ func ParseInfo(s string) (*usi.Info, int, error) {
 			mpv = n
 
 		case pv:
-			m := make([]*shogi.Move, len(a))
+			m := make([]*shogi.Move, len(a[i+1:]))
 			for j, v := range a[i+1:] {
 				mv, err := ParseMove(v)
 				if err != nil {

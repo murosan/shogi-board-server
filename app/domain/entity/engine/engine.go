@@ -130,7 +130,7 @@ func (e *Engine) Close() error {
 	}()
 	go func() {
 		if err := e.Cmd.Write(usi.Quit); err != nil {
-			ch <- errors.Wrap(err, "failed to close engine")
+			ch <- errors.Wrap(err, "failed to execute 'quit'")
 		}
 		ch <- e.Cmd.Wait()
 	}()

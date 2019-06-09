@@ -25,7 +25,7 @@ func Close(sbc *context.Context) func(echo.Context) error {
 		}
 
 		sbc.Logger.Info(
-			"[Connect]",
+			"[Close]",
 			zap.String("name", name),
 			zap.String("target key", egn.Key),
 		)
@@ -46,7 +46,7 @@ func closeEngine(c *context.Context, e *engine.Engine) error {
 	// exec quit command
 	if err := e.Close(); err != nil {
 		werr := errors.Wrap(err, "failed to close")
-		c.Logger.Error("failed to close", zap.Error(werr))
+		c.Logger.Error("[closeEngine]", zap.Error(werr))
 		return werr
 	}
 
