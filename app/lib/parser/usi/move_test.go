@@ -100,7 +100,7 @@ func moveErrorPrintHelper(
 	expected, actual interface{},
 ) {
 	t.Helper()
-	t.Errorf(`[Parse Move] %s
+	t.Errorf(`[ParseMove] %s
 Index:    %d
 Input:    %s
 Expected: %v
