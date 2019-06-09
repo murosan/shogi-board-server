@@ -12,11 +12,15 @@ import (
 func ParseMove(s string) (*shogi.Move, error) {
 	a := strings.Split(strings.TrimSpace(s), "")
 
+	if len(a) < 4 {
+		return nil, errors.New("insufficient length. input = " + s)
+	}
+
 	// is from captured.
 	if strings.Contains(s, "*") {
 		piece, err := ParsePiece(a[0])
 		if err != nil {
-			msg := "failed to parse captured piece on ParseMove. value = " + a[0]
+			msg := "failed to parse captured piece on ParseMove. input = " + a[0]
 			return nil, errors.Wrap(err, msg)
 		}
 
@@ -24,12 +28,12 @@ func ParseMove(s string) (*shogi.Move, error) {
 
 		row, err := parseRow(a[3])
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to parse row. value = "+a[3])
+			return nil, errors.Wrap(err, "failed to parse row. input = "+a[3])
 		}
 
 		col, err := parseColumn(a[2])
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to parse column. value = "+a[2])
+			return nil, errors.Wrap(err, "failed to parse column. input = "+a[2])
 		}
 
 		dst := &shogi.Point{Row: row, Column: col}
@@ -43,22 +47,22 @@ func ParseMove(s string) (*shogi.Move, error) {
 
 	srow, err := parseRow(a[1])
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse row. value = "+a[1])
+		return nil, errors.Wrap(err, "failed to parse row. input = "+a[1])
 	}
 
 	scol, err := parseColumn(a[0])
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse column. value = "+a[0])
+		return nil, errors.Wrap(err, "failed to parse column. input = "+a[0])
 	}
 
 	drow, err := parseRow(a[3])
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse row. value = "+a[3])
+		return nil, errors.Wrap(err, "failed to parse row. input = "+a[3])
 	}
 
 	dcol, err := parseColumn(a[2])
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse column. value = "+a[2])
+		return nil, errors.Wrap(err, "failed to parse column. input = "+a[2])
 	}
 
 	src := &shogi.Point{Row: srow, Column: scol}
@@ -76,10 +80,10 @@ func ParseMove(s string) (*shogi.Move, error) {
 func parseColumn(s string) (int, error) {
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		return 0, nil
+		return 0, errors.Wrap(err, "is not a number. input = "+s)
 	}
 	if i < 1 || i > 9 {
-		return 0, errors.New("invalid column number. value = " + s)
+		return 0, errors.New("invalid column number. input = " + s)
 	}
 
 	// decrease 1. because given string is in 1-9,
@@ -90,7 +94,7 @@ func parseColumn(s string) (int, error) {
 func parseRow(s string) (int, error) {
 	r := []rune(s)[0]
 	if r < 97 || r > 105 {
-		return 0, errors.New("invalid row number. value = " + s)
+		return 0, errors.New("invalid row number. input = " + s)
 	}
 	return int(r - 97), nil
 }

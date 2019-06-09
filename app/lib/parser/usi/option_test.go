@@ -1,9 +1,8 @@
 package usi
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/pkg/errors"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -279,15 +278,12 @@ Expected: %v
 Actual:   %v`, in, e2, e1)
 	}
 
-	// check if the serialized value is same
-	json1, _ := json.MarshalIndent(o1, "", "  ")
-	json2, _ := json.MarshalIndent(o2, "", "  ")
-	if !bytes.Equal(json1, json2) {
+	if !reflect.DeepEqual(o1, o2) {
 		t.Errorf(`
 Marshaled value (json bytes) was not as expected.
 Input:    %s
-Expected: %s
-Actual:   %s
-`, in, string(json2), string(json1))
+Expected: %v
+Actual:   %v
+`, in, o1, o2)
 	}
 }
