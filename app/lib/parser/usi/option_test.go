@@ -57,6 +57,55 @@ func TestParseCheck(t *testing.T) {
 	}
 }
 
+func TestParseRange(t *testing.T) {
+	cases := []struct {
+		in   string
+		want *option.Range
+		err  error
+	}{
+		{
+			"option name Selectivity type spin default 2 min 0 max 4",
+			&option.Range{Name: "Selectivity", Value: 2, Default: 2, Min: 0, Max: 4},
+			nil,
+		},
+		{
+			"option name Selectivity type spin default -100 min -123456 max 54321 ",
+			&option.Range{
+				Name:    "Selectivity",
+				Value:   -100,
+				Default: -100,
+				Min:     -123456,
+				Max:     54321,
+			},
+			nil,
+		},
+		{
+			"option name Selectivity type spin min 0 max 4",
+			nil,
+			emptyErr,
+		},
+		{
+			"option name Selectivity type spin default 2",
+			nil,
+			emptyErr,
+		},
+		{
+			"option name Selectivity type spin min 0 max 4 default 2",
+			nil,
+			emptyErr,
+		},
+		{
+			"option name Selectivity type spin default two min 0 max 4",
+			nil,
+			emptyErr,
+		},
+	}
+	for _, c := range cases {
+		o, err := ParseRange(c.in)
+		basicOptionMatching(t, c.in, o, c.want, err, c.err)
+	}
+}
+
 // in: input
 // o1: Returned Option
 // o2: Expected Option
