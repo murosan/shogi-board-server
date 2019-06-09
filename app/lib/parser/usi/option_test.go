@@ -106,6 +106,51 @@ func TestParseRange(t *testing.T) {
 	}
 }
 
+func TestParseSelect(t *testing.T) {
+	cases := []struct {
+		in   string
+		want *option.Select
+		err  error
+	}{
+		{
+			"option name Style type combo default Normal var Solid var Normal var Risky",
+			&option.Select{
+				Name:    "Style",
+				Value:   "Normal",
+				Default: "Normal",
+				Vars:    []string{"Solid", "Normal", "Risky"},
+			},
+			nil,
+		},
+		{
+			"option name Style type combo default Nor mal var Sol id var Nor mal var R isky",
+			&option.Select{
+				Name:    "Style",
+				Value:   "Nor mal",
+				Default: "Nor mal",
+				Vars:    []string{"Sol id", "Nor mal", "R isky"},
+			},
+			nil,
+		},
+		{"option name Style type combo default None var Solid var Normal var Risky",
+			nil,
+			emptyErr,
+		},
+		{"option name Style type combo var Solid var Normal var Risky",
+			nil,
+			emptyErr,
+		},
+		{"option name Style type combo default Normal",
+			nil,
+			emptyErr,
+		},
+	}
+	for _, c := range cases {
+		o, err := ParseSelect(c.in)
+		basicOptionMatching(t, c.in, o, c.want, err, c.err)
+	}
+}
+
 // in: input
 // o1: Returned Option
 // o2: Expected Option
