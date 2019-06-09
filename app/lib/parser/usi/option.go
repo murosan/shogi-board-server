@@ -73,6 +73,18 @@ func ParseRange(s string) (*option.Range, error) {
 		return nil, errors.New(msg)
 	}
 
+	if init < min || init > max {
+		msg := fmt.Sprintf(
+			"%s\n%s Default value is not in range. Default: %d, Min: %d, Max: %d",
+			errMsg,
+			s,
+			init,
+			min,
+			max,
+		)
+		return nil, errors.New(msg)
+	}
+
 	return &option.Range{
 		Name:    res[0][1],
 		Value:   init,
