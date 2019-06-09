@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	emptyErr = errors.New("")
+	errEmp = errors.New("")
 )
 
 func TestParseButton(t *testing.T) {
@@ -21,7 +21,7 @@ func TestParseButton(t *testing.T) {
 	}{
 		{"option name ResetLearning type button", &option.Button{Name: "ResetLearning"}, nil},
 		{"option name <empty> type button", &option.Button{Name: "<empty>"}, nil},
-		{"option name ResetLearning type button sur", nil, emptyErr},
+		{"option name ResetLearning type button sur", nil, errEmp},
 		{"option name 1 type button", &option.Button{Name: "1"}, nil},
 	}
 	for _, c := range cases {
@@ -45,9 +45,9 @@ func TestParseCheck(t *testing.T) {
 			&option.Check{Name: "UseBook", Value: true, Default: true},
 			nil,
 		},
-		{"option name UseBook type check default ", nil, emptyErr},
-		{"option name UseBook type check default not_bool", nil, emptyErr},
-		{"option name UseBook type check dlft true", nil, emptyErr},
+		{"option name UseBook type check default ", nil, errEmp},
+		{"option name UseBook type check default not_bool", nil, errEmp},
+		{"option name UseBook type check dlft true", nil, errEmp},
 	}
 
 	for _, c := range cases {
@@ -81,42 +81,42 @@ func TestParseRange(t *testing.T) {
 		{
 			"option name Selectivity type spin min 0 max 4",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{
 			"option name Selectivity type spin default 2",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{
 			"option name Selectivity type spin min 0 max 4 default 2",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{
 			"option name Selectivity type spin default a min 0 max 4",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{
 			"option name Selectivity type spin default 2 min a max 4",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{
 			"option name Selectivity type spin default 2 min 0 max a",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{
 			"option name Selectivity type spin default 2 min 4 max 0",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{
 			"option name Selectivity type spin default 7 min 0 max 4",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 	}
 	for _, c := range cases {
@@ -153,19 +153,19 @@ func TestParseSelect(t *testing.T) {
 		},
 		{"option name Style type combo default None var Solid var Normal var Risky",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{"option name Style type combo var Solid var Normal var Risky",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{"option name Style type combo default Normal",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{"option name Style type combo default Normal var ",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 	}
 	for _, c := range cases {
@@ -198,11 +198,11 @@ func TestParseTextFromStringType(t *testing.T) {
 		},
 		{"option name BookFile type string",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{"option name BookFile type string public.bin",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 	}
 	for _, c := range cases {
@@ -236,11 +236,11 @@ func TestParseTextFromFilenameType(t *testing.T) {
 		},
 		{"option name LearningFile type filename",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 		{"option name LearningFile type filename <empty>",
 			nil,
-			emptyErr,
+			errEmp,
 		},
 	}
 	for _, c := range cases {
@@ -280,7 +280,7 @@ Actual:   %v`, in, e2, e1)
 
 	if !reflect.DeepEqual(o1, o2) {
 		t.Errorf(`
-Marshaled value (json bytes) was not as expected.
+Two options was not equal.
 Input:    %s
 Expected: %v
 Actual:   %v

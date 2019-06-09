@@ -50,14 +50,15 @@ func TestParseMove(t *testing.T) {
 			},
 			nil,
 		},
-		{"", &shogi.Move{}, emptyErr},
-		{"7g7z", &shogi.Move{}, emptyErr},
-		{"7g7$", &shogi.Move{}, emptyErr},
-		{"0g7a", &shogi.Move{}, emptyErr},
-		{"1x7a", &shogi.Move{}, emptyErr},
-		{"G*vb", &shogi.Move{}, emptyErr},
-		{"G*4z", &shogi.Move{}, emptyErr},
-		{"A*7a", &shogi.Move{}, emptyErr},
+		{"", &shogi.Move{}, errEmp},
+		{"7g7z", &shogi.Move{}, errEmp},
+		{"7gaf", &shogi.Move{}, errEmp},
+		{"7g7$", &shogi.Move{}, errEmp},
+		{"0g7a", &shogi.Move{}, errEmp},
+		{"1x7a", &shogi.Move{}, errEmp},
+		{"G*vb", &shogi.Move{}, errEmp},
+		{"G*4z", &shogi.Move{}, errEmp},
+		{"A*7a", &shogi.Move{}, errEmp},
 	}
 
 	for i, c := range cases {

@@ -1,8 +1,9 @@
 package usi
 
 import (
-	"github.com/murosan/shogi-board-server/app/domain/model/shogi"
 	"testing"
+
+	"github.com/murosan/shogi-board-server/app/domain/model/shogi"
 )
 
 func TestParsePiece(t *testing.T) {
@@ -46,20 +47,20 @@ func TestParsePiece(t *testing.T) {
 		r, e := ParsePiece(c.in)
 
 		if c.isError && e == nil {
-			t.Errorf(`[FromUsi Piece] Expected error, but got nil
+			t.Errorf(`[ParsePiece] Expected error, but got nil.
 Index: %d
 Input: %s`, i, c.in)
 		}
 
 		if !c.isError && e != nil {
-			t.Errorf(`[FromUsi Piece] Expected nil, but got error.
+			t.Errorf(`[ParsePiece] Expected nil, but got error.
 Index: %d
 Input: %s
 Got:   %v`, i, c.in, e)
 		}
 
 		if c.want != r {
-			t.Errorf(`[FromUsi Piece] The value was not as expected.
+			t.Errorf(`[ParsePiece] The value was not as expected.
 Index:    %d
 Input:    %s
 Expected: %d
