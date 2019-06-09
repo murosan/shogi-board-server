@@ -6,12 +6,12 @@ package engine
 
 import (
 	"bytes"
-	"github.com/murosan/shogi-board-server/app/domain/entity/option"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"strings"
 	"time"
 
+	"github.com/murosan/shogi-board-server/app/domain/entity/option"
 	"github.com/murosan/shogi-board-server/app/domain/model/exception"
 	"github.com/murosan/shogi-board-server/app/domain/model/infrastructure/os"
 	"github.com/murosan/shogi-board-server/app/domain/model/usi"
