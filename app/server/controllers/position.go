@@ -2,10 +2,13 @@ package controllers
 
 import (
 	"github.com/labstack/echo"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"net/http"
 
+	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/model/shogi"
+	"github.com/murosan/shogi-board-server/app/domain/model/usi"
 	"github.com/murosan/shogi-board-server/app/server/context"
 )
 
@@ -33,20 +36,41 @@ func SetPosition(sbc *context.Context) func(echo.Context) error {
 
 		sbc.Logger.Info("[SetPosition]", zap.Any("position", p))
 
-		usi, err := p.ToUSI()
+		usipos, err := p.ToUSI()
 		if err != nil {
 			sbc.Logger.Warn("[SetPosition] failed to convert to usi", zap.Error(err))
 			return c.NoContent(http.StatusBadRequest)
 		}
 
-		sbc.Logger.Info("[SetPosition]", zap.ByteString("usi", usi))
+		sbc.Logger.Info("[SetPosition]", zap.ByteString("usi", usipos))
 
-		if err := egn.Cmd.Write(usi); err != nil {
+		// exec stop if thinking
+		isThinking := egn.State == engine.Thinking
+		if isThinking {
+			if err := egn.Cmd.Write(usi.Stop); err != nil {
+				err2 := errors.Wrap(err, "failed to stop")
+				sbc.Logger.Error("[SetPosition]", zap.Error(err2))
+				return c.NoContent(http.StatusInternalServerError)
+			}
+			egn.State = engine.StandBy
+		}
+
+		if err := egn.Cmd.Write(usipos); err != nil {
 			sbc.Logger.Error(
 				"[SetPosition] error at write position command",
 				zap.Error(err),
 			)
 			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		egn.FlushResult()
+
+		// start thinking if isThinking is true
+		if isThinking {
+			if err := start(sbc, egn); err != nil {
+				sbc.Logger.Error("[SetPosition] failed to restart", zap.Error(err))
+				return c.NoContent(http.StatusInternalServerError)
+			}
 		}
 
 		return c.NoContent(http.StatusOK)

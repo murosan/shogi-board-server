@@ -51,6 +51,9 @@ type Engine struct {
 	// See app/config/config.go.
 	Cmd *os.Cmd
 
+	// message receiver
+	Ch chan []byte
+
 	logger logger.Logger
 }
 
@@ -71,6 +74,7 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 		State:  NotConnected,
 		Result: &Result{}, // TODO
 		Cmd:    cmd,
+		Ch:     make(chan []byte),
 		logger: logger,
 	}
 
@@ -83,8 +87,7 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 	engine.State = Connected
 
 	// output receiver
-	ch := make(chan []byte)
-	go engine.catchOutput(ch)
+	go engine.catchOutput(engine.Ch)
 
 	// execute initial usi commands
 	logger.Info("[engine.New]", zap.ByteString("exec", usi.Usi))
@@ -93,7 +96,7 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 	}
 
 	logger.Info("[engine.New]", zap.ByteString("wait", usi.UsiOK))
-	if err := engine.waitFor(ch, usi.UsiOK, true); err != nil {
+	if err := engine.waitFor(engine.Ch, usi.UsiOK, true); err != nil {
 		return nil, errors.Wrap(err, "could not get 'usiok' from the engine")
 	}
 
@@ -103,12 +106,17 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 	}
 
 	logger.Info("[engine.New]", zap.ByteString("wait", usi.ReadyOK))
-	if err := engine.waitFor(ch, usi.ReadyOK, false); err != nil {
+	if err := engine.waitFor(engine.Ch, usi.ReadyOK, false); err != nil {
 		return nil, errors.Wrap(err, "could not get 'readyok' from the engine")
 	}
 
 	logger.Info("[engine.New]", zap.String("finished", ""))
 	return engine, nil
+}
+
+// FlushResult resets result
+func (e *Engine) FlushResult() {
+	e.Result = &Result{}
 }
 
 // Close closes the connection with the shogi engine.
