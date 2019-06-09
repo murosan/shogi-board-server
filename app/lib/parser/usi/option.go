@@ -11,7 +11,7 @@ import (
 
 // ParseButton generates new Button and returns it from the given string.
 func ParseButton(s string) (*option.Button, error) {
-	res := buttonRegex.FindAllStringSubmatch(s, -1)
+	res := buttonRegex.FindAllStringSubmatch(strings.TrimSpace(s), -1)
 
 	if len(res) == 0 || len(res[0]) < 2 {
 		msg := "failed to parse button. given=" + s + "\n" + usiOptionFormat
@@ -23,10 +23,10 @@ func ParseButton(s string) (*option.Button, error) {
 
 // ParseCheck generates new Check and returns it from the given string.
 func ParseCheck(s string) (*option.Check, error) {
-	res := checkRegex.FindAllStringSubmatch(s, -1)
+	res := checkRegex.FindAllStringSubmatch(strings.TrimSpace(s), -1)
 
 	if len(res) == 0 || len(res[0]) < 3 {
-		msg := "failed to parse check. given=" + s + "\n" + usiOptionFormat
+		msg := "failed to parse check. input = " + s + usiOptionFormat
 		return nil, errors.New(msg)
 	}
 
@@ -36,9 +36,9 @@ func ParseCheck(s string) (*option.Check, error) {
 
 // ParseRange generates new Range and returns it from the given string.
 func ParseRange(s string) (*option.Range, error) {
-	res := spinRegex.FindAllStringSubmatch(s, -1)
+	res := spinRegex.FindAllStringSubmatch(strings.TrimSpace(s), -1)
 
-	errMsg := "failed to parse range. given=" + s + "\n" + usiOptionFormat
+	errMsg := "failed to parse range. given=" + s + usiOptionFormat
 
 	if len(res) == 0 || len(res[0]) < 5 {
 		return nil, errors.New(errMsg)
@@ -84,9 +84,9 @@ func ParseRange(s string) (*option.Range, error) {
 
 // ParseSelect generates new Select and returns it from the given string.
 func ParseSelect(s string) (*option.Select, error) {
-	res := selectRegex.FindAllStringSubmatch(s, -1)
+	res := selectRegex.FindAllStringSubmatch(strings.TrimSpace(s), -1)
 
-	errMsg := "failed to parse select. given=" + s + "\n" + usiOptionFormat
+	errMsg := "failed to parse select. input = " + s + usiOptionFormat
 
 	if len(res) == 0 || len(res[0]) < 4 {
 		return nil, errors.New(errMsg)
@@ -129,15 +129,15 @@ func ParseSelect(s string) (*option.Select, error) {
 
 // ParseTextFromStringType generates new Text and returns it from the given string.
 func ParseTextFromStringType(s string) (*option.Text, error) {
-	res := stringRegex.FindAllStringSubmatch(s, -1)
-	errMsg := "failed to parse string. given=" + s + "\n" + usiOptionFormat
+	res := stringRegex.FindAllStringSubmatch(strings.TrimSpace(s), -1)
+	errMsg := "failed to parse string. input = " + s + usiOptionFormat
 	return parseText(res, errMsg)
 }
 
 // ParseTextFromFilenameType generates new Text and returns it from the given string.
 func ParseTextFromFilenameType(s string) (*option.Text, error) {
-	res := fileNameRegex.FindAllStringSubmatch(s, -1)
-	errMsg := "failed to parse filename. given=" + s + "\n" + usiOptionFormat
+	res := fileNameRegex.FindAllStringSubmatch(strings.TrimSpace(s), -1)
+	errMsg := "failed to parse filename. input = " + s + usiOptionFormat
 	return parseText(res, errMsg)
 }
 

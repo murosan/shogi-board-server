@@ -31,6 +31,32 @@ func TestParseButton(t *testing.T) {
 	}
 }
 
+func TestParseCheck(t *testing.T) {
+	cases := []struct {
+		in   string
+		want *option.Check
+		err  error
+	}{
+		{
+			"option name UseBook type check default true",
+			&option.Check{Name: "UseBook", Value: true, Default: true},
+			nil,
+		},
+		{"   option name UseBook type check default true   ",
+			&option.Check{Name: "UseBook", Value: true, Default: true},
+			nil,
+		},
+		{"option name UseBook type check default ", nil, emptyErr},
+		{"option name UseBook type check default not_bool", nil, emptyErr},
+		{"option name UseBook type check dlft true", nil, emptyErr},
+	}
+
+	for _, c := range cases {
+		o, err := ParseCheck(c.in)
+		basicOptionMatching(t, c.in, o, c.want, err, c.err)
+	}
+}
+
 // in: input
 // o1: Returned Option
 // o2: Expected Option
@@ -46,12 +72,12 @@ Expected: %v
 Actual:   %v`, in, e2, e1)
 	}
 
-	// 予想通りのエラーが返った
+	// returned expected error
 	if e1 != nil && strings.Contains(string(e1.Error()), string(e2.Error())) {
 		return
 	}
 
-	// エラーは返ったが、想定と違った
+	// an error was returned, but was not as expected
 	if e1 != nil && !strings.Contains(string(e1.Error()), string(e2.Error())) {
 		t.Errorf(`
 Returned error was not as expected.
@@ -60,7 +86,7 @@ Expected: %v
 Actual:   %v`, in, e2, e1)
 	}
 
-	// json化した値が同等かどうか
+	// check if the serialized value is same
 	json1, _ := json.MarshalIndent(o1, "", "  ")
 	json2, _ := json.MarshalIndent(o2, "", "  ")
 	if !bytes.Equal(json1, json2) {
