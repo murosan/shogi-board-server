@@ -280,21 +280,29 @@ func infoHelper(
 	msg := ""
 	res, mpvKey, e := ParseInfo(in)
 
-	if (e == nil && err != nil) || (e != nil && err == nil) {
-		msg = "Got error type was not as expected."
+	if (e == nil) != (err == nil) {
+		msg = "The types of two errors does not match"
 		infoErrorPrintHelper(t, i, msg, in, err, e)
 		return
 	}
 
-	// was expected error
-	if e != nil && err != nil && strings.Contains(string(e.Error()), string(err.Error())) {
+	if (e != nil) && (err != nil) {
+		if !strings.Contains(e.Error(), err.Error()) {
+			msg = "Two errors are not nil as expected, but the error message is not correct."
+			infoErrorPrintHelper(t, i, msg, in, err, e)
+		}
 		return
 	}
 
-	// was error but no as expected
-	if e != nil && err != nil && !strings.Contains(string(e.Error()), string(err.Error())) {
-		msg = "Expected error, but was not as expected."
+	if (res == nil) != (want == nil) {
+		msg = "The types of two *usi.Info does not match"
 		infoErrorPrintHelper(t, i, msg, in, err, e)
+		return
+	}
+
+	if res == nil {
+		// won't come here
+		t.Errorf("should not come here, because err is nil")
 		return
 	}
 

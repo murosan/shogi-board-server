@@ -71,20 +71,30 @@ func moveHelper(t *testing.T, i int, in string, want *shogi.Move, err error) {
 	res, e := ParseMove(in)
 	msg := ""
 
-	if (e == nil && err != nil) || (e != nil && err == nil) {
-		msg = "Expected error, but was not as expected."
-		moveErrorPrintHelper(t, i, msg, in, err, e)
-	}
-
-	// expected same error
-	if e != nil && strings.Contains(string(e.Error()), string(err.Error())) {
+	if (e == nil) != (err == nil) {
+		msg = "The types of two errors does not match"
+		moveErrorPrintHelper(t, i, msg, in, want, res)
 		return
 	}
 
-	// was error but not as expected
-	if e != nil && !strings.Contains(string(e.Error()), string(err.Error())) {
-		msg = "Expected error, but was not as expected."
-		moveErrorPrintHelper(t, i, msg, in, err, e)
+	if (e != nil) && (err != nil) {
+		if !strings.Contains(e.Error(), err.Error()) {
+			msg = "Two errors are not nil as expected, but the error message is not correct."
+			moveErrorPrintHelper(t, i, msg, in, want, res)
+		}
+		return
+	}
+
+	if (res == nil) != (want == nil) {
+		msg = "The types of two *usi.Info does not match"
+		moveErrorPrintHelper(t, i, msg, in, want, res)
+		return
+	}
+
+	if res == nil {
+		// won't come here
+		t.Errorf("should not come here, because err is nil")
+		return
 	}
 
 	if !reflect.DeepEqual(res, want) {

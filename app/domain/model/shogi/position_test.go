@@ -165,9 +165,11 @@ func TestPosition_ToUSI(t *testing.T) {
 			return
 		}
 
-		if (c.err != nil) && (err != nil) && !strings.Contains(err.Error(), c.err.Error()) {
-			msg := "Two errors are not nil as expected, but the error message is not correct."
-			positionToUSIErrorPrintHelper(t, i, msg, c.in, err, c.err)
+		if (c.err != nil) && (err != nil) {
+			if !strings.Contains(err.Error(), c.err.Error()) {
+				msg := "Two errors are not nil as expected, but the error message is not correct."
+				positionToUSIErrorPrintHelper(t, i, msg, c.in, err, c.err)
+			}
 			return
 		}
 

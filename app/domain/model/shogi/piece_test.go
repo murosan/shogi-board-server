@@ -43,20 +43,20 @@ func TestPieceToUSI(t *testing.T) {
 		r, e := PieceToUSI(c.in)
 
 		if c.isError && e == nil {
-			t.Errorf(`[ToUsi Piece] Expected error, but got nil
+			t.Errorf(`[PieceToUSI] Expected error, but got nil
 Index: %d
 Input: %d`, i, c.in)
 		}
 
 		if !c.isError && e != nil {
-			t.Errorf(`[ToUsi Piece] Expected nil, but got error.
+			t.Errorf(`[PieceToUSI] Expected nil, but got error.
 Index: %d
 Input: %d
 Got:   %v`, i, c.in, e)
 		}
 
 		if c.want != r {
-			t.Errorf(`[ToUsi Piece] The value was not as expected.
+			t.Errorf(`[PieceToUSI] The value was not as expected.
 Index:    %d
 Input:    %d
 Expected: %s
