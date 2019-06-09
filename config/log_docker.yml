@@ -1,0 +1,23 @@
+level: 'debug'
+sampling:
+  initial: 100
+  thereafter: 100
+encoding: 'json'
+encoderConfig:
+  timeKey: 'time'
+  levelKey: 'level'
+  nameKey: 'logger'
+  callerKey: 'caller'
+  messageKey: 'msg'
+  stacktraceKey: 'stacktrace'
+  levelEncoder: ''
+  timeEncoder: 'iso8601'
+  durationEncoder: ''
+  callerEncoder: ''
+outputPaths:
+  - 'stdout'
+  - '/go/src/shogi-board-server/log/app.log'
+errorOutputPaths:
+  - 'stderr'
+  - '/go/src/shogi-board-server/log/app.log'
+  - '/go/src/shogi-board-server/log/app_error.log'

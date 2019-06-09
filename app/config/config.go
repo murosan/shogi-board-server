@@ -44,7 +44,7 @@ type App struct {
 // The appPath is a path to application config file.
 // See /config/app_example.yml.
 // The logPath is a path to logger(zap) config file.
-// See /config/log_example.yml
+// See /config/log.yml
 //
 // Only YAML syntax is supported for now.
 // TODO: support JSON and TOML

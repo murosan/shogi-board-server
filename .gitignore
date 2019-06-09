@@ -1,9 +1,9 @@
 /main
-/app/proto/*.pb.go
 /coverage
 /log
 /config/*
 !/config/*_example.yml
-!/config/lotate
+!/config/log.yml
+!/config/log_docker.yml
 /engines
 .envrc

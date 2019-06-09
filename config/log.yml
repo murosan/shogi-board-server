@@ -5,7 +5,7 @@ level: 'debug'
 sampling:
   initial: 100
   thereafter: 100
-encoding: 'console' # or json
+encoding: 'console'
 encoderConfig:
   timeKey: 'time'
   levelKey: 'level'
@@ -14,7 +14,7 @@ encoderConfig:
   messageKey: 'msg'
   stacktraceKey: 'stacktrace'
   levelEncoder: ''
-  timeEncoder: 'iso8601' # be empty for timestamp
+  timeEncoder: 'iso8601'
   durationEncoder: ''
   callerEncoder: ''
 outputPaths:
