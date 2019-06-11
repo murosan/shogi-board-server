@@ -6,15 +6,14 @@ package main
 
 import (
 	"flag"
-	"github.com/murosan/shogi-board-server/app/server/controllers"
-	"github.com/murosan/shogi-board-server/app/services/context"
-	"net/http"
-
-	"github.com/murosan/shogi-board-server/app/services/config"
-	"github.com/murosan/shogi-board-server/app/services/logger"
-
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"net/http"
+
+	"github.com/murosan/shogi-board-server/app/server/controllers"
+	"github.com/murosan/shogi-board-server/app/services/config"
+	"github.com/murosan/shogi-board-server/app/services/context"
+	"github.com/murosan/shogi-board-server/app/services/logger"
 )
 
 var (
@@ -41,23 +40,28 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+	}))
 
 	e.GET("/ok", ok)
 	e.HEAD("/ok", ok)
 
-	e.POST("/init", controllers.Init(context.Use()))
-	e.POST("/connect", controllers.Connect(context.Use()))
-	e.POST("/close", controllers.Close(context.Use()))
-	e.POST("/start", controllers.Start(context.Use()))
-	e.POST("/stop", controllers.Stop(context.Use()))
-	e.GET("/options/get", controllers.GetOptions(context.Use()))
-	e.PUT("/options/update/button/:name", controllers.UpdateButton(context.Use()))
-	e.PUT("/options/update/check/:name/:value", controllers.UpdateCheck(context.Use()))
-	e.PUT("/options/update/range/:name/:value", controllers.UpdateRange(context.Use()))
-	e.PUT("/options/update/select/:name/:value", controllers.UpdateSelect(context.Use()))
-	e.PUT("/options/update/text/:name/:value", controllers.UpdateText(context.Use()))
-	e.GET("/result/get", controllers.GetResult(context.Use()))
-	e.POST("/position/set", controllers.SetPosition(context.Use()))
+	ctx := context.Use()
+
+	e.POST("/init", controllers.Init(ctx))
+	e.POST("/connect", controllers.Connect(ctx))
+	e.POST("/close", controllers.Close(ctx))
+	e.POST("/start", controllers.Start(ctx))
+	e.POST("/stop", controllers.Stop(ctx))
+	e.GET("/options/get", controllers.GetOptions(ctx))
+	e.POST("/options/update/button", controllers.UpdateButton(ctx))
+	e.POST("/options/update/check", controllers.UpdateCheck(ctx))
+	e.POST("/options/update/range", controllers.UpdateRange(ctx))
+	e.POST("/options/update/select", controllers.UpdateSelect(ctx))
+	e.POST("/options/update/text", controllers.UpdateText(ctx))
+	e.GET("/result/get", controllers.GetResult(ctx))
+	e.POST("/position/set", controllers.SetPosition(ctx))
 
 	err := e.Start(":" + *port)
 	if err != nil {

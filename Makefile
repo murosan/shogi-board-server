@@ -1,7 +1,7 @@
 GIT_DIR=$(shell git rev-parse --git-dir)
 
 setup:
-	cp ./scripts/pre-commit.sh $(GIT_DIR)/hooks/pre-commit
+	cp ./bin/pre-commit.sh $(GIT_DIR)/hooks/pre-commit
 	git config commit.template .commit-template
 
 start:

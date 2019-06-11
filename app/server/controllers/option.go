@@ -4,8 +4,8 @@ import (
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
 	"net/http"
-	"strconv"
 
+	"github.com/murosan/shogi-board-server/app/domain/entity/option"
 	"github.com/murosan/shogi-board-server/app/server/context"
 )
 
@@ -32,6 +32,12 @@ func GetOptions(sbc *context.Context) func(echo.Context) error {
 // UpdateButton executes setoption USI command
 func UpdateButton(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
+		var b option.Button
+
+		if err := c.Bind(&b); err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
 		name := c.QueryParam(ParamEngineName)
 		egn, ok := sbc.Engines[name]
 
@@ -39,16 +45,9 @@ func UpdateButton(sbc *context.Context) func(echo.Context) error {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		optName := c.Param("name")
-		v := c.Param("value")
+		sbc.Logger.Info("[UpdateButton]", zap.Any("button", b))
 
-		sbc.Logger.Info(
-			"[UpdateButton]",
-			zap.String("value", v),
-			zap.String("name", optName),
-		)
-
-		btn, ok := egn.Options.Buttons[optName]
+		btn, ok := egn.Options.Buttons[b.Name]
 		if !ok {
 			return c.NoContent(http.StatusNotFound)
 		}
@@ -65,6 +64,12 @@ func UpdateButton(sbc *context.Context) func(echo.Context) error {
 // UpdateCheck executes setoption USI command
 func UpdateCheck(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
+		var v option.Check
+
+		if err := c.Bind(&v); err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
 		name := c.QueryParam(ParamEngineName)
 		egn, ok := sbc.Engines[name]
 
@@ -72,22 +77,15 @@ func UpdateCheck(sbc *context.Context) func(echo.Context) error {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		optName := c.Param("name")
-		v := c.Param("value")
+		sbc.Logger.Info("[UpdateCheck]", zap.Any("check", v))
 
-		sbc.Logger.Info(
-			"[UpdateCheck]",
-			zap.String("value", v),
-			zap.String("name", optName),
-		)
+		chk, ok := egn.Options.Checks[v.Name]
 
-		chk, ok := egn.Options.Checks[optName]
-
-		if !ok || (v != "true" && v != "false") {
+		if !ok {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		chk.Set(v == "true")
+		chk.Set(v.Value)
 
 		if err := egn.Cmd.Write([]byte(chk.ToUSI())); err != nil {
 			sbc.Logger.Error("[UpdateCheck]", zap.Error(err))
@@ -101,6 +99,12 @@ func UpdateCheck(sbc *context.Context) func(echo.Context) error {
 // UpdateRange executes setoption USI command
 func UpdateRange(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
+		var v option.Range
+
+		if err := c.Bind(&v); err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
 		name := c.QueryParam(ParamEngineName)
 		egn, ok := sbc.Engines[name]
 
@@ -108,28 +112,16 @@ func UpdateRange(sbc *context.Context) func(echo.Context) error {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		optName := c.Param("name")
-		v := c.Param("value")
+		sbc.Logger.Info("[UpdateRange]", zap.Any("range", v))
 
-		sbc.Logger.Info(
-			"[UpdateRange]",
-			zap.String("value", v),
-			zap.String("name", optName),
-		)
-
-		rng, ok := egn.Options.Ranges[optName]
+		rng, ok := egn.Options.Ranges[v.Name]
 
 		if !ok {
+			sbc.Logger.Info("[UpdateRange]", zap.String("option not found", v.Name))
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		n, err := strconv.Atoi(v)
-
-		if err != nil {
-			return c.NoContent(http.StatusBadRequest)
-		}
-
-		if err := rng.Set(n); err != nil {
+		if err := rng.Set(v.Value); err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
@@ -145,6 +137,12 @@ func UpdateRange(sbc *context.Context) func(echo.Context) error {
 // UpdateSelect executes setoption USI command
 func UpdateSelect(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
+		var v option.Select
+
+		if err := c.Bind(&v); err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
 		name := c.QueryParam(ParamEngineName)
 		egn, ok := sbc.Engines[name]
 
@@ -152,22 +150,15 @@ func UpdateSelect(sbc *context.Context) func(echo.Context) error {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		optName := c.Param("name")
-		v := c.Param("value")
+		sbc.Logger.Info("[UpdateSelect]", zap.Any("select", v))
 
-		sbc.Logger.Info(
-			"[UpdateSelect]",
-			zap.String("value", v),
-			zap.String("name", optName),
-		)
-
-		sel, ok := egn.Options.Selects[optName]
+		sel, ok := egn.Options.Selects[v.Name]
 
 		if !ok {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		if err := sel.Set(v); err != nil {
+		if err := sel.Set(v.Value); err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
@@ -183,6 +174,12 @@ func UpdateSelect(sbc *context.Context) func(echo.Context) error {
 // UpdateText executes setoption USI command
 func UpdateText(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
+		var v option.Text
+
+		if err := c.Bind(&v); err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
 		name := c.QueryParam(ParamEngineName)
 		egn, ok := sbc.Engines[name]
 
@@ -190,22 +187,15 @@ func UpdateText(sbc *context.Context) func(echo.Context) error {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		optName := c.Param("name")
-		v := c.Param("value")
+		sbc.Logger.Info("[UpdateText]", zap.Any("text", v))
 
-		sbc.Logger.Info(
-			"[UpdateText]",
-			zap.String("value", v),
-			zap.String("name", optName),
-		)
-
-		txt, ok := egn.Options.Texts[optName]
+		txt, ok := egn.Options.Texts[v.Name]
 
 		if !ok {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		txt.Set(v)
+		txt.Set(v.Value)
 
 		if err := egn.Cmd.Write([]byte(txt.ToUSI())); err != nil {
 			sbc.Logger.Error("[UpdateText]", zap.Error(err))

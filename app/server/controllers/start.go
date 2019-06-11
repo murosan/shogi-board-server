@@ -78,8 +78,8 @@ func start(sbc *context.Context, egn *engine.Engine) error {
 
 				sbc.Logger.Info("[start]", zap.Any("parsed", i))
 
-				if mpv == 1 {
-					// If mpv is 1, it means 'best move' usually.
+				if mpv <= 1 {
+					// If mpv is less than or equal to 1, it means 'best move' usually.
 					// If the number of candidates is reduced from 5 to 2,
 					// there will be extra information left, so delete
 					egn.FlushResult()

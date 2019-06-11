@@ -32,10 +32,10 @@ type Position struct {
 func (p *Position) ToUSI() ([]byte, error) {
 	// for safety
 	if len(p.Pos) != 9 {
-		return nil, errors.New("length of position.Pos is not 9.")
+		return nil, errors.New("length of position.Pos is not 9")
 	}
 	if len(p.Cap0) != 7 || len(p.Cap1) != 7 {
-		return nil, errors.New("length of position.Cap* is not 7.")
+		return nil, errors.New("length of position.Cap* is not 7")
 	}
 
 	rows := make([]string, 9)
