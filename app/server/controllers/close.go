@@ -18,7 +18,7 @@ import (
 func Close(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
 		name := c.QueryParam(ParamEngineName)
-		egn, ok := sbc.Engines[name]
+		egn, ok := sbc.GetEngine(name)
 
 		if !ok {
 			return c.NoContent(http.StatusNotFound)
@@ -39,7 +39,7 @@ func Close(sbc *context.Context) func(echo.Context) error {
 }
 
 func closeEngine(c *context.Context, e *engine.Engine) error {
-	if e.State == engine.NotConnected {
+	if e.State.Get() == engine.NotConnected {
 		return nil
 	}
 

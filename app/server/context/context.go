@@ -5,6 +5,8 @@
 package context
 
 import (
+	"sync"
+
 	"github.com/murosan/shogi-board-server/app/config"
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/logger"
@@ -13,6 +15,7 @@ import (
 // Context represents shogi-board-server.
 // It holds entities, modules.
 type Context struct {
+	sync.RWMutex
 	Logger  logger.Logger
 	Config  *config.Config
 	Engines map[string]*engine.Engine
@@ -27,10 +30,17 @@ func New(logger logger.Logger, config *config.Config) *Context {
 	}
 }
 
-// EngineList returns list of the shogi engine connected.
-func (c *Context) EngineList() (e []*engine.Engine) {
-	for _, v := range c.Engines {
-		e = append(e, v)
-	}
-	return
+// SetEngine set the engine to Engines
+func (c *Context) SetEngine(name string, e *engine.Engine) {
+	c.Lock()
+	c.Engines[name] = e
+	c.Unlock()
+}
+
+// GetEngine find a engine from the given key and returns it.
+func (c *Context) GetEngine(name string) (*engine.Engine, bool) {
+	c.RLock()
+	e, ok := c.Engines[name]
+	c.RUnlock()
+	return e, ok
 }

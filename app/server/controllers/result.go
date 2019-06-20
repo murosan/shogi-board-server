@@ -12,7 +12,7 @@ import (
 func GetResult(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
 		name := c.QueryParam(ParamEngineName)
-		egn, ok := sbc.Engines[name]
+		egn, ok := sbc.GetEngine(name)
 
 		// engine was not found
 		if !ok {
@@ -25,8 +25,8 @@ func GetResult(sbc *context.Context) func(echo.Context) error {
 			zap.String("egn.Name", egn.Name),
 		)
 
-		sbc.Logger.Info("[GetResult]", zap.Any("result", egn.Result))
-
-		return c.JSON(http.StatusOK, egn.Result)
+		res := egn.Result.GetAll()
+		sbc.Logger.Info("[GetResult]", zap.Any("result", res))
+		return c.JSON(http.StatusOK, res)
 	}
 }

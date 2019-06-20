@@ -16,7 +16,7 @@ import (
 func SetPosition(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
 		name := c.QueryParam(ParamEngineName)
-		egn, ok := sbc.Engines[name]
+		egn, ok := sbc.GetEngine(name)
 
 		// engine was not found
 		if !ok {
@@ -45,14 +45,14 @@ func SetPosition(sbc *context.Context) func(echo.Context) error {
 		sbc.Logger.Info("[SetPosition]", zap.ByteString("usi", usipos))
 
 		// exec stop if thinking
-		isThinking := egn.State == engine.Thinking
+		isThinking := egn.State.Get() == engine.Thinking
 		if isThinking {
 			if err := egn.Cmd.Write(usi.Stop); err != nil {
 				err2 := errors.Wrap(err, "failed to stop")
 				sbc.Logger.Error("[SetPosition]", zap.Error(err2))
 				return c.NoContent(http.StatusInternalServerError)
 			}
-			egn.State = engine.StandBy
+			egn.State.Set(engine.StandBy)
 		}
 
 		if err := egn.Cmd.Write(usipos); err != nil {
@@ -63,7 +63,7 @@ func SetPosition(sbc *context.Context) func(echo.Context) error {
 			return c.NoContent(http.StatusInternalServerError)
 		}
 
-		egn.FlushResult()
+		egn.Result.Flush()
 
 		// start thinking if isThinking is true
 		if isThinking {

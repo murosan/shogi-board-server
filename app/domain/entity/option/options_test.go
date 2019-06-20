@@ -31,24 +31,13 @@ var (
 )
 
 func TestOptions_Push(t *testing.T) {
-	opts := &Options{
-		Buttons: make(map[string]*Button),
-		Checks:  make(map[string]*Check),
-		Ranges:  make(map[string]*Range),
-		Selects: make(map[string]*Select),
-		Texts:   make(map[string]*Text),
-	}
+	opts := NewOptions()
 
-	for i, opt := range []Option{b, c, r, s, txt} {
-		if err := opts.Push(opt); err != nil {
-			t.Errorf(`
-[app > domain > entity > engine > Options.Push]
-Index:    %d
-Expected: nil
-Actual:   %v 
-`, i, err)
-		}
-	}
+	opts.PutButton(b)
+	opts.PutCheck(c)
+	opts.PutRange(r)
+	opts.PutSelect(s)
+	opts.PutText(txt)
 
 	if !reflect.DeepEqual(opts, hasValue) {
 		t.Errorf(`
@@ -57,17 +46,4 @@ Expected: %v
 Actual:   %v
 `, hasValue, opts)
 	}
-
-	someOpt := &someOption{}
-	if err := opts.Push(someOpt); err == nil {
-		t.Errorf(`
-[app > domain > entity > engine > Options.Push]
-Expected error, but got nil
-`)
-	}
 }
-
-type someOption struct{}
-
-// ToUSI
-func (s *someOption) ToUSI() string { return "" }

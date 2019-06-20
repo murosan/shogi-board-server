@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/option"
@@ -27,6 +28,8 @@ var (
 
 // Engine represents shogi engine model.
 type Engine struct {
+	sync.Mutex
+
 	// The engine's key name. The key of the engine's executable path
 	// in configuration file will be used. The key must be unique.
 	Key string
@@ -41,10 +44,10 @@ type Engine struct {
 	Options *option.Options
 
 	// Engine state.
-	State State
+	State *State
 
 	// Thought result of the engine.
-	Result usi.Result
+	Result *usi.Result
 
 	// Shogi engine external command. The path written in
 	// app config is used. It must be executable.
@@ -61,21 +64,15 @@ type Engine struct {
 func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 	// first, initialize with nil values
 	engine := &Engine{
-		Key:    key,
-		Name:   "",
-		Author: "",
-		Options: &option.Options{
-			Buttons: make(map[string]*option.Button),
-			Checks:  make(map[string]*option.Check),
-			Ranges:  make(map[string]*option.Range),
-			Selects: make(map[string]*option.Select),
-			Texts:   make(map[string]*option.Text),
-		},
-		State:  NotConnected,
-		Result: usi.NewResult(),
-		Cmd:    cmd,
-		Ch:     make(chan []byte),
-		logger: logger,
+		Key:     key,
+		Name:    "",
+		Author:  "",
+		Options: option.NewOptions(),
+		State:   NewState(),
+		Result:  usi.NewResult(),
+		Cmd:     cmd,
+		Ch:      make(chan []byte),
+		logger:  logger,
 	}
 
 	// exec external command
@@ -84,7 +81,7 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 		return nil, errors.Wrap(err, msg)
 	}
 
-	engine.State = Connected
+	engine.State.Set(Connected)
 
 	// output receiver
 	go engine.catchOutput(engine.Ch)
@@ -112,11 +109,6 @@ func New(key string, cmd *os.Cmd, logger logger.Logger) (*Engine, error) {
 
 	logger.Info("[engine.New]", zap.String("finished", ""))
 	return engine, nil
-}
-
-// FlushResult resets result
-func (e *Engine) FlushResult() {
-	e.Result = usi.NewResult()
 }
 
 // Close closes the connection with the shogi engine.
@@ -180,7 +172,7 @@ func (e *Engine) waitFor(ch chan []byte, exitWord []byte, parseOpt bool) error {
 	for {
 		select {
 		case b := <-ch:
-			s := string(b) // TODO?: is not good for performance
+			s := string(b)
 
 			// set name if s starts with 'id name '
 			if parseOpt && strings.HasPrefix(s, engineNamePrefix) {
@@ -205,7 +197,7 @@ func (e *Engine) waitFor(ch chan []byte, exitWord []byte, parseOpt bool) error {
 						e.logger.Error("[waitFor] parse button", zap.Error(err))
 					}
 					e.logger.Info("[waitFor]", zap.Any("button", btn))
-					e.Options.Buttons[btn.Name] = btn
+					e.Options.PutButton(btn)
 
 				case strings.Contains(s, parserUSI.TypeCheck):
 					chk, err := parserUSI.ParseCheck(s)
@@ -213,7 +205,7 @@ func (e *Engine) waitFor(ch chan []byte, exitWord []byte, parseOpt bool) error {
 						e.logger.Error("[waitFor] parse check", zap.Error(err))
 					}
 					e.logger.Info("[waitFor]", zap.Any("check", chk))
-					e.Options.Checks[chk.Name] = chk
+					e.Options.PutCheck(chk)
 
 				case strings.Contains(s, parserUSI.TypeRange):
 					rng, err := parserUSI.ParseRange(s)
@@ -221,7 +213,7 @@ func (e *Engine) waitFor(ch chan []byte, exitWord []byte, parseOpt bool) error {
 						e.logger.Error("[waitFor] parse range", zap.Error(err))
 					}
 					e.logger.Info("[waitFor]", zap.Any("range", rng))
-					e.Options.Ranges[rng.Name] = rng
+					e.Options.PutRange(rng)
 
 				case strings.Contains(s, parserUSI.TypeSelect):
 					sel, err := parserUSI.ParseSelect(s)
@@ -229,7 +221,7 @@ func (e *Engine) waitFor(ch chan []byte, exitWord []byte, parseOpt bool) error {
 						e.logger.Error("[waitFor] parse select", zap.Error(err))
 					}
 					e.logger.Info("[waitFor]", zap.Any("select", sel))
-					e.Options.Selects[sel.Name] = sel
+					e.Options.PutSelect(sel)
 
 				case strings.Contains(s, parserUSI.TypeString):
 					txt, err := parserUSI.ParseTextFromStringType(s)
@@ -237,7 +229,7 @@ func (e *Engine) waitFor(ch chan []byte, exitWord []byte, parseOpt bool) error {
 						e.logger.Error("[waitFor] parse text", zap.Error(err))
 					}
 					e.logger.Info("[waitFor]", zap.Any("txt from string", txt))
-					e.Options.Texts[txt.Name] = txt
+					e.Options.PutText(txt)
 
 				case strings.Contains(s, parserUSI.TypeFilename):
 					txt, err := parserUSI.ParseTextFromFilenameType(s)
@@ -245,7 +237,7 @@ func (e *Engine) waitFor(ch chan []byte, exitWord []byte, parseOpt bool) error {
 						e.logger.Error("[waitFor] parse text", zap.Error(err))
 					}
 					e.logger.Info("[waitFor]", zap.Any("txt from filename", txt))
-					e.Options.Texts[txt.Name] = txt
+					e.Options.PutText(txt)
 				}
 
 			}

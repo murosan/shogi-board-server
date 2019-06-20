@@ -14,7 +14,7 @@ import (
 func Stop(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
 		name := c.QueryParam(ParamEngineName)
-		egn, ok := sbc.Engines[name]
+		egn, ok := sbc.GetEngine(name)
 
 		// engine was not found
 		if !ok {
@@ -28,7 +28,7 @@ func Stop(sbc *context.Context) func(echo.Context) error {
 		)
 
 		// engine is not thinking. nothing to do
-		if egn.State != engine.Thinking {
+		if egn.State.Get() != engine.Thinking {
 			sbc.Logger.Info("[Stop]", zap.Any("nothing to do", egn.State))
 			return c.NoContent(http.StatusOK)
 		}
@@ -40,8 +40,8 @@ func Stop(sbc *context.Context) func(echo.Context) error {
 		}
 
 		// set state and reset thought result.
-		egn.State = engine.StandBy
-		egn.FlushResult()
+		egn.State.Set(engine.StandBy)
+		egn.Result.Flush()
 
 		return c.NoContent(http.StatusOK)
 	}

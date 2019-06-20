@@ -58,7 +58,7 @@ func Connect(sbc *context.Context) func(echo.Context) error {
 		}
 
 		// set the initialized engine to Context
-		sbc.Engines[name] = egn
+		sbc.SetEngine(name, egn)
 
 		return c.NoContent(http.StatusOK)
 	}

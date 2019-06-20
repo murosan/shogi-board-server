@@ -181,7 +181,7 @@ func UpdateText(sbc *context.Context) func(echo.Context) error {
 		}
 
 		name := c.QueryParam(ParamEngineName)
-		egn, ok := sbc.Engines[name]
+		egn, ok := sbc.GetEngine(name)
 
 		if !ok {
 			return c.NoContent(http.StatusNotFound)

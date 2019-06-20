@@ -16,7 +16,7 @@ import (
 func Start(sbc *context.Context) func(echo.Context) error {
 	return func(c echo.Context) error {
 		name := c.QueryParam(ParamEngineName)
-		egn, ok := sbc.Engines[name]
+		egn, ok := sbc.GetEngine(name)
 
 		// engine was not found
 		if !ok {
@@ -39,18 +39,18 @@ func Start(sbc *context.Context) func(echo.Context) error {
 }
 
 func start(sbc *context.Context, egn *engine.Engine) error {
-	if egn.State == engine.Thinking {
+	if egn.State.Get() == engine.Thinking {
 		sbc.Logger.Info("[start]", zap.String("nothing to do", ""))
 		return nil
 	}
 
 	// if state is connected, execute 'usinewgame'
-	if egn.State == engine.Connected {
+	if egn.State.Get() == engine.Connected {
 		if err := egn.Cmd.Write(usi.NewGame); err != nil {
 			sbc.Logger.Error("[start] failed to start", zap.Error(err))
 			return err
 		}
-		egn.State = engine.StandBy
+		egn.State.Set(engine.StandBy)
 	}
 
 	// start thinking
@@ -82,15 +82,15 @@ func start(sbc *context.Context, egn *engine.Engine) error {
 					// If mpv is less than or equal to 1, it means 'best move' usually.
 					// If the number of candidates is reduced from 5 to 2,
 					// there will be extra information left, so delete
-					egn.FlushResult()
+					egn.Result.Flush()
 				}
 				if len(i.Moves) != 0 {
-					egn.Result[mpv] = i
+					egn.Result.Set(mpv, i)
 				}
 			}
 		}
 	}()
 
-	egn.State = engine.Thinking
+	egn.State.Set(engine.Thinking)
 	return nil
 }
