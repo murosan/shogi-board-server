@@ -1,4 +1,4 @@
-FROM golang:1.11
+FROM golang:1.12
 
 ENV GO111MODULE=on TZ=Asia/Tokyo
 
@@ -8,7 +8,7 @@ COPY . .
 
 CMD go run main.go \
       -port 8081 \
-      -appConfig ./config/app_docker.yml \
-      -logConfig ./config/log_docker.yml
+      -app_config ./config/app.docker.yml \
+      -log_config ./config/log.docker.yml
 
 EXPOSE 8081

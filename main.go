@@ -19,12 +19,12 @@ import (
 var (
 	port          = flag.String("port", "8080", "http server port")
 	appConfigPath = flag.String(
-		"appConfig",
+		"app_config",
 		"./config/app.yml",
 		"application config path",
 	)
 	logConfigPath = flag.String(
-		"logConfig",
+		"log_config",
 		"./config/log.yml",
 		"log config path",
 	)
