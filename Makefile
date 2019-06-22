@@ -30,3 +30,6 @@ check:
 # clean up go modules
 clean_modules:
 	go mod tidy
+
+release-mac:
+	./bin/release.sh

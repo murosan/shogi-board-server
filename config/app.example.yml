@@ -1,8 +1,10 @@
-# 各将棋エンジンの実行ファイルの場所
+# 設定ファイル
 
+# 将棋エンジンの実行ファイルの場所
 engines:
+  # 名前: 実行パスを絶対パスで記入
   com: /path/to/your/engine/bin
-  # 追加するときは ↓ のように並べていく
-  # com_name2: /path/exe
-  # com_name3: /path/exe2
-  # name4: /usr/local/bin/engine
+  # 追加するときは以下のように並べていく
+  # com_name2: /path/to/exe
+  # com_name3: /path/to/exe2
+  # name4: /Users/murosan/shogi/engines/bin/engine

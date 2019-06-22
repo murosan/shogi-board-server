@@ -6,4 +6,5 @@
 !/config/log.yml
 !/config/log.docker.yml
 /engines
+/releases
 .envrc
