@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"gopkg.in/yaml.v2"
 
 	smap "github.com/murosan/goutils/map/strings"
@@ -77,7 +78,8 @@ func New(appPath, logPath string) *Config {
 	} else {
 		log = zap.NewProductionConfig()
 		log.OutputPaths = []string{"stdout"}
-		log.EncoderConfig.TimeKey = "iso8601"
+		log.EncoderConfig.TimeKey = "time"
+		log.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	}
 
 	if len(app.Engines) == 0 {

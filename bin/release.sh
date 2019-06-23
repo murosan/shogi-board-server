@@ -2,16 +2,35 @@
 
 read -p "Version (ex. 1.0.0) > " VERSION
 
-DIR="./releases/sbserver-${VERSION}-macOS"
+PROJECT_ROOT=$(cd $(dirname $0)/..; pwd)
+RELEASE=$PROJECT_ROOT/releases
 
-rm -rf ${DIR} ${DIR}.zip
-mkdir -p ${DIR}
+rm -rf $RELEASE
+mkdir $RELEASE
 
-go build -o ${DIR}/sbserver-${VERSION}
+MAC_DIR="sbserver-$VERSION-macOS"
+WINDOWS_DIR="sbserver-$VERSION-Windows-x64"
 
-cp ./bin/start.sh ${DIR}/start
-cp ./config/app.example.yml ${DIR}/app.yml
+export GOARCH=amd64
 
-zip -9 -r ${DIR}.zip ${DIR}
+function build() {
+  local dir=$1
+  local conf_dir="$RELEASE/$dir/config"
+  local bin_name="sbserver"
+  if [[ $dir = $WINDOWS_DIR ]]; then
+    bin_name+=".exe"
+  fi
 
-rm -rf ${DIR}
+  cd $PROJECT_ROOT
+
+  mkdir $RELEASE/$dir $conf_dir
+  go build -o $RELEASE/$dir/$bin_name
+  cp ./config/app.example.yml $conf_dir/app.config.yml
+
+  cd $RELEASE
+  tar cvzf $dir.tar.gz $dir
+  rm -rf $dir
+}
+
+GOOS=darwin build $MAC_DIR
+GOOS=windows build $WINDOWS_DIR

@@ -31,5 +31,5 @@ check:
 clean_modules:
 	go mod tidy
 
-release-mac:
+release:
 	./bin/release.sh

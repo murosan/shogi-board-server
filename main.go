@@ -20,7 +20,7 @@ var (
 	port          = flag.String("port", "8080", "http server port")
 	appConfigPath = flag.String(
 		"app_config",
-		"./config/app.yml",
+		"./config/app.config.yml",
 		"application config path",
 	)
 	logConfigPath = flag.String("log_config", "", "log config path")
