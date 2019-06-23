@@ -9,7 +9,9 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/murosan/shogi-board-server/app/server/controllers"
 	"github.com/murosan/shogi-board-server/app/services/config"
@@ -21,14 +23,19 @@ var (
 	port          = flag.String("port", "8080", "http server port")
 	appConfigPath = flag.String(
 		"app_config",
-		path.Join("config", "app.config.yml"),
-		"application config path",
+		"",
+		"application config path. default=config/app.config.yml",
 	)
-	logConfigPath = flag.String("log_config", "", "log config path")
+	logConfigPath = flag.String("log_config", "", "log config path. optional")
 )
 
 func main() {
 	flag.Parse()
+
+	if *appConfigPath == "" {
+		acp := filepath.Join(path.Dir(os.Args[0]), "config", "app.config.yml")
+		appConfigPath = &acp
+	}
 
 	config.Init(*appConfigPath, *logConfigPath)
 	logger.Init(config.Use())
