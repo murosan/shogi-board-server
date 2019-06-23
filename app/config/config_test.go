@@ -25,8 +25,17 @@ func TestNew(t *testing.T) {
 		logPath string
 		app     App
 	}{
-		{path.Join(pwd, dataDir, "app.config.yml"),
+		{
+			path.Join(pwd, dataDir, "app.config.yml"),
 			path.Join(pwd, dataDir, "log.config.yml"),
+			App{
+				Engines:     map[string]string{"com": "/home/user/path/to/engine/bin"},
+				EngineNames: []string{"com"},
+			},
+		},
+		{
+			path.Join(pwd, dataDir, "app.config.yml"),
+			"",
 			App{
 				Engines:     map[string]string{"com": "/home/user/path/to/engine/bin"},
 				EngineNames: []string{"com"},

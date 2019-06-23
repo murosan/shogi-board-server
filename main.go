@@ -23,11 +23,7 @@ var (
 		"./config/app.yml",
 		"application config path",
 	)
-	logConfigPath = flag.String(
-		"log_config",
-		"./config/log.yml",
-		"log config path",
-	)
+	logConfigPath = flag.String("log_config", "", "log config path")
 )
 
 func main() {

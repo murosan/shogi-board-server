@@ -58,20 +58,26 @@ func New(appPath, logPath string) *Config {
 		panic(err)
 	}
 
-	// load log config path as byte array
-	l, err := ioutil.ReadFile(logPath)
-	if err != nil {
-		panic(err)
-	}
-
 	// convert YAML to App
 	if err := yaml.Unmarshal(a, &app); err != nil {
 		panic(err)
 	}
 
-	// convert YAML to zap.Config
-	if err := yaml.Unmarshal(l, &log); err != nil {
-		panic(err)
+	if logPath != "" {
+		// load log config path as byte array
+		l, err := ioutil.ReadFile(logPath)
+		if err != nil {
+			panic(err)
+		}
+
+		// convert YAML to zap.Config
+		if err := yaml.Unmarshal(l, &log); err != nil {
+			panic(err)
+		}
+	} else {
+		log = zap.NewProductionConfig()
+		log.OutputPaths = []string{"stdout"}
+		log.EncoderConfig.TimeKey = "iso8601"
 	}
 
 	if len(app.Engines) == 0 {
