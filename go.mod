@@ -13,7 +13,7 @@ require (
 	github.com/murosan/goutils v0.0.0-20190506160604-a2da7259cdd8
 	github.com/oxequa/interact v0.0.0-20171114182912-f8fb5795b5d7 // indirect
 	github.com/oxequa/realize v2.0.2+incompatible
-	github.com/pkg/errors v0.9.1
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rakyll/gotest v0.0.0-20180125184505-86f0749cd8cc
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
