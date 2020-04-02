@@ -4,49 +4,41 @@
 
 package engine
 
-import "sync"
-
-// State represents the state of shogi engine or connection.
-type State struct {
-	sync.Mutex
-	current StateID
-}
-
-// NewState returns new state
-func NewState() *State {
-	return &State{current: NotConnected}
-}
-
-// Set changes current state id
-func (s *State) Set(id StateID) {
-	s.Lock()
-	s.current = id
-	s.Unlock()
-}
-
-// Get returns current state id
-func (s *State) Get() StateID {
-	s.Lock()
-	defer s.Unlock()
-	return s.current
-}
-
-// StateID is a alias of int type, and the values of this type
-// represents the state of shogi engine.
-type StateID int
+// State represents the state of shogi engine.
+type State int
 
 const (
 	// NotConnected is the state before connecting to a shogi engine.
-	NotConnected StateID = 1
+	NotConnected State = 1 << iota
 
 	// Connected is the state after connected to a shogi engine,
-	// and before executing usinewgame(USI command).
-	Connected StateID = 2
+	// and before executing 'usi' (USI command).
+	// It also means the engine has never thought yet.
+	Connected
 
-	// StandBy is the state after executing usinewgame(USI command),
-	// and the shogi engine is not thinking.
-	StandBy StateID = 3
+	// StandBy is the state the engine is not thinking.
+	// It means the engine has thought over once, and is stopped thinking now.
+	StandBy
 
 	// Thinking is the state the connected shogi engine is thinking.
-	Thinking StateID = 4
+	Thinking
 )
+
+func (s State) String() string {
+	switch s {
+	case NotConnected:
+		return "State(NotConnected)"
+	case Connected:
+		return "State(Connected)"
+	case StandBy:
+		return "State(StandBy)"
+	case Thinking:
+		return "State(Thinking)"
+	default:
+		return "State(Unknown)"
+	}
+}
+
+func (s State) isValid() bool {
+	return NotConnected <= s && s <= Thinking
+}

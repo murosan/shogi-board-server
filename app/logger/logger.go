@@ -8,7 +8,7 @@ package logger
 import (
 	"go.uber.org/zap"
 
-	"github.com/murosan/shogi-board-server/app/config"
+	"github.com/murosan/shogi-board-server/app/domain/config"
 )
 
 // Logger is a interface of logger.
