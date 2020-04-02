@@ -15,6 +15,7 @@ var (
 	Stores = stores{
 		Engine:     store.NewEngineStore(),
 		EngineInfo: store.NewEngineInfoStore(),
+		Game:       store.NewGameStore(),
 	}
 
 	Services services
@@ -24,6 +25,7 @@ type (
 	stores struct {
 		Engine     store.EngineStore
 		EngineInfo store.EngineInfoStore
+		Game       store.GameStore
 	}
 
 	services struct {
@@ -40,6 +42,7 @@ func Initialize(appConfigPath, logConfigPath string) {
 		Engine: service.NewEngineService(
 			Stores.Engine,
 			Stores.EngineInfo,
+			Stores.Game,
 			Config,
 			Logger,
 			infrastructure.NewCmd,

@@ -35,6 +35,7 @@ func Initialize(
 		{path: "/options/update/select", handler: update.NewSelectHandler(es, logger)},
 		{path: "/options/update/text", handler: update.NewTextHandler(es, logger)},
 		{path: "/result/get", handler: result.NewGetHandler(es, logger)},
+		{path: "/position/get", handler: position.NewGetHandler(es, logger)},
 		{path: "/position/set", handler: position.NewSetHandler(es, logger)},
 	}
 

@@ -26,6 +26,7 @@ type EngineService interface {
 	UpdateRangeOption(engine.ID, *engine.Range) error
 	UpdateSelectOption(engine.ID, *engine.Select) error
 	UpdateTextOption(engine.ID, *engine.Text) error
+	GetCurrentPosition(engine.ID) (*shogi.Position, bool)
 	UpdatePosition(engine.ID, *shogi.Position) error
 	GetResult(engine.ID) usi.Result
 }
@@ -34,6 +35,7 @@ type EngineService interface {
 func NewEngineService(
 	engineStore store.EngineStore,
 	engineInfoStore store.EngineInfoStore,
+	gameStore store.GameStore,
 	config *config.Config,
 	logger logger.Logger,
 	newCmd func(string) infrastructure.Cmd,
@@ -42,6 +44,7 @@ func NewEngineService(
 	return &engineService{
 		engineStore:     engineStore,
 		engineInfoStore: engineInfoStore,
+		gameStore:       gameStore,
 		config:          config,
 		logger:          logger,
 		newCmd:          newCmd,
@@ -52,8 +55,10 @@ func NewEngineService(
 type engineService struct {
 	engineStore     store.EngineStore
 	engineInfoStore store.EngineInfoStore
-	config          *config.Config
-	logger          logger.Logger
+	gameStore       store.GameStore
+
+	config *config.Config
+	logger logger.Logger
 
 	newCmd       func(string) infrastructure.Cmd
 	newConnector func(infrastructure.Cmd, logger.Logger) infrastructure.Connector
@@ -154,9 +159,17 @@ func (service *engineService) UpdateTextOption(id engine.ID, txt *engine.Text) e
 	})
 }
 
+func (service *engineService) GetCurrentPosition(id engine.ID) (*shogi.Position, bool) {
+	return service.gameStore.FindPosition(id)
+}
+
 func (service *engineService) UpdatePosition(id engine.ID, pos *shogi.Position) error {
-	return service.withControl(id, func(service EngineControlService) error {
-		return service.UpdatePosition(pos)
+	return service.withControl(id, func(ecs EngineControlService) error {
+		if err := ecs.UpdatePosition(pos); err != nil {
+			return err
+		}
+		service.gameStore.UpsertPosition(id, pos)
+		return nil
 	})
 }
 
