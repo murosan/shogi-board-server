@@ -1,6 +1,7 @@
 package position
 
 import (
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -15,6 +16,22 @@ import (
 	"github.com/murosan/shogi-board-server/app/server/handler/handlers"
 )
 
+var (
+	queryKeys = struct {
+		format string
+	}{
+		format: "format",
+	}
+
+	queryValues = struct {
+		json,
+		sfen string
+	}{
+		json: "json",
+		sfen: "sfen",
+	}
+)
+
 // GetHandler is a handler for getting the current position.
 // Returns NOT_FOUND when the engine does not exists or the game has not started yet.
 type GetHandler struct {
@@ -27,6 +44,11 @@ func NewGetHandler(es service.EngineService, logger logger.Logger) handler.Handl
 }
 
 func (hdr *GetHandler) Func(ctx *handler.Context) error {
+	format := ctx.GetQuery(queryKeys.format)
+	if format == "" {
+		return framework.NewBadRequestError("please specify format query", nil)
+	}
+
 	var pos *shogi.Position
 	var ok bool
 	err := handlers.WithEngineID(ctx, func(id engine.ID) error {
@@ -41,16 +63,27 @@ func (hdr *GetHandler) Func(ctx *handler.Context) error {
 		return err
 	}
 
-	usi, err := convert.Position(pos)
-	if err != nil {
-		hdr.logger.Error("convert", zap.Any("pos", pos), zap.Error(err))
-		return framework.NewInternalServerError("convert position error", err)
+	switch format {
+	case queryValues.json:
+		return ctx.JSON(http.StatusOK, pos)
+	case queryValues.sfen:
+		usi, err := convert.Position(pos)
+		if err != nil {
+			hdr.logger.Error("convert", zap.Any("pos", pos), zap.Error(err))
+			return framework.NewInternalServerError("convert position error", err)
+		}
+		return ctx.Text(http.StatusOK, usi)
+	default:
+		return framework.NewBadRequestError(
+			fmt.Sprintf(
+				"unknown format. got=%s. availables=%s,%s",
+				format,
+				queryValues.json,
+				queryValues.sfen,
+			),
+			nil,
+		)
 	}
-
-	return ctx.JSON(http.StatusOK, posResp{
-		Object: pos,
-		Sfen:   string(usi),
-	})
 }
 
 func (*GetHandler) Description() string {

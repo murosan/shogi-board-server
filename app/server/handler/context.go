@@ -31,4 +31,8 @@ func (ctx *Context) Bind(i interface{}) error { return ctx.ec.Bind(i) }
 
 func (ctx *Context) NoContent(status int) error { return ctx.ec.NoContent(status) }
 
+func (ctx *Context) Text(status int, b []byte) error {
+	return ctx.ec.Blob(status, echo.MIMETextPlainCharsetUTF8, b)
+}
+
 func (ctx *Context) JSON(status int, v interface{}) error { return ctx.ec.JSON(status, v) }
