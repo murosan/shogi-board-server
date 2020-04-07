@@ -8,8 +8,10 @@ package engine
 type State int
 
 const (
+	_ State = iota // ignore zero
+
 	// NotConnected is the state before connecting to a shogi engine.
-	NotConnected State = 1 << iota
+	NotConnected
 
 	// Connected is the state after connected to a shogi engine,
 	// and before executing 'usi' (USI command).
