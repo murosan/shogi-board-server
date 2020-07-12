@@ -93,6 +93,9 @@ func (service *engineService) Connect(id engine.ID) error {
 
 func (service *engineService) Close(id engine.ID) error {
 	return service.withControl(id, func(ecs EngineControlService) error {
+		if err := ecs.Stop(); err != nil {
+			return err
+		}
 		if err := ecs.Close(); err != nil {
 			return err
 		}
