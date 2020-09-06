@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	connectTimeout = time.Second * 10
-	closeTimeout   = time.Second * 10
-	readyTimeout   = time.Second * 10
+	connectTimeout = time.Second * 5
+	closeTimeout   = time.Second * 5
+	readyTimeout   = time.Second * 5
 )
 
 var (
@@ -77,6 +77,7 @@ func (service *engineControlService) Connect() error {
 	if err := service.write(usi.Command.USI); err != nil {
 		return framework.NewInternalServerError("write "+string(usi.Command.USI), err)
 	}
+	done := make(chan struct{})
 
 	err := service.withTimeout(
 		connectTimeout,
@@ -84,6 +85,7 @@ func (service *engineControlService) Connect() error {
 			service.connector.OnReceive(func(b []byte) bool {
 				service.logger.Info("[EngineOutput]", zap.ByteString("value", b))
 				if bytes.Equal(b, usi.Response.OK) {
+					close(done)
 					return false
 				}
 
@@ -166,6 +168,10 @@ func (service *engineControlService) Connect() error {
 
 	if err != nil {
 		return framework.NewInternalServerError("receive "+string(usi.Response.OK), err)
+	}
+
+	if err := service.timeout(done, connectTimeout); err != nil {
+		return framework.NewInternalServerError("connect timeout", err)
 	}
 
 	egn.SetState(engine.Connected)
@@ -355,12 +361,15 @@ func (service *engineControlService) write(bytes []byte) error {
 }
 
 func (service *engineControlService) withTimeout(timeout time.Duration, block func()) error {
-	ch := make(chan interface{}, 1)
+	ch := make(chan struct{}, 1)
 	go func() {
 		block()
-		ch <- struct{}{}
+		close(ch)
 	}()
+	return service.timeout(ch, timeout)
+}
 
+func (service *engineControlService) timeout(ch chan struct{}, timeout time.Duration) error {
 	select {
 	case <-ch:
 		return nil
