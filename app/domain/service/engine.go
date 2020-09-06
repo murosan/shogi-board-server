@@ -1,6 +1,8 @@
 package service
 
 import (
+	"path/filepath"
+
 	"github.com/murosan/shogi-board-server/app/domain/config"
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
@@ -81,6 +83,7 @@ func (service *engineService) Connect(id engine.ID) error {
 
 	egn := engine.New(id, path)
 	cmd := service.newCmd(path)
+	cmd.Chdir(filepath.Dir(path))
 	conn := service.newConnector(cmd, service.logger)
 	if err := service.engineStore.Insert(egn, conn); err != nil {
 		return framework.NewInternalServerError("insert new engine", err)
