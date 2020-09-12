@@ -14,7 +14,7 @@ const (
 	NotConnected
 
 	// Connected is the state after connected to a shogi engine,
-	// and before executing 'usi' (USI command).
+	// and after executing 'isready' (USI command).
 	// It also means the engine has never thought yet.
 	Connected
 

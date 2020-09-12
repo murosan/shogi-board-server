@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
@@ -19,6 +20,7 @@ type Cmd interface {
 	Start() error
 	Wait(timeout time.Duration) error
 	Scanner() *bufio.Scanner
+	Chdir(dir string)
 }
 
 type cmd struct {
@@ -71,3 +73,5 @@ func (c *cmd) Wait(timeout time.Duration) error {
 func (c *cmd) Write(b []byte) (int, error) { return c.in.Write(b) }
 
 func (c *cmd) Scanner() *bufio.Scanner { return c.scanner }
+
+func (c *cmd) Chdir(dir string) { c.cmd.Dir = filepath.Clean(dir) }

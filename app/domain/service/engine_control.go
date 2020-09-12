@@ -77,101 +77,107 @@ func (service *engineControlService) Connect() error {
 	if err := service.write(usi.Command.USI); err != nil {
 		return framework.NewInternalServerError("write "+string(usi.Command.USI), err)
 	}
+
 	done := make(chan struct{})
 
-	err := service.withTimeout(
-		connectTimeout,
-		func() {
-			service.connector.OnReceive(func(b []byte) bool {
-				service.logger.Info("[EngineOutput]", zap.ByteString("value", b))
-				if bytes.Equal(b, usi.Response.OK) {
-					close(done)
-					return false
+	go service.connector.OnReceive(func(b []byte) bool {
+		service.logger.Info("[EngineOutput]", zap.ByteString("value", b))
+		if bytes.Equal(b, usi.Response.OK) {
+			done <- struct{}{}
+			return true
+		}
+
+		if bytes.Equal(b, usi.Response.ReadyOK) {
+			close(done)
+			return false
+		}
+
+		// set name if s starts with 'id name '
+		if bytes.HasPrefix(b, namePrefix) {
+			bn := bytes.TrimLeft(b, string(namePrefix))
+			sn := string(bytes.TrimSpace(bn))
+			egn.SetName(sn)
+			service.logger.Info("[EngineName]", zap.String("value", sn))
+			return true
+		}
+
+		// set author if s starts with 'id author '
+		if bytes.HasPrefix(b, authorPrefix) {
+			ba := bytes.TrimLeft(b, string(authorPrefix))
+			sa := string(bytes.TrimSpace(ba))
+			egn.SetAuthor(sa)
+			service.logger.Info("[EngineAuthor]", zap.String("value", sa))
+			return true
+		}
+
+		// parse option
+		if bytes.HasPrefix(b, optionPrefix) {
+			s := string(b)
+			switch {
+			case strings.Contains(s, parse.TypeButton):
+				opt, err := parse.Button(s)
+				if err != nil {
+					service.logger.Error("parse button", zap.Error(err))
 				}
+				service.logger.Info("parsed button", zap.Any("value", opt))
+				egn.GetOptions().PutButton(opt)
 
-				// set name if s starts with 'id name '
-				if bytes.HasPrefix(b, namePrefix) {
-					bn := bytes.TrimLeft(b, string(namePrefix))
-					sn := string(bytes.TrimSpace(bn))
-					egn.SetName(sn)
-					service.logger.Info("[EngineName]", zap.String("value", sn))
-					return true
+			case strings.Contains(s, parse.TypeCheck):
+				opt, err := parse.Check(s)
+				if err != nil {
+					service.logger.Error("parse check", zap.Error(err))
 				}
+				service.logger.Info("parsed check", zap.Any("value", opt))
+				egn.GetOptions().PutCheck(opt)
 
-				// set author if s starts with 'id author '
-				if bytes.HasPrefix(b, authorPrefix) {
-					ba := bytes.TrimLeft(b, string(authorPrefix))
-					sa := string(bytes.TrimSpace(ba))
-					egn.SetAuthor(sa)
-					service.logger.Info("[EngineAuthor]", zap.String("value", sa))
-					return true
+			case strings.Contains(s, parse.TypeRange):
+				opt, err := parse.Range(s)
+				if err != nil {
+					service.logger.Error("parse range", zap.Error(err))
 				}
+				service.logger.Info("parsed range", zap.Any("value", opt))
+				egn.GetOptions().PutRange(opt)
 
-				// parse option
-				if bytes.HasPrefix(b, optionPrefix) {
-					s := string(b)
-					switch {
-					case strings.Contains(s, parse.TypeButton):
-						opt, err := parse.Button(s)
-						if err != nil {
-							service.logger.Error("parse button", zap.Error(err))
-						}
-						service.logger.Info("parsed button", zap.Any("value", opt))
-						egn.GetOptions().PutButton(opt)
-
-					case strings.Contains(s, parse.TypeCheck):
-						opt, err := parse.Check(s)
-						if err != nil {
-							service.logger.Error("parse check", zap.Error(err))
-						}
-						service.logger.Info("parsed check", zap.Any("value", opt))
-						egn.GetOptions().PutCheck(opt)
-
-					case strings.Contains(s, parse.TypeRange):
-						opt, err := parse.Range(s)
-						if err != nil {
-							service.logger.Error("parse range", zap.Error(err))
-						}
-						service.logger.Info("parsed range", zap.Any("value", opt))
-						egn.GetOptions().PutRange(opt)
-
-					case strings.Contains(s, parse.TypeSelect):
-						opt, err := parse.Select(s)
-						if err != nil {
-							service.logger.Error("parse select", zap.Error(err))
-						}
-						service.logger.Info("parsed select", zap.Any("value", opt))
-						egn.GetOptions().PutSelect(opt)
-
-					case strings.Contains(s, parse.TypeString):
-						opt, err := parse.TextFromStringType(s)
-						if err != nil {
-							service.logger.Error("parse string", zap.Error(err))
-						}
-						service.logger.Info("parsed string", zap.Any("value", opt))
-						egn.GetOptions().PutText(opt)
-
-					case strings.Contains(s, parse.TypeFilename):
-						opt, err := parse.TextFromFilenameType(s)
-						if err != nil {
-							service.logger.Error("parse filename", zap.Error(err))
-						}
-						service.logger.Info("parsed filename", zap.Any("value", opt))
-						egn.GetOptions().PutText(opt)
-					}
+			case strings.Contains(s, parse.TypeSelect):
+				opt, err := parse.Select(s)
+				if err != nil {
+					service.logger.Error("parse select", zap.Error(err))
 				}
+				service.logger.Info("parsed select", zap.Any("value", opt))
+				egn.GetOptions().PutSelect(opt)
 
-				return true
-			})
-		},
-	)
+			case strings.Contains(s, parse.TypeString):
+				opt, err := parse.TextFromStringType(s)
+				if err != nil {
+					service.logger.Error("parse string", zap.Error(err))
+				}
+				service.logger.Info("parsed string", zap.Any("value", opt))
+				egn.GetOptions().PutText(opt)
 
-	if err != nil {
-		return framework.NewInternalServerError("receive "+string(usi.Response.OK), err)
-	}
+			case strings.Contains(s, parse.TypeFilename):
+				opt, err := parse.TextFromFilenameType(s)
+				if err != nil {
+					service.logger.Error("parse filename", zap.Error(err))
+				}
+				service.logger.Info("parsed filename", zap.Any("value", opt))
+				egn.GetOptions().PutText(opt)
+			}
+		}
+
+		return true
+	})
 
 	if err := service.timeout(done, connectTimeout); err != nil {
-		return framework.NewInternalServerError("connect timeout", err)
+		close(done)
+		return framework.NewInternalServerError("connect timeout. failed to receive usiok", err)
+	}
+
+	if err := service.write(usi.Command.IsReady); err != nil {
+		return framework.NewInternalServerError("write "+string(usi.Command.IsReady), err)
+	}
+
+	if err := service.timeout(done, readyTimeout); err != nil {
+		return framework.NewInternalServerError("connect timeout. failed to receive readyok", err)
 	}
 
 	egn.SetState(engine.Connected)
@@ -210,23 +216,6 @@ func (service *engineControlService) Start() error {
 	}
 
 	if egn.GetState() == engine.Connected {
-		if err := service.write(usi.Command.IsReady); err != nil {
-			return framework.NewInternalServerError("write "+string(usi.Command.IsReady), err)
-		}
-
-		res := usi.Response.ReadyOK
-		err := service.withTimeout(
-			readyTimeout,
-			func() {
-				f := func(b []byte) bool { return !bytes.Equal(b, res) }
-				service.connector.OnReceive(f)
-			},
-		)
-
-		if err != nil {
-			return framework.NewInternalServerError("receive "+string(res), err)
-		}
-
 		if err := service.write(usi.Command.NewGame); err != nil {
 			return framework.NewInternalServerError("write "+string(usi.Command.NewGame), err)
 		}
@@ -272,11 +261,11 @@ func (service *engineControlService) Start() error {
 		})
 	}()
 
+	egn.SetState(engine.Thinking)
 	if err := service.write(usi.Command.GoInf); err != nil {
 		return framework.NewInternalServerError("write "+string(usi.Command.GoInf), nil)
 	}
 
-	egn.SetState(engine.Thinking)
 	return nil
 }
 
