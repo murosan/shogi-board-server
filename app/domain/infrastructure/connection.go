@@ -23,6 +23,7 @@ type connector struct {
 	cmd      Cmd
 	logger   logger.Logger
 	receiver chan []byte
+	isClosed bool
 }
 
 // NewConnector returns new Connector.
@@ -49,11 +50,25 @@ func (conn *connector) Connect() error {
 func (conn *connector) Close(timeout time.Duration) error {
 	conn.Lock()
 	defer conn.Unlock()
+
+	if conn.isClosed {
+		return nil
+	}
+	conn.isClosed = true
+
 	return conn.cmd.Wait(timeout)
 }
 
 func (conn *connector) OnReceive(block func([]byte) bool) {
-	for block(<-conn.receiver) {
+	for {
+		b, ok := <-conn.receiver
+		if !ok {
+			break // channel is closed
+		}
+
+		if !block(b) {
+			break
+		}
 	}
 }
 
@@ -72,5 +87,9 @@ func (conn *connector) receive() {
 	if err := sc.Err(); err != nil {
 		conn.logger.Warn("connection pipe broken", zap.Error(err))
 	}
+
 	close(conn.receiver)
+	if err := conn.Close(3 * time.Second); err != nil {
+		conn.logger.Warn("closing error")
+	}
 }
