@@ -96,8 +96,3 @@ func (*GetHandler) Methods() []string {
 		http.MethodGet,
 	}
 }
-
-type posResp struct {
-	Object *shogi.Position `json:"object"`
-	Sfen   string          `json:"sfen"`
-}

@@ -117,5 +117,5 @@ const (
 func (p Piece) ToInt() int { return int(p) }
 
 func (p Piece) String() string {
-	return fmt.Sprintf("shogi.Piece(%s)", string(p))
+	return fmt.Sprintf("shogi.Piece(%d)", int(p))
 }

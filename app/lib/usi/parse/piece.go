@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
@@ -66,7 +66,7 @@ func Piece(p usi.Piece) (s shogi.Piece, e error) {
 	case usi.Ryu1:
 		s = shogi.Ryu1
 	default:
-		e = errors.New("PieceIDが不正です id = " + string(s))
+		e = fmt.Errorf("PieceIDが不正です id = %d", int(s))
 	}
 	return
 }

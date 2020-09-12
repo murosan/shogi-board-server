@@ -349,15 +349,6 @@ func (service *engineControlService) write(bytes []byte) error {
 	return nil
 }
 
-func (service *engineControlService) withTimeout(timeout time.Duration, block func()) error {
-	ch := make(chan struct{}, 1)
-	go func() {
-		block()
-		close(ch)
-	}()
-	return service.timeout(ch, timeout)
-}
-
 func (service *engineControlService) timeout(ch chan struct{}, timeout time.Duration) error {
 	select {
 	case <-ch:
