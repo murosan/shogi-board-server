@@ -226,8 +226,6 @@ func (service *engineControlService) Start() error {
 	// before start thinking, delete all consideration results
 	service.engineInfoStore.DeleteAll(egn.GetID())
 
-	done := make(chan struct{})
-
 	// catch call engine outputs on background
 	go func() {
 		egn := service.engine
@@ -259,19 +257,15 @@ func (service *engineControlService) Start() error {
 				}
 			}
 
-			close(done)
 			return egn.GetState() == engine.Thinking
 		})
 	}()
 
+	egn.SetState(engine.Thinking)
 	if err := service.write(usi.Command.GoInf); err != nil {
 		return framework.NewInternalServerError("write "+string(usi.Command.GoInf), nil)
 	}
 
-	if err := service.timeout(done, connectTimeout); err != nil {
-		return framework.NewInternalServerError("connect timeout", err)
-	}
-	egn.SetState(engine.Thinking)
 	return nil
 }
 
