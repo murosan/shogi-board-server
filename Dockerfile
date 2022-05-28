@@ -1,6 +1,6 @@
-FROM golang:1.13
+FROM golang:1.18
 
-ENV GO111MODULE=on TZ=Asia/Tokyo
+ENV TZ=Asia/Tokyo
 
 WORKDIR /go/src/shogi-board-server
 
