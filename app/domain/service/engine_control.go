@@ -19,9 +19,10 @@ import (
 )
 
 const (
-	connectTimeout = time.Second * 5
-	closeTimeout   = time.Second * 5
-	readyTimeout   = time.Second * 5
+	connectTimeout  = time.Second * 5
+	closeTimeout    = time.Second * 5
+	readyTimeout    = time.Second * 5
+	bestmoveTimeout = time.Second * 5
 )
 
 var (
@@ -80,7 +81,7 @@ func (service *engineControlService) Connect() error {
 
 	done := make(chan struct{})
 
-	go service.connector.OnReceive(func(b []byte) bool {
+	service.connector.OnReceive(func(b []byte) bool {
 		service.logger.Info("[EngineOutput]", zap.ByteString("value", b))
 		if bytes.Equal(b, usi.Response.OK) {
 			done <- struct{}{}
@@ -169,6 +170,7 @@ func (service *engineControlService) Connect() error {
 
 	if err := service.timeout(done, connectTimeout); err != nil {
 		close(done)
+		service.connector.UnsetOnReceive()
 		return framework.NewInternalServerError("connect timeout. failed to receive usiok", err)
 	}
 
@@ -226,40 +228,37 @@ func (service *engineControlService) Start() error {
 	// before start thinking, delete all consideration results
 	service.engineInfoStore.DeleteAll(egn.GetID())
 
-	// catch call engine outputs on background
-	go func() {
+	service.connector.OnReceive(func(b []byte) bool {
 		egn := service.engine
-		service.connector.OnReceive(func(b []byte) bool {
-			service.logger.Info("[EngineOutput]", zap.ByteString("message", b))
+		service.logger.Info("[EngineOutput]", zap.ByteString("message", b))
 
-			// ignore 'info string' for now
-			if bytes.HasPrefix(b, []byte("info string")) {
-				return true
+		// ignore 'info string' for now
+		if bytes.HasPrefix(b, []byte("info string")) {
+			return true
+		}
+
+		if bytes.HasPrefix(b, []byte("info ")) {
+			i, mpv, err := parse.Info(string(b))
+			if err != nil {
+				service.logger.Error("[start]", zap.Error(err))
+				return true // ignore error
 			}
 
-			if bytes.HasPrefix(b, []byte("info ")) {
-				i, mpv, err := parse.Info(string(b))
-				if err != nil {
-					service.logger.Error("[start]", zap.Error(err))
-					return true // ignore error
-				}
+			// service.logger.Info("[ParsedInfo]", zap.Any("value", i))
 
-				// service.logger.Info("[ParsedInfo]", zap.Any("value", i))
-
-				if mpv <= 1 {
-					// If mpv is less than or equal to 1, it means 'best move' usually.
-					// We need to delete when the number of candidates is reduced,
-					// for example from 5 to 2, not to be left extra information.
-					service.engineInfoStore.DeleteAll(egn.GetID())
-				}
-				if len(i.Moves) != 0 {
-					service.engineInfoStore.Upsert(egn.GetID(), mpv, i)
-				}
+			if mpv <= 1 {
+				// If mpv is less than or equal to 1, it means 'best move' usually.
+				// We need to delete when the number of candidates is reduced,
+				// for example from 5 to 2, not to be left extra information.
+				service.engineInfoStore.DeleteAll(egn.GetID())
 			}
+			if len(i.Moves) != 0 {
+				service.engineInfoStore.Upsert(egn.GetID(), mpv, i)
+			}
+		}
 
-			return egn.GetState() == engine.Thinking
-		})
-	}()
+		return egn.GetState() == engine.Thinking
+	})
 
 	egn.SetState(engine.Thinking)
 	if err := service.write(usi.Command.GoInf); err != nil {
@@ -280,8 +279,27 @@ func (service *engineControlService) Stop() error {
 	if err := service.write(usi.Command.Stop); err != nil {
 		return framework.WrapError("write "+string(usi.Command.Quit), err)
 	}
-
+	service.engineInfoStore.DeleteAll(egn.GetID())
 	egn.SetState(engine.StandBy)
+
+	done := make(chan struct{})
+
+	service.connector.OnReceive(func(b []byte) bool {
+		service.logger.Info("[EngineOutput]", zap.ByteString("message", b))
+
+		if bytes.HasPrefix(b, []byte("bestmove ")) {
+			close(done)
+			return false
+		}
+		return true
+	})
+
+	if err := service.timeout(done, bestmoveTimeout); err != nil {
+		close(done)
+		service.connector.UnsetOnReceive()
+		return framework.NewInternalServerError("bestmove timeout.", err)
+	}
+
 	return nil
 }
 
