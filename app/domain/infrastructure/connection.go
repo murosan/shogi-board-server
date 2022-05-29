@@ -14,24 +14,25 @@ import (
 type Connector interface {
 	Connect() error
 	Close(timeout time.Duration) error
-	OnReceive(func([]byte) bool)
+	OnReceive(func([]byte) bool) // if true, continue receiving
+	UnsetOnReceive()
 	Writer() io.Writer
 }
 
 type connector struct {
-	sync.Mutex
-	cmd      Cmd
-	logger   logger.Logger
-	receiver chan []byte
-	isClosed bool
+	sync.RWMutex
+	cmd       Cmd
+	logger    logger.Logger
+	onReceive func([]byte) bool
+	isClosed  bool
 }
 
 // NewConnector returns new Connector.
 func NewConnector(cmd Cmd, logger logger.Logger) Connector {
 	return &connector{
-		cmd:      cmd,
-		logger:   logger,
-		receiver: make(chan []byte),
+		cmd:       cmd,
+		logger:    logger,
+		onReceive: func(b []byte) bool { return true },
 	}
 }
 
@@ -60,16 +61,13 @@ func (conn *connector) Close(timeout time.Duration) error {
 }
 
 func (conn *connector) OnReceive(block func([]byte) bool) {
-	for {
-		b, ok := <-conn.receiver
-		if !ok {
-			break // channel is closed
-		}
+	conn.Lock()
+	conn.onReceive = block
+	conn.Unlock()
+}
 
-		if !block(b) {
-			break
-		}
-	}
+func (conn *connector) UnsetOnReceive() {
+	conn.OnReceive(func(b []byte) bool { return true })
 }
 
 func (conn *connector) Writer() io.Writer { return conn.cmd }
@@ -81,14 +79,21 @@ func (conn *connector) receive() {
 	}
 
 	for sc.Scan() {
-		conn.receiver <- sc.Bytes()
+		b := sc.Bytes()
+
+		conn.RLock()
+		f := conn.onReceive
+		conn.RUnlock()
+
+		if !f(b) {
+			conn.UnsetOnReceive()
+		}
 	}
 
 	if err := sc.Err(); err != nil {
 		conn.logger.Warn("connection pipe broken", zap.Error(err))
 	}
 
-	close(conn.receiver)
 	if err := conn.Close(3 * time.Second); err != nil {
 		conn.logger.Warn("closing error")
 	}
