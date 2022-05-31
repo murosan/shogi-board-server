@@ -22,7 +22,7 @@ const (
 	connectTimeout  = time.Second * 5
 	closeTimeout    = time.Second * 5
 	readyTimeout    = time.Second * 5
-	bestmoveTimeout = time.Second * 5
+	bestmoveTimeout = time.Second * 2
 )
 
 var (
@@ -295,9 +295,8 @@ func (service *engineControlService) Stop() error {
 	})
 
 	if err := service.timeout(done, bestmoveTimeout); err != nil {
-		close(done)
 		service.connector.UnsetOnReceive()
-		return framework.NewInternalServerError("bestmove timeout.", err)
+		close(done)
 	}
 
 	return nil
