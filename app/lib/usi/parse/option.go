@@ -154,13 +154,20 @@ func TextFromFilenameType(s string) (*engine.Text, error) {
 }
 
 func parseText(res [][]string, errMsg string) (*engine.Text, error) {
-	if len(res) == 0 || len(res[0]) < 3 {
+	if len(res) == 0 || len(res[0]) < 2 {
 		return nil, errors.New(errMsg)
+	}
+
+	// USIの仕様では、デフォルト値が空白文字の場合、<empty>を渡さなければならないが
+	// 将棋エンジンによっては空白文字のまま出力する模様
+	dflt := "" // "<empty>" の方が良いかもしれない
+	if len(res[0]) == 3 {
+		dflt = res[0][2]
 	}
 
 	return &engine.Text{
 		Name:    res[0][1],
 		Value:   res[0][2],
-		Default: res[0][2],
+		Default: dflt,
 	}, nil
 }
