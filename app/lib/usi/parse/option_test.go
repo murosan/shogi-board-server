@@ -196,14 +196,9 @@ func TestTextFromStringType(t *testing.T) {
 			},
 			nil,
 		},
-		{"option name BookFile type string",
-			nil,
-			errEmp,
-		},
-		{"option name BookFile type string public.bin",
-			nil,
-			errEmp,
-		},
+		{"option name BookFile type string default ", &engine.Text{Name: "BookFile"}, nil},
+		{"option name BookFile type string", nil, errEmp},
+		{"option name BookFile type string public.bin", nil, errEmp},
 	}
 	for _, c := range cases {
 		o, err := TextFromStringType(c.in)
@@ -234,14 +229,9 @@ func TestTextFromFilenameType(t *testing.T) {
 			},
 			nil,
 		},
-		{"option name LearningFile type filename",
-			nil,
-			errEmp,
-		},
-		{"option name LearningFile type filename <empty>",
-			nil,
-			errEmp,
-		},
+		{"option name LearningFile type filename default", &engine.Text{Name: "LearningFile"}, nil},
+		{"option name LearningFile type filename", nil, errEmp},
+		{"option name LearningFile type filename <empty>", nil, errEmp},
 	}
 	for _, c := range cases {
 		o, err := TextFromFilenameType(c.in)

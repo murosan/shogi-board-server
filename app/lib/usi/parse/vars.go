@@ -30,8 +30,8 @@ var (
 	checkRegex    = regexp.MustCompile(`^option name (.*) type check default (true|false)$`)
 	spinRegex     = regexp.MustCompile(`^option name (.*) type spin default (-?[0-9]+) min (-?[0-9]+) max (-?[0-9]+)$`)
 	selectRegex   = regexp.MustCompile(`^option name (.*) type combo default (.*?) (var .*)$`)
-	stringRegex   = regexp.MustCompile(`^option name (.*) type string default (.*)$`)
-	fileNameRegex = regexp.MustCompile(`^option name (.*) type filename default (.*)$`)
+	stringRegex   = regexp.MustCompile(`^option name (.*) type string default ?(.*?)$`)
+	fileNameRegex = regexp.MustCompile(`^option name (.*) type filename default ?(.*?)$`)
 
 	usiOptionFormat = `
 Formats
