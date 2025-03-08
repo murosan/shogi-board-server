@@ -7,7 +7,7 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
 )
 
-// EngineInfoStore is a in memory store
+// EngineInfoStore is an in-memory store
 // for information given from shogi engines.
 type EngineInfoStore interface {
 	FindAll(engine.ID) usi.Result

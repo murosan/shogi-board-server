@@ -13,6 +13,7 @@ import (
 //   - NotConnected, then returns NOT_FOUND or BAD_REQUEST
 //   - Connected or StandBy, then starts thinking and returns OK
 //   - Thinking, then returns OK (do nothing)
+//
 // See domain/entity/engine/state.go about engine state.
 type StartHandler struct {
 	es     service.EngineService

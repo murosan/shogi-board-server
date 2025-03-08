@@ -7,7 +7,7 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 )
 
-// GameStore is a in memory store that holds game state.
+// GameStore is an in-memory store that holds game state.
 type GameStore interface {
 	FindPosition(engine.ID) (*shogi.Position, bool)
 	UpsertPosition(engine.ID, *shogi.Position)

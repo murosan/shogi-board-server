@@ -15,7 +15,7 @@ var QueryKeys = struct {
 	EngineIDAlias: "key", // for backward compatibility
 }
 
-// WithEngineID executes block with a engine.ID if the engine name is specified,
+// WithEngineID executes block with an engine.ID if the engine name is specified,
 // otherwise returns BAD_REQUEST error.
 func WithEngineID(ctx *handler.Context, block func(engine.ID) error) error {
 	id, err := GetEngineID(ctx)
@@ -37,5 +37,5 @@ func GetEngineID(ctx *handler.Context) (engine.ID, error) {
 	}
 
 	errMsg := "please specify engine id in query parameter"
-	return "", framework.NewBadRequestError(errMsg, nil)
+	return "", framework.ErrBadRequest.With(errMsg)
 }

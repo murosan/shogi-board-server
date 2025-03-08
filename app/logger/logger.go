@@ -11,7 +11,7 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/config"
 )
 
-// Logger is a interface of logger.
+// Logger is an interface of logger.
 type Logger interface {
 	Debug(msg string, fields ...zap.Field)
 	Info(msg string, fields ...zap.Field)

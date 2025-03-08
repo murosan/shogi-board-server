@@ -44,7 +44,7 @@ const (
 	// NariGin0 is a NariGin in USI expression owned by the first player.
 	NariGin0 Piece = "+S"
 
-	// Uma0 is a Uma in USI expression owned by the first player.
+	// Uma0 is an Uma in USI expression owned by the first player.
 	Uma0 Piece = "+B"
 
 	// Ryu0 is a Ryu in USI expression owned by the first player.
@@ -86,7 +86,7 @@ const (
 	// NariGin1 is a NariGin in USI expression owned by the second player.
 	NariGin1 Piece = "+s"
 
-	// Uma1 is a Uma in USI expression owned by the second player.
+	// Uma1 is an Uma in USI expression owned by the second player.
 	Uma1 Piece = "+b"
 
 	// Ryu1 is a Ryu in USI expression owned by the second player.

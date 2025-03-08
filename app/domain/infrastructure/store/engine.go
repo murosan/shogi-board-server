@@ -8,7 +8,7 @@ import (
 	"github.com/murosan/shogi-board-server/app/domain/infrastructure"
 )
 
-// EngineStore is a in memory store for shogi engines.
+// EngineStore is an in-memory store for shogi engines.
 type EngineStore interface {
 	Insert(*engine.Engine, infrastructure.Connector) error
 	Delete(engine.ID) error

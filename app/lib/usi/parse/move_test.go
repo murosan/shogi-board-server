@@ -107,7 +107,7 @@ func moveErrorPrintHelper(
 	t *testing.T,
 	i int,
 	msg, in string,
-	expected, actual interface{},
+	expected, actual any,
 ) {
 	t.Helper()
 	t.Errorf(`[Move] %s

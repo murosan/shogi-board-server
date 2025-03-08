@@ -45,7 +45,7 @@ func TestNew(t *testing.T) {
 	for i, c := range cases {
 		conf := New(c.appPath, c.logPath)
 
-		failed := func(key string, expected, actual interface{}) {
+		failed := func(key string, expected, actual any) {
 			t.Helper()
 			t.Errorf(`
 [app > config > TestNew] %s was not equal to as expected.

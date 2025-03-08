@@ -190,7 +190,7 @@ func positionToUSIErrorPrintHelper(
 	i int,
 	msg string,
 	in *shogi.Position,
-	expected, actual interface{},
+	expected, actual any,
 ) {
 	t.Helper()
 	t.Errorf(`[Position.ToUSI] %s

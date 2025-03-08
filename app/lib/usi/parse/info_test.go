@@ -337,7 +337,7 @@ func infoErrorPrintHelper(
 	msg,
 	in string,
 	expected,
-	actual interface{},
+	actual any,
 ) {
 	t.Helper()
 	t.Errorf(`[Info] %s

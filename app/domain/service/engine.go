@@ -68,16 +68,14 @@ type engineService struct {
 
 func (service *engineService) Connect(id engine.ID) error {
 	if service.engineStore.Exists(id) {
-		return framework.NewBadRequestError("engine already exists. id="+id.String(), nil)
+		return framework.ErrBadRequest.With("engine already exists. id=" + id.String())
 	}
 
 	// TODO
 	path, ok := service.config.App.Engines[id.String()]
 	if !ok {
-		return framework.NewNotFoundError(
-			"engine path not found. "+
-				"please specify in config. id="+id.String(),
-			nil,
+		return framework.ErrNotFound.With(
+			"engine path not found. please specify in config. id=" + id.String(),
 		)
 	}
 
@@ -86,7 +84,7 @@ func (service *engineService) Connect(id engine.ID) error {
 	cmd.Chdir(filepath.Dir(path))
 	conn := service.newConnector(cmd, service.logger)
 	if err := service.engineStore.Insert(egn, conn); err != nil {
-		return framework.NewInternalServerError("insert new engine", err)
+		return framework.ErrInternalServerError.With("insert new engine")
 	}
 
 	return service.withControl(id, func(service EngineControlService) error {
@@ -109,7 +107,9 @@ func (service *engineService) Close(id engine.ID) error {
 func (service *engineService) CloseAll() error {
 	for _, id := range service.engineStore.FindAllKeys() {
 		if err := service.Close(id); err != nil {
-			return framework.NewInternalServerError("delete engine at engine service. ID="+id.String(), err)
+			return framework.ErrInternalServerError.
+				With("delete engine at engine service. ID=" + id.String()).
+				WithErr(err)
 		}
 	}
 	return nil
@@ -130,7 +130,7 @@ func (service *engineService) Stop(id engine.ID) error {
 func (service *engineService) GetOptions(id engine.ID) (*engine.Options, error) {
 	egn, _, ok := service.engineStore.Find(id)
 	if !ok {
-		return nil, framework.NewNotFoundError("no such engine. ID="+id.String(), nil)
+		return nil, framework.ErrNotFound.With("no such engine. ID=" + id.String())
 	}
 	return egn.GetOptions(), nil
 }
@@ -189,7 +189,7 @@ func (service *engineService) withControl(
 ) error {
 	egn, conn, ok := service.engineStore.Find(id)
 	if !ok {
-		return framework.NewNotFoundError("no such engine. ID="+id.String(), nil)
+		return framework.ErrNotFound.With("no such engine. ID=" + id.String())
 	}
 
 	s := NewEngineControlService(egn, conn, service.engineInfoStore, service.logger)

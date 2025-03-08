@@ -244,7 +244,7 @@ func TestTextFromFilenameType(t *testing.T) {
 // o2: Expected Option
 // e1: Returned Error
 // e2: Expected Error
-func basicOptionMatching(t *testing.T, in string, o1, o2 interface{}, e1, e2 error) {
+func basicOptionMatching(t *testing.T, in string, o1, o2 any, e1, e2 error) {
 	t.Helper()
 	if (e1 == nil && e2 != nil) || (e1 != nil && e2 == nil) {
 		t.Errorf(`

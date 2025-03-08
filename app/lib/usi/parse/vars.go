@@ -19,7 +19,7 @@ const (
 	TypeString = " type string "
 
 	// TypeFilename is used for check the engine output is option type string
-	// shogi-board-servre treat the type string and filename as the same type.
+	// shogi-board-server treat the type string and filename as the same type.
 	TypeFilename = " type filename "
 )
 

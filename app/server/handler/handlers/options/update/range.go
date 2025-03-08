@@ -23,7 +23,7 @@ func NewRangeHandler(es service.EngineService, logger logger.Logger) handler.Han
 func (hdr *RangeHandler) Func(ctx *handler.Context) error {
 	var option engine.Range
 	if err := ctx.Bind(&option); err != nil {
-		return framework.NewBadRequestError("body required", err)
+		return framework.ErrBadRequest.With("body required").WithErr(err)
 	}
 
 	err := handlers.WithEngineID(ctx, func(id engine.ID) error {
