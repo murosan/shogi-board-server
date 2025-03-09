@@ -183,6 +183,7 @@ func (service *engineControlService) Connect() error {
 	}
 
 	if err := service.timeout(done, readyTimeout); err != nil {
+		close(done)
 		return framework.ErrInternalServerError.
 			With("connect timeout. failed to receive readyok").
 			WithErr(err)
@@ -256,7 +257,7 @@ func (service *engineControlService) Start() error {
 
 			if mpv <= 1 {
 				// If mpv is less than or equal to 1, it means 'best move' usually.
-				// We need to delete when the number of candidates is reduced,
+				// We need to delete existing results when the number of candidates is reduced,
 				// for example from 5 to 2, not to be left extra information.
 				service.engineInfoStore.DeleteAll(egn.GetID())
 			}
