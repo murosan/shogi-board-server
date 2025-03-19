@@ -28,7 +28,7 @@ test:
 test-c:
 	rm -rf ./coverage
 	mkdir -p ./coverage
-	gotest -v -cover -coverprofile ./coverage/cover.out $(TEST_ARGS)
+	go test -v -cover -coverprofile ./coverage/cover.out $(TEST_ARGS)
 	go tool cover -html=./coverage/cover.out -o ./coverage/cover.html
 	open ./coverage/cover.html
 

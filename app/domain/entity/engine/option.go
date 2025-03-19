@@ -7,6 +7,8 @@ package engine
 import (
 	"fmt"
 	"strconv"
+
+	"golang.org/x/xerrors"
 )
 
 const (
@@ -66,7 +68,7 @@ type Range struct {
 func (r *Range) ToUSI() string { return set + r.Name + val + fmt.Sprint(r.Value) }
 func (r *Range) Validate() error {
 	if r.Value < r.Min || r.Value > r.Max {
-		return fmt.Errorf(
+		return xerrors.Errorf(
 			"[Check.Validate] out of range. value=%d, min=%d, max=%d",
 			r.Value, r.Min, r.Max,
 		)
@@ -104,7 +106,7 @@ func (s *Select) Validate() error {
 			return nil
 		}
 	}
-	return fmt.Errorf(
+	return xerrors.Errorf(
 		"[Select.Validate] vars does not contain the value. value=%s, vars=%v",
 		s.Value, s.Vars,
 	)

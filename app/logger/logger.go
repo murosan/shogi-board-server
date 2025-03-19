@@ -6,6 +6,8 @@
 package logger
 
 import (
+	"fmt"
+
 	"go.uber.org/zap"
 
 	"github.com/murosan/shogi-board-server/app/domain/config"
@@ -18,6 +20,8 @@ type Logger interface {
 	Warn(msg string, fields ...zap.Field)
 	Error(msg string, fields ...zap.Field)
 	Fatal(msg string, fields ...zap.Field)
+
+	Errorf(format string, args ...any)
 }
 
 // New generates zap.Config from given config,
@@ -29,5 +33,11 @@ func New(c *config.Config) Logger {
 		panic(err)
 	}
 
-	return l
+	return &logger{l}
+}
+
+type logger struct{ *zap.Logger }
+
+func (l *logger) Errorf(format string, args ...any) {
+	l.Error(fmt.Sprintf(format, args...))
 }

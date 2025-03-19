@@ -249,7 +249,7 @@ func (service *engineControlService) Start() error {
 		if bytes.HasPrefix(b, []byte("info ")) {
 			i, mpv, err := parse.Info(string(b))
 			if err != nil {
-				service.logger.Error("[start]", zap.Error(err))
+				service.logger.Errorf("[start] %s. %+v", string(b), err)
 				return true // ignore error
 			}
 

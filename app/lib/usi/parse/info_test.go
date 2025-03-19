@@ -171,7 +171,7 @@ func TestInfo(t *testing.T) {
 			nil,
 		},
 		{
-			"info score cp -157 str multipv 3 lalala... pv 5g5f 4g4f 4e3c+ 4c3c",
+			"info score cp -157 str multipv 3 lalala... pv 5g5f 4g4f 4e3c+ 4c3c rep_draw",
 			&usi.Info{
 				Values: make(map[string]int),
 				Score:  -157,
@@ -261,6 +261,8 @@ func TestInfo(t *testing.T) {
 		{"info time a", nil, 0, errEmp},
 		{"info depth a", nil, 0, errEmp},
 		{"info score cp 4 multipv a", nil, 0, errEmp},
+		{"info score cp", nil, 0, errEmp},
+		{"info time", nil, 0, errEmp},
 	}
 
 	for i, c := range cases {

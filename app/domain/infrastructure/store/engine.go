@@ -1,11 +1,11 @@
 package store
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/engine"
 	"github.com/murosan/shogi-board-server/app/domain/infrastructure"
+	"golang.org/x/xerrors"
 )
 
 // EngineStore is an in-memory store for shogi engines.
@@ -33,7 +33,7 @@ type engineStore struct {
 func (s *engineStore) Insert(e *engine.Engine, conn infrastructure.Connector) error {
 	id := e.GetID()
 	if s.Exists(id) {
-		return fmt.Errorf("already exists. id=%s", id)
+		return xerrors.Errorf("already exists. id=%s", id)
 	}
 
 	s.Lock()
@@ -45,7 +45,7 @@ func (s *engineStore) Insert(e *engine.Engine, conn infrastructure.Connector) er
 
 func (s *engineStore) Delete(id engine.ID) error {
 	if !s.Exists(id) {
-		return fmt.Errorf("no such key. id=%s", id)
+		return xerrors.Errorf("no such key. id=%s", id)
 	}
 	s.Lock()
 	defer s.Unlock()

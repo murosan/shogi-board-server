@@ -2,12 +2,12 @@ package parse
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
+	"golang.org/x/xerrors"
 )
 
 const (
@@ -26,97 +26,108 @@ const (
 func Info(s string) (*usi.Info, int, error) {
 	// should not pass 'info string'
 	if strings.HasPrefix(s, "info string") {
-		return nil, 0, errors.New("'info string' was given")
+		return nil, 0, xerrors.New("'info string' was given")
 	}
 
 	a := strings.Split(s, " ")
 	r := &usi.Info{Values: make(map[string]int)}
 	mpv := 0
 
-	nan := "given value was not a number. value = "
+	for len(a) > 0 {
+		tpe := strings.TrimSpace(a[0])
 
-	i := 0
-	for i < len(a) {
-		switch strings.TrimSpace(a[i]) {
+		a = a[1:]
+		if len(a) == 0 {
+			return nil, 0, xerrors.New("wrong info format")
+		}
+
+		switch tpe {
 		case depth:
-			i++
-			n, err := strconv.Atoi(a[i])
+			n, err := strconv.Atoi(a[0])
 			if err != nil {
-				return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+				return nil, 0, xerrors.Errorf(": %w", err)
 			}
+			a = a[1:]
 			r.Values[depth] = n
 
 		case selDepth:
-			i++
-			n, err := strconv.Atoi(a[i])
+			n, err := strconv.Atoi(a[0])
 			if err != nil {
-				return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+				return nil, 0, xerrors.Errorf(": %w", err)
 			}
+			a = a[1:]
 			r.Values[selDepth] = n
 
 		case time:
-			i++
-			n, err := strconv.Atoi(a[i])
+			n, err := strconv.Atoi(a[0])
 			if err != nil {
-				return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+				return nil, 0, xerrors.Errorf(": %w", err)
 			}
+			a = a[1:]
 			r.Values[time] = n
 
 		case nodes:
-			i++
-			n, err := strconv.Atoi(a[i])
+			n, err := strconv.Atoi(a[0])
 			if err != nil {
-				return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+				return nil, 0, xerrors.Errorf(": %w", err)
 			}
+			a = a[1:]
 			r.Values[nodes] = n
 
 		case hashFull:
-			i++
-			n, err := strconv.Atoi(a[i])
+			n, err := strconv.Atoi(a[0])
 			if err != nil {
-				return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+				return nil, 0, xerrors.Errorf(": %w", err)
 			}
+			a = a[1:]
 			r.Values[hashFull] = n
 
 		case nps:
-			i++
-			n, err := strconv.Atoi(a[i])
+			n, err := strconv.Atoi(a[0])
 			if err != nil {
-				return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+				return nil, 0, xerrors.Errorf(": %w", err)
 			}
+			a = a[1:]
 			r.Values[nps] = n
 
 		case score:
-			if a[i+1] == "cp" || a[i+1] == "mate" {
-				n, err := strconv.Atoi(a[i+2])
+			if len(a) < 2 {
+				return nil, 0, xerrors.New("wrong score format")
+			}
+			if a[0] == "cp" || a[0] == "mate" {
+				n, err := strconv.Atoi(a[1])
 				if err != nil {
-					return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+					return nil, 0, xerrors.Errorf(": %w", err)
 				}
 				r.Score = n
 			}
-			i += 2
+			a = a[2:]
 
 		case multiPv:
-			i++
-			n, err := strconv.Atoi(a[i])
+			n, err := strconv.Atoi(a[0])
 			if err != nil {
-				return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+				return nil, 0, xerrors.Errorf(": %w", err)
 			}
+			a = a[1:]
 			mpv = n
 
 		case pv:
-			m := make([]*shogi.Move, len(a[i+1:]))
-			for j, v := range a[i+1:] {
+			m := make([]*shogi.Move, 0, len(a))
+			for j, v := range a {
 				mv, err := Move(v)
 				if err != nil {
-					return nil, 0, fmt.Errorf(nan+a[i]+": %w", err)
+					if errors.Is(err, ErrCustomUSIFormat) {
+						continue
+					}
+					return nil, 0, xerrors.Errorf("pv(j=%v,v=%s): %w", j, v, err)
 				}
-				m[j] = mv
+				m = append(m, mv)
 			}
 			r.Moves = m
-			i += len(a) // force to end this loop, because pv must be in ending of info.
+
+			// exit loop, because pv must be in last part of info.
+			a = nil
 		}
-		i++
 	}
 
 	return r, mpv, nil
