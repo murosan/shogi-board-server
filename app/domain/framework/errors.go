@@ -49,8 +49,3 @@ func (e *ControllerError) WithErr(err error) *ControllerError {
 		Err:     err,
 	}
 }
-
-func (e *ControllerError) Is(target error) bool {
-	err, ok := target.(*ControllerError)
-	return ok && err.Status == e.Status
-}

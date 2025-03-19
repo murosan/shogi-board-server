@@ -38,10 +38,12 @@ func NewConnector(cmd Cmd, logger logger.Logger) Connector {
 
 func (conn *connector) Connect() error {
 	conn.Lock()
-	if err := conn.cmd.Start(); err != nil {
+	err := conn.cmd.Start()
+	conn.Unlock()
+
+	if err != nil {
 		return err
 	}
-	conn.Unlock()
 
 	// receive on background until the pipe broken
 	go conn.receive()
