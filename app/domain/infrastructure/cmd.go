@@ -7,11 +7,12 @@ package infrastructure
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"golang.org/x/xerrors"
 )
 
 // Cmd is simple interface of exec.Cmd.
@@ -43,13 +44,13 @@ func NewCmd(path string) Cmd {
 func (c *cmd) Start() error {
 	stdin, err := c.cmd.StdinPipe()
 	if err != nil {
-		return fmt.Errorf("get stdin pipe: %w", err)
+		return xerrors.Errorf("get stdin pipe: %w", err)
 	}
 	c.in = stdin
 
 	stdout, err := c.cmd.StdoutPipe()
 	if err != nil {
-		return fmt.Errorf("get stdout pipe: %w", err)
+		return xerrors.Errorf("get stdout pipe: %w", err)
 	}
 	c.out = stdout
 	c.scanner = bufio.NewScanner(stdout)

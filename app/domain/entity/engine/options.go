@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-// Options is a option holder.
+// Options is an option holder.
 type Options struct {
 	sync.RWMutex
 	Buttons map[string]*Button `json:"buttons"`

@@ -23,7 +23,7 @@ func NewTextHandler(es service.EngineService, logger logger.Logger) handler.Hand
 func (hdr *TextHandler) Func(ctx *handler.Context) error {
 	var option engine.Text
 	if err := ctx.Bind(&option); err != nil {
-		return framework.NewBadRequestError("body required", err)
+		return framework.ErrBadRequest.With("body required").WithErr(err)
 	}
 
 	err := handlers.WithEngineID(ctx, func(id engine.ID) error {

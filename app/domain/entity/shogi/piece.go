@@ -12,7 +12,7 @@ import (
 type Piece int
 
 const (
-	// Empty is not piece, is just a empty cell.
+	// Empty is not piece, is just an empty cell.
 	Empty Piece = 0
 
 	// Fu0 is a Fu owned by the first player.
@@ -63,7 +63,7 @@ const (
 	// NariGin moves as same as Kin.
 	NariGin0 Piece = 14
 
-	// Uma0 is a Uma owned by the first player.
+	// Uma0 is an Uma owned by the first player.
 	// Uma can move to the place where Gyoku and Kaku can move.
 	Uma0 Piece = 16
 
@@ -107,7 +107,7 @@ const (
 	// NariGin1 is a NariGin owned by the second player.
 	NariGin1 = -NariGin0
 
-	// Uma1 is a Uma owned by the second player.
+	// Uma1 is an Uma owned by the second player.
 	Uma1 = -Uma0
 
 	// Ryu1 is a Ryu owned by the second player.

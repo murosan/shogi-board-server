@@ -1,10 +1,9 @@
 package parse
 
 import (
-	"fmt"
-
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
+	"golang.org/x/xerrors"
 )
 
 func Piece(p usi.Piece) (s shogi.Piece, e error) {
@@ -66,7 +65,7 @@ func Piece(p usi.Piece) (s shogi.Piece, e error) {
 	case usi.Ryu1:
 		s = shogi.Ryu1
 	default:
-		e = fmt.Errorf("PieceIDが不正です id = %d", int(s))
+		e = xerrors.Errorf("PieceIDが不正です id = %d", int(s))
 	}
 	return
 }

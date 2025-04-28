@@ -7,6 +7,7 @@ import (
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
+	"golang.org/x/xerrors"
 )
 
 // Position converts shogi.Position to usi-position command bytes.
@@ -92,7 +93,7 @@ func rowToUSI(row []int) (s string, err error) {
 
 		p, err := Piece(shogi.Piece(id))
 		if err != nil {
-			return "", fmt.Errorf("failed to convert piece to usi: %w", err)
+			return "", xerrors.Errorf("failed to convert piece to usi: %w", err)
 		}
 
 		s += p.String()

@@ -12,6 +12,7 @@ import (
 // When the engine state is
 //   - NotConnected, then returns NOT_FOUND or BAD_REQUEST
 //   - Connected, StandBy or Thinking, then closes connection and returns OK
+//
 // See domain/entity/engine/state.go about engine state.
 type CloseHandler struct {
 	es     service.EngineService

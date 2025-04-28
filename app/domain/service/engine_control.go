@@ -72,11 +72,11 @@ func (service *engineControlService) Connect() error {
 	service.logger.Info("[Connecting to Engine]", zap.String("engine id", egn.GetID().String()))
 
 	if err := service.connector.Connect(); err != nil {
-		return framework.NewInternalServerError("call connect", err)
+		return framework.ErrInternalServerError.With("call connect").WithErr(err)
 	}
 
 	if err := service.write(usi.Command.USI); err != nil {
-		return framework.NewInternalServerError("write "+string(usi.Command.USI), err)
+		return framework.ErrInternalServerError.With("write " + string(usi.Command.USI)).WithErr(err)
 	}
 
 	done := make(chan struct{})
@@ -171,15 +171,22 @@ func (service *engineControlService) Connect() error {
 	if err := service.timeout(done, connectTimeout); err != nil {
 		close(done)
 		service.connector.UnsetOnReceive()
-		return framework.NewInternalServerError("connect timeout. failed to receive usiok", err)
+		return framework.ErrInternalServerError.
+			With("connect timeout. failed to receive usiok").
+			WithErr(err)
 	}
 
 	if err := service.write(usi.Command.IsReady); err != nil {
-		return framework.NewInternalServerError("write "+string(usi.Command.IsReady), err)
+		return framework.ErrInternalServerError.
+			With("write " + string(usi.Command.IsReady)).
+			WithErr(err)
 	}
 
 	if err := service.timeout(done, readyTimeout); err != nil {
-		return framework.NewInternalServerError("connect timeout. failed to receive readyok", err)
+		close(done)
+		return framework.ErrInternalServerError.
+			With("connect timeout. failed to receive readyok").
+			WithErr(err)
 	}
 
 	egn.SetState(engine.Connected)
@@ -195,11 +202,13 @@ func (service *engineControlService) Close() error {
 	}
 
 	if err := service.write(usi.Command.Quit); err != nil {
-		return framework.WrapError("write "+string(usi.Command.Quit), err)
+		return framework.ErrInternalServerError.
+			With("write " + string(usi.Command.Quit)).
+			WithErr(err)
 	}
 
 	if err := service.connector.Close(closeTimeout); err != nil {
-		return framework.NewInternalServerError("close engine", err)
+		return framework.ErrInternalServerError.With("close engine").WithErr(err)
 	}
 
 	return nil
@@ -210,7 +219,7 @@ func (service *engineControlService) Start() error {
 	service.logger.Info("[Starting Engine]", zap.String("engine name", egn.GetName()))
 
 	if egn.GetState() == engine.NotConnected {
-		return framework.NewBadRequestError("must initialize engine first", nil)
+		return framework.ErrBadRequest.With("must initialize engine first")
 	}
 
 	if egn.GetState() == engine.Thinking {
@@ -219,7 +228,7 @@ func (service *engineControlService) Start() error {
 
 	if egn.GetState() == engine.Connected {
 		if err := service.write(usi.Command.NewGame); err != nil {
-			return framework.NewInternalServerError("write "+string(usi.Command.NewGame), err)
+			return framework.ErrInternalServerError.With("write " + string(usi.Command.NewGame)).WithErr(err)
 		}
 
 		egn.SetState(engine.StandBy)
@@ -240,7 +249,7 @@ func (service *engineControlService) Start() error {
 		if bytes.HasPrefix(b, []byte("info ")) {
 			i, mpv, err := parse.Info(string(b))
 			if err != nil {
-				service.logger.Error("[start]", zap.Error(err))
+				service.logger.Errorf("[start] %s. %+v", string(b), err)
 				return true // ignore error
 			}
 
@@ -248,7 +257,7 @@ func (service *engineControlService) Start() error {
 
 			if mpv <= 1 {
 				// If mpv is less than or equal to 1, it means 'best move' usually.
-				// We need to delete when the number of candidates is reduced,
+				// We need to delete existing results when the number of candidates is reduced,
 				// for example from 5 to 2, not to be left extra information.
 				service.engineInfoStore.DeleteAll(egn.GetID())
 			}
@@ -262,7 +271,9 @@ func (service *engineControlService) Start() error {
 
 	egn.SetState(engine.Thinking)
 	if err := service.write(usi.Command.GoInf); err != nil {
-		return framework.NewInternalServerError("write "+string(usi.Command.GoInf), nil)
+		return framework.ErrInternalServerError.
+			With("write " + string(usi.Command.GoInf)).
+			WithErr(err)
 	}
 
 	return nil
@@ -277,7 +288,9 @@ func (service *engineControlService) Stop() error {
 	}
 
 	if err := service.write(usi.Command.Stop); err != nil {
-		return framework.WrapError("write "+string(usi.Command.Quit), err)
+		return framework.ErrInternalServerError.
+			With("write " + string(usi.Command.Quit)).
+			WithErr(err)
 	}
 	service.engineInfoStore.DeleteAll(egn.GetID())
 	egn.SetState(engine.StandBy)
@@ -325,7 +338,7 @@ func (service *engineControlService) UpdateTextOption(text *engine.Text) error {
 func (service *engineControlService) updateOption(option engine.Option) error {
 	service.logger.Info("[UpdateOption]", zap.String("option", option.String()))
 	if err := option.Validate(); err != nil {
-		return framework.NewBadRequestError("invalid option value", err)
+		return framework.ErrBadRequest.With("invalid option value").WithErr(err)
 	}
 	return service.write([]byte(option.ToUSI()))
 }
@@ -344,10 +357,10 @@ func (service *engineControlService) UpdatePosition(position *shogi.Position) er
 
 	b, err := convert.Position(position)
 	if err != nil {
-		return framework.NewBadRequestError("invalid position", err)
+		return framework.ErrBadRequest.With("invalid position").WithErr(err)
 	}
 	if err := service.write(b); err != nil {
-		return framework.NewInternalServerError("write "+string(b), err)
+		return framework.ErrInternalServerError.With("write " + string(b)).WithErr(err)
 	}
 
 	// restart thinking
@@ -361,7 +374,7 @@ func (service *engineControlService) write(bytes []byte) error {
 	service.logger.Info("[Write]", zap.ByteString("message", bytes))
 	w := service.connector.Writer()
 	if _, err := w.Write(append(bytes, '\n')); err != nil {
-		return framework.NewInternalServerError("write", err)
+		return framework.ErrInternalServerError.With("write").WithErr(err)
 	}
 	return nil
 }
@@ -371,6 +384,6 @@ func (service *engineControlService) timeout(ch chan struct{}, timeout time.Dura
 	case <-ch:
 		return nil
 	case <-time.After(timeout):
-		return framework.NewInternalServerError("timeout", nil)
+		return framework.ErrInternalServerError.With("timeout")
 	}
 }

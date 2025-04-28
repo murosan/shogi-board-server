@@ -6,12 +6,12 @@ type Position struct {
 	Pos [][]int `json:"pos"`
 
 	// captures of the first player
-	// each elements represents the number of piece.
+	// each element represents the number of pieces.
 	// [Fu, Kyou, Kei, Gin, Kei, Kin, Kaku, Hisha]
 	Cap0 []int `json:"cap0"`
 
 	// captures of the second player
-	// each elements represents the number of piece.
+	// each element represents the number of pieces.
 	// [Fu, Kyou, Kei, Gin, Kei, Kin, Kaku, Hisha]
 	Cap1 []int `json:"cap1"`
 

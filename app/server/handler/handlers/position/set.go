@@ -27,7 +27,7 @@ func NewSetHandler(es service.EngineService, logger logger.Logger) handler.Handl
 func (hdr *SetHandler) Func(ctx *handler.Context) error {
 	var pos shogi.Position
 	if err := ctx.Bind(&pos); err != nil {
-		return framework.NewBadRequestError("body required", err)
+		return framework.ErrBadRequest.With("body required").WithErr(err)
 	}
 
 	err := handlers.WithEngineID(ctx, func(id engine.ID) error {

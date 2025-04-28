@@ -6,9 +6,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
-	"path"
 	"path/filepath"
+	"runtime"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,7 +19,7 @@ import (
 )
 
 var (
-	port          = flag.String("port", "8080", "http server port")
+	port          = flag.Int("port", 8080, "http server port")
 	appConfigPath = flag.String(
 		"app_config",
 		"",
@@ -31,7 +32,8 @@ func main() {
 	flag.Parse()
 
 	if *appConfigPath == "" {
-		acp := filepath.Join(path.Dir(os.Args[0]), "config", "app.config.yml")
+		wd, _ := os.Getwd()
+		acp := filepath.Join(wd, "config", "app.config.yml")
 		appConfigPath = &acp
 	}
 
@@ -50,7 +52,12 @@ func main() {
 		module.Services.Engine,
 	)
 
-	err := e.Start(":" + *port)
+	addr := fmt.Sprintf(":%d", *port)
+	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
+		addr = "localhost" + addr
+	}
+
+	err := e.Start(addr)
 	if err != nil {
 		panic(err)
 	}

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -31,13 +32,14 @@ func handleError(ctx *Context, err error) error {
 		return nil
 	}
 
-	if _, ok := err.(*framework.BadRequestError); ok {
-		ctx.logger.Info(fmt.Sprint(http.StatusBadRequest), zap.Error(err))
-		return errJSON(ctx, http.StatusBadRequest, err)
-	}
-	if _, ok := err.(*framework.NotFoundError); ok {
-		ctx.logger.Info(fmt.Sprint(http.StatusNotFound), zap.Error(err))
-		return errJSON(ctx, http.StatusNotFound, err)
+	var e *framework.ControllerError
+	if errors.As(err, &e) {
+		if errors.Is(e, framework.ErrInternalServerError) {
+			ctx.logger.Error(e.Message, zap.Error(err))
+		} else {
+			ctx.logger.Info(e.Message, zap.Error(err))
+		}
+		return errJSON(ctx, e.Status, err)
 	}
 
 	ctx.logger.Error(fmt.Sprint(http.StatusInternalServerError), zap.Error(err))
@@ -47,7 +49,7 @@ func handleError(ctx *Context, err error) error {
 func errJSON(ctx *Context, status int, err error) error {
 	return ctx.JSON(
 		status,
-		map[string]interface{}{
+		map[string]any{
 			"status":  status,
 			"message": err.Error(),
 		},

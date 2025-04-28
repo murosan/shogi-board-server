@@ -46,7 +46,7 @@ func NewGetHandler(es service.EngineService, logger logger.Logger) handler.Handl
 func (hdr *GetHandler) Func(ctx *handler.Context) error {
 	format := ctx.GetQuery(queryKeys.format)
 	if format == "" {
-		return framework.NewBadRequestError("please specify format query", nil)
+		return framework.ErrBadRequest.With("please specify format query")
 	}
 
 	var pos *shogi.Position
@@ -54,7 +54,7 @@ func (hdr *GetHandler) Func(ctx *handler.Context) error {
 	err := handlers.WithEngineID(ctx, func(id engine.ID) error {
 		pos, ok = hdr.es.GetCurrentPosition(id)
 		if !ok {
-			return framework.NewNotFoundError("position not found. id="+id.String(), nil)
+			return framework.ErrBadRequest.With("position not found. id=" + id.String())
 		}
 		return nil
 	})
@@ -70,18 +70,17 @@ func (hdr *GetHandler) Func(ctx *handler.Context) error {
 		usi, err := convert.Position(pos)
 		if err != nil {
 			hdr.logger.Error("convert", zap.Any("pos", pos), zap.Error(err))
-			return framework.NewInternalServerError("convert position error", err)
+			return framework.ErrInternalServerError.With("convert position error").WithErr(err)
 		}
 		return ctx.Text(http.StatusOK, usi)
 	default:
-		return framework.NewBadRequestError(
+		return framework.ErrBadRequest.With(
 			fmt.Sprintf(
 				"unknown format. got=%s. availables=%s,%s",
 				format,
 				queryValues.json,
 				queryValues.sfen,
 			),
-			nil,
 		)
 	}
 }

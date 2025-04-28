@@ -1,41 +1,51 @@
 package parse
 
 import (
+	"bytes"
 	"errors"
-	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/murosan/shogi-board-server/app/domain/entity/shogi"
 	"github.com/murosan/shogi-board-server/app/domain/entity/usi"
+	"golang.org/x/xerrors"
 )
+
+// ErrCustomUSIFormat means the input is a non-official usi format.
+var ErrCustomUSIFormat = errors.New("custom usi format error")
 
 // Move generates shogi.Move parsing from given string, and returns it
 func Move(s string) (*shogi.Move, error) {
-	a := strings.Split(strings.TrimSpace(s), "")
+	s = strings.TrimSpace(s)
 
+	// https://yaneuraou.yaneu.com/2017/06/16/拡張usiプロトコル-読み筋出力について/
+	// ↑の一覧以外にも rep_win が来ることを確認したので rep_ でチェック
+	if s == "win" || s == "resign" || strings.HasPrefix(s, "rep_") {
+		return nil, ErrCustomUSIFormat
+	}
+
+	a := []byte(s)
 	if len(a) < 4 {
 		return nil, errors.New("insufficient length. input = " + s)
 	}
 
 	// is from captured.
-	if strings.Contains(s, "*") {
+	if bytes.IndexByte(a, '*') >= 0 {
 		piece, err := Piece(usi.Piece(a[0]))
 		if err != nil {
-			msg := "failed to parse captured piece on Move. input = " + a[0] + ": %w"
-			return nil, fmt.Errorf(msg, err)
+			msg := "failed to parse captured piece on Move. input = " + string(a[0]) + ": %w"
+			return nil, xerrors.Errorf(msg, err)
 		}
 
 		src := &shogi.Point{Row: -1, Column: -1}
 
 		row, err := parseRow(a[3])
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse row. input = %s: %w", a[3], err)
+			return nil, xerrors.Errorf("row=%v: %w", a[3], err)
 		}
 
 		col, err := parseColumn(a[2])
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse column. input = %s: %w", a[2], err)
+			return nil, xerrors.Errorf("col=%v: %w", a[2], err)
 		}
 
 		dst := &shogi.Point{Row: row, Column: col}
@@ -49,27 +59,27 @@ func Move(s string) (*shogi.Move, error) {
 
 	srow, err := parseRow(a[1])
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse row. input = %s: %w", a[1], err)
+		return nil, xerrors.Errorf("srow=%v: %w", a[1], err)
 	}
 
 	scol, err := parseColumn(a[0])
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse column. input = %s: %w", a[0], err)
+		return nil, xerrors.Errorf("scol=%v: %w", a[0], err)
 	}
 
 	drow, err := parseRow(a[3])
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse row. input = %s: %w", a[3], err)
+		return nil, xerrors.Errorf("drow=%v: %w", a[3], err)
 	}
 
 	dcol, err := parseColumn(a[2])
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse column. input = %s: %w", a[2], err)
+		return nil, xerrors.Errorf("dcol=%v: %w", a[2], err)
 	}
 
 	src := &shogi.Point{Row: srow, Column: scol}
 	dst := &shogi.Point{Row: drow, Column: dcol}
-	prm := len(a) == 5 && a[4] == "+"
+	prm := len(a) == 5 && a[4] == '+'
 
 	return &shogi.Move{
 		Source:     src,
@@ -79,24 +89,16 @@ func Move(s string) (*shogi.Move, error) {
 	}, nil
 }
 
-func parseColumn(s string) (int, error) {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		return 0, fmt.Errorf("is not a number. input = %s: %w", s, err)
+func parseColumn(b byte) (int, error) {
+	if b < '1' || b > '9' {
+		return 0, errors.New("invalid column number. input = " + string(b))
 	}
-	if i < 1 || i > 9 {
-		return 0, errors.New("invalid column number. input = " + s)
-	}
-
-	// decrease 1. because given string is in 1-9,
-	// but our column should be in 0-8
-	return i - 1, nil
+	return int(b - '1'), nil
 }
 
-func parseRow(s string) (int, error) {
-	r := []rune(s)[0]
-	if r < 97 || r > 105 {
-		return 0, errors.New("invalid row number. input = " + s)
+func parseRow(b byte) (int, error) {
+	if b < 'a' || b > 'i' {
+		return 0, errors.New("invalid row number. input = " + string(b))
 	}
-	return int(r - 97), nil
+	return int(b - 'a'), nil
 }

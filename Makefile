@@ -9,9 +9,7 @@ install:
 
 install-tools:
 	go mod download
-	grep _ tools/tools.go | \
-	awk '{print $$2}' | \
-	xargs -tI % go install %
+	go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
 
 setup:
 	cp ./bin/pre-commit.sh $(GIT_DIR)/hooks/pre-commit
@@ -22,7 +20,7 @@ clean:
 	go clean
 
 build:
-	go build -o ./main
+	go build -ldflags="-s -w" -trimpath -o ./main
 
 test:
 	go test $(TEST_ARGS)
@@ -30,7 +28,7 @@ test:
 test-c:
 	rm -rf ./coverage
 	mkdir -p ./coverage
-	gotest -v -cover -coverprofile ./coverage/cover.out $(TEST_ARGS)
+	go test -v -cover -coverprofile ./coverage/cover.out $(TEST_ARGS)
 	go tool cover -html=./coverage/cover.out -o ./coverage/cover.html
 	open ./coverage/cover.html
 

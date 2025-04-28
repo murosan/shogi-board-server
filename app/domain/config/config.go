@@ -6,7 +6,7 @@
 package config
 
 import (
-	"io/ioutil"
+	"os"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -52,7 +52,7 @@ func New(appPath, logPath string) *Config {
 	var log zap.Config
 
 	// load app config path as byte array
-	a, err := ioutil.ReadFile(appPath)
+	a, err := os.ReadFile(appPath)
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +64,7 @@ func New(appPath, logPath string) *Config {
 
 	if logPath != "" {
 		// load log config path as byte array
-		l, err := ioutil.ReadFile(logPath)
+		l, err := os.ReadFile(logPath)
 		if err != nil {
 			panic(err)
 		}
