@@ -6,6 +6,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/murosan/goutils v0.0.0-20190506160604-a2da7259cdd8
 	go.uber.org/zap v1.27.0
+	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -21,5 +22,4 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 )
