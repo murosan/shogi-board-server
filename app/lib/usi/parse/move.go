@@ -40,12 +40,12 @@ func Move(s string) (*shogi.Move, error) {
 
 		row, err := parseRow(a[3])
 		if err != nil {
-			return nil, xerrors.Errorf(": %w", a[3], err)
+			return nil, xerrors.Errorf("row=%v: %w", a[3], err)
 		}
 
 		col, err := parseColumn(a[2])
 		if err != nil {
-			return nil, xerrors.Errorf(": %w", a[2], err)
+			return nil, xerrors.Errorf("col=%v: %w", a[2], err)
 		}
 
 		dst := &shogi.Point{Row: row, Column: col}
@@ -59,22 +59,22 @@ func Move(s string) (*shogi.Move, error) {
 
 	srow, err := parseRow(a[1])
 	if err != nil {
-		return nil, xerrors.Errorf(": %w", a[1], err)
+		return nil, xerrors.Errorf("srow=%v: %w", a[1], err)
 	}
 
 	scol, err := parseColumn(a[0])
 	if err != nil {
-		return nil, xerrors.Errorf(": %w", a[0], err)
+		return nil, xerrors.Errorf("scol=%v: %w", a[0], err)
 	}
 
 	drow, err := parseRow(a[3])
 	if err != nil {
-		return nil, xerrors.Errorf(": %w", a[3], err)
+		return nil, xerrors.Errorf("drow=%v: %w", a[3], err)
 	}
 
 	dcol, err := parseColumn(a[2])
 	if err != nil {
-		return nil, xerrors.Errorf(": %w", a[2], err)
+		return nil, xerrors.Errorf("dcol=%v: %w", a[2], err)
 	}
 
 	src := &shogi.Point{Row: srow, Column: scol}
