@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 
@@ -33,7 +32,8 @@ func main() {
 	flag.Parse()
 
 	if *appConfigPath == "" {
-		acp := filepath.Join(path.Dir(os.Args[0]), "config", "app.config.yml")
+		wd, _ := os.Getwd()
+		acp := filepath.Join(wd, "config", "app.config.yml")
 		appConfigPath = &acp
 	}
 
